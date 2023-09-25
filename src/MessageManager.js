@@ -25,6 +25,7 @@ class MessageManager {
     }
 
     receiveMessage(message) {
+        console.log(`Received message from Twitch: ${message.text}`);
         if (this.options.rejectProfane && filter.isProfane(message.text)) {
             console.info(`rejected profane message from ${message.username}`);
             return;
@@ -42,6 +43,7 @@ class MessageManager {
         this.chatHistory.push(message);
         const id = this.chatHistory.length - 1;
         this.messageQueue.push(id);
+        this.ooba.send(message.text);
     }
 
     setDrawManager(drawManager) {

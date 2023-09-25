@@ -15,7 +15,6 @@ class OobaClient extends EventEmitter{
         this.ws = new WebSocket(uri);
         this.ws.on('open', () => {
             console.log("Connected to Oobabooga");
-            this.send("Hello, Oobabooga!");
         });
         this.ws.on('message', (data) => {
             const json = JSON.parse(data);

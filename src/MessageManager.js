@@ -57,8 +57,8 @@ class MessageManager {
         setInterval(() => {
             const queueLength = this.messageQueue.length;
             console.log(`Message queue length: ${queueLength}`);
-            // Exit if queue is empty or if the voice handler is busy speaking
-            if (queueLength == 0 || this.voiceHandler.is_speaking) return;
+            // Exit if queue is empty or if the voice handler is busy speaking or if a message is being generated already
+            if (queueLength == 0 || this.voiceHandler.is_speaking || this.ooba.recievingMessage) return;
             this.respondToChatFromMessageQueue();
         }, this.options['response-interval']);
     }

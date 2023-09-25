@@ -8,15 +8,19 @@ const Persona = require('./src/Persona');
 
 // Load Config
 const config = YAML.parse(fs.readFileSync('./config.yml', 'utf8'));
+console.log(config);
 
 // Load the AI's persona
 const persona = new Persona(config.persona_file);
 
 // Connect to Oobabooga
-const ooba = new OobaClient(process.env.OOBA_URL);
+const ooba = new OobaClient({
+    baseUrl: config.oobabooga.url,
+    requestParams: {}
+});
 
 // Initialize message manager
-const messageManager = new MessageManager(ooba, persona);
+const messageManager = new MessageManager(ooba, persona, config.messages);
 
 // If stable diffusion is enabled, initialize a draw manager and attach to message manager
 if (config.stable_diffusion.enabled === true) {

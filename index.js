@@ -18,11 +18,13 @@ const ooba = new OobaClient(process.env.OOBA_URL);
 // Initialize message manager
 const messageManager = new MessageManager(ooba, persona);
 
-// If stable diffusion is enabled, initialize stable diff client and attach to message manager
+// If stable diffusion is enabled, initialize a draw manager and attach to message manager
 if (config.stable_diffusion.enabled === true) {
     const StableDiffClient = require('./src/StableDiffClient');
     const stableDiffClient = new StableDiffClient();
-    messageManager.setStableDiffusionClient(stableDiffClient);
+    const DrawManager = require('./src/DrawManager');
+    const drawManager = new DrawManager(stableDiffClient);
+    messageManager.setDrawManager(drawManager);
 }
 
 // If using Windows and voice is enabled, initialize voice synthesis

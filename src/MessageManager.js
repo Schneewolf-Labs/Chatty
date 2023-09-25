@@ -2,7 +2,7 @@ class MessageManager {
     constructor(ooba, persona) {
         this.ooba = ooba;
         this.persona = persona;
-        this.stableDiffusionClient = null;
+        this.drawManager = null;
         this.voiceHandler = null;
 
         this.chatHistory = [];
@@ -10,8 +10,8 @@ class MessageManager {
         this.promptQueue = [];
     }
 
-    setStableDiffusionClient(stableDiffusionClient) {
-        this.stableDiffusionClient = stableDiffusionClient;
+    setDrawManager(drawManager) {
+        this.drawManager = drawManager;
     }
 
     setVoiceHandler(voiceHandler) {

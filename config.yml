@@ -3,10 +3,11 @@ messages:
     max-tokens: 2048
     response-interval: 5000
     chat-history-length: 7
+    chat-max-batch-size: 10
     reject-profanity: true
-    reject-negativity: true
+    reject-negativity: false
     sentiment-threshold: -0.5
-    prompt: "You are hosting a Twitch livestream and responding to your viewers comments in the chat. Give just your response below as if you were speaking to them on stream. Below are the most recent messages in the chat history:"
+    prompt: "You are hosting a Twitch livestream and responding to your viewers comments in the chat. Below are the most recent messages in the chat history. Give only your response below as if you were speaking to them on stream as "
 oobabooga:
     url: "ws://127.0.0.1:5005"
 stable_diffusion:
@@ -17,4 +18,4 @@ stable_diffusion:
 voice:
     enabled: true
     output_device: 1
-    exe_location: "F:/TTS/wintts/net6.0/WinTTS.exe"
+    exe_location: "F:/TTS/wintts/WinTTS.exe"

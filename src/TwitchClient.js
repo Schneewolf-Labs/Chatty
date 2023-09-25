@@ -1,8 +1,4 @@
 const tmi = require('tmi.js');
-const badwords = require('bad-words');
-const filter = new badwords();
-const Sentiment = require('sentiment');
-const sentiment = new Sentiment();
 
 // Twitch CLient class
 class TwitchClient {
@@ -26,12 +22,20 @@ class TwitchClient {
         
         // Listen to Twitch chat:
         this.client.on('message', (channel, tags, message, self) => {
-            console.log(`${tags['display-name']}: ${message}`);
-            console.log('Sentiment score: ' + sentiment.analyze(message).score);
             if (self) return;
-            if (filter.isProfane(message)) {
-                twitch.say(channel, `@${tags.username}, please watch your language!`);
-            }
+            const msg = {
+                username: tags.username,
+                text: message,
+                timestamp: Date.now(),
+
+            };
+            this.messageManager.receiveMessage(msg);
+            // console.log(`${tags['display-name']}: ${message}`);
+            // console.log('Sentiment score: ' + sentiment.analyze(message).score);
+            // if (self) return;
+            // if (filter.isProfane(message)) {
+            //     twitch.say(channel, `@${tags.username}, please watch your language!`);
+            // }
         });
 
         this.messageHistory = [];

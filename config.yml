@@ -16,4 +16,5 @@ stable_diffusion:
     negative_prompt: "EasyNegative, lewd, nsfw, sex, naked, nude, suicide, animal harm, loli, rape, blood, gore"
 voice:
     enabled: true
-    output_device: 0
+    output_device: 2
+    exe_location: "F:/TTS/wintts/net6.0/WinTTS.exe"

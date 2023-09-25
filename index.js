@@ -34,7 +34,7 @@ if (config.stable_diffusion.enabled === true) {
 // If using Windows and voice is enabled, initialize voice synthesis
 if (process.platform === 'win32' && config.voice.enabled === true) {
     const VoiceHandler = require('./src/VoiceHandler');
-    const voiceHandler = new VoiceHandler();
+    const voiceHandler = new VoiceHandler(config.voice);
     messageManager.setVoiceHandler(voiceHandler);
 }
 

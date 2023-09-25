@@ -1,4 +1,4 @@
-persona_file: ""
+persona_file: "persona.yaml"
 messages:
     max-tokens: 2048
     response-interval: 20000

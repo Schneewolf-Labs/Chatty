@@ -7,6 +7,7 @@ class Persona {
             const persona = YAML.parse(fs.readFileSync(personaFile, 'utf8'));
             this.name = persona.name;
             this.directive = persona.context;
+            console.info('Loaded persona: ' + this.name);
         } catch (e) {
             console.error('Error loading persona file: ' + e);
             this.name = '';

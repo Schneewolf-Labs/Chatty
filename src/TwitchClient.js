@@ -25,22 +25,14 @@ class TwitchClient {
             if (self) return;
             const msg = {
                 username: tags.username,
+                display_name: tags['display-name'],
                 text: message,
                 timestamp: Date.now(),
-
+                tags: tags,
+                channel: channel
             };
             this.messageManager.receiveMessage(msg);
-            // console.log(`${tags['display-name']}: ${message}`);
-            // console.log('Sentiment score: ' + sentiment.analyze(message).score);
-            // if (self) return;
-            // if (filter.isProfane(message)) {
-            //     twitch.say(channel, `@${tags.username}, please watch your language!`);
-            // }
         });
-
-        this.messageHistory = [];
-        this.chatQueue = [];
-        this.promptQueue = [];
     }
 
     connect() {

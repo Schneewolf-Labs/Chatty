@@ -22,6 +22,15 @@ class MessageManager {
                 this.voiceHandler.speak(message);
             }
         });
+
+        // Setup interval to flush message queue to AI
+        setInterval(() => {
+            const queueLength = this.messageQueue.length;
+            console.log(`Message queue length: ${queueLength}`);
+            // Exit if queue is empty or if the voice handler is busy speaking
+            if (queueLength == 0 || this.voiceHandler.is_speaking) return;
+            this.respondToChatFromMessageQueue();
+        }, this.options['response-interval']);
     }
 
     receiveMessage(message) {
@@ -43,7 +52,30 @@ class MessageManager {
         this.chatHistory.push(message);
         const id = this.chatHistory.length - 1;
         this.messageQueue.push(id);
-        this.ooba.send(message.text);
+    }
+
+    respondToChatFromMessageQueue() {
+        let text = '';
+        const lowId = this.messageQueue[0].id;
+        const lowerBound = Math.max(0, lowId - this.options['chat-history-length']);
+        // Add recent chat history to the prompt
+        for (let i = lowId; i >= lowerBound; i--) {
+            const message = this.chatHistory[i];
+            text += `${message.username}: ${message.text}\n`;
+        }
+        // Add enqueued messages to the prompt
+        for (let i = 0; i < this.messageQueue.length; i++) {
+            const id = this.messageQueue[i];
+            const message = this.chatHistory[id];
+            text += `${message.username}: ${message.text}\n`;
+        }
+
+        const prompt = this.persona.directive + "\n"
+            + this.options['prompt'] + "\n"
+            + text + `\n${this.persona.name}:`;
+        
+        this.ooba.send(prompt);
+        this.messageQueue = [];
     }
 
     setDrawManager(drawManager) {

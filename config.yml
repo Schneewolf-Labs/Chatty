@@ -1,12 +1,12 @@
 persona_file: "persona.yaml"
 messages:
     max-tokens: 2048
-    response-interval: 20000
-    chat-history-size: 7
+    response-interval: 5000
+    chat-history-length: 7
     reject-profanity: true
     reject-negativity: true
     sentiment-threshold: -0.5
-    prompt: "You are hosting a Twitch livestream and responding to your viewers comments in the chat. Below are the most recent messages in the chat history:"
+    prompt: "You are hosting a Twitch livestream and responding to your viewers comments in the chat. Give just your response below as if you were speaking to them on stream. Below are the most recent messages in the chat history:"
 oobabooga:
     url: "ws://127.0.0.1:5005"
 stable_diffusion:

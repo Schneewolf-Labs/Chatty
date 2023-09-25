@@ -1,0 +1,16 @@
+persona_file: ""
+messages:
+    max-tokens: 2048
+    response-interval: 20000
+    chat-history-size: 7
+    reject-profanity: true
+    reject-negativity: true
+    prompt: "You are hosting a Twitch livestream and responding to your viewers comments in the chat. Below are the most recent messages in the chat history:"
+stable_diffusion:
+    enabled: true
+    trigger: "please draw"
+    url: "127.0.0.1:7860"
+    negative_prompt: "EasyNegative, lewd, nsfw, sex, naked, nude, suicide, animal harm, loli, rape, blood, gore"
+voice:
+    enabled: true
+    output_device: 0

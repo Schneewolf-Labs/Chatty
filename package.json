@@ -19,6 +19,8 @@
   "dependencies": {
     "bad-words": "^3.0.4",
     "dotenv": "^16.3.1",
-    "tmi.js": "^1.8.5"
+    "sentiment": "^5.0.2",
+    "tmi.js": "^1.8.5",
+    "yaml": "^2.3.2"
   }
 }

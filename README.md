@@ -1,6 +1,15 @@
 # Chatty
 A framework for connecting AI to Twitch chat.
 
+## Features
+- Streams chat messages with tmi.js
+- Profanity detection and sentiment analysis
+- Oobabooga API integration
+- Automatic1111 Stable Diffusion integration
+- Voice synthesis (Windows only)
+- Text, image, and audio file output for OBS
+- API for managing and monitoring
+
 ## Installation
 1. Install [Node.js](https://nodejs.org/en/download/)
 2. Install [Git](https://git-scm.com/downloads)

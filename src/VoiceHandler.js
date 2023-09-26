@@ -18,9 +18,9 @@ class VoiceHandler {
         this.is_speaking = true;
         // spawn child process to speak message
         console.info(`WinTTS speaking: ${message}`);
-        // strip non-alphanumeric characters if enabled
+        // strip non-alphanumeric (except puncutation) characters if enabled
         if (this.alphanumeric_only) {
-            message = message.replace(/[^a-zA-Z0-9 ]/g, '');
+            message = message.replace(/[^a-zA-Z0-9\s.,!?]/g, '');
         }
         const child = spawn(this.exe_location, [message, this.audio_device]);
         child.on('exit', (code, signal) => {

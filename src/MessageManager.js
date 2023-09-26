@@ -53,8 +53,6 @@ class MessageManager {
 
             // Strip any URLs from the message
             message = message.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '');
-            // Remove any non-alphanumeric characters from the message
-            message = message.replace(/[^a-zA-Z0-9 ]/g, '');
 
             // Add response to response history
             this.responseHistory[this.lastResponseID] = message;

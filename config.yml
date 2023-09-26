@@ -25,3 +25,4 @@ voice:
     audio_device: 1
     exe_location: "F:/TTS/wintts/WinTTS.exe"
     output_location: "output/voice.wav"
+    alphanumeric_only: true

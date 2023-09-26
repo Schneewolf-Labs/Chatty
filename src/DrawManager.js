@@ -64,7 +64,7 @@ class DrawManager extends EventEmitter{
         const triggerIndex = message.indexOf(trigger);
         if (triggerIndex === -1) return null; // return null if trigger not found
         // extract between trigger and punctuation (if any) for prompt
-        const punctuation = ['.', ',', '?', '!'];
+        const punctuation = ['.', '?', '!'];
         let prompt = message.substring(triggerIndex+trigger.length); // remove everything before and including trigger
         // iterate through prompt and if punctuation is found, truncate message and use as prompt
         for (let i = 0; i < prompt.length; i++) {

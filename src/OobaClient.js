@@ -34,7 +34,8 @@ class OobaClient extends EventEmitter{
     send(prompt) {
         console.log(`Sending prompt to Oobabooga: ${prompt}`);
         this.ws.send(JSON.stringify({
-            prompt: prompt
+            prompt: prompt,
+            ...this.requestParams
         }));
     }
 

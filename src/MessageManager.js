@@ -11,6 +11,9 @@ class MessageManager {
         this.drawManager = null;
         this.voiceHandler = null;
 
+        this.chatPrompt = this.options['prompt'] + this.persona.name + "!\n";
+        this.promptTokens = this.chatPrompt.split(' ').length;
+
         this.chatHistory = [];
         this.responseHistory = {};
         this.lastResponseID = 0;
@@ -97,10 +100,16 @@ class MessageManager {
     }
 
     respondToChatFromMessageQueue() {
+        const directiveTokens = this.persona.numTokens;
+        const maxTokens = this.options['max-tokens'] - directiveTokens -  this.promptTokens - 1;
+        console.info(`max tokens remaining for chat: ${maxTokens}`);
+        
         let text = '';
-        const lowId = this.messageQueue[0];
-        const lowerBound = Math.max(0, lowId - this.options['chat-history-length']);
-        //const upperBound = Math.min(this.chatHistory.length, lowId + this.options['chat-max-batch-length']);
+        const lowId = this.messageQueue[0]; // first id of messages we want to respond to
+        const lowerBound = Math.max(0, lowId - this.options['chat-history-length']); // lowest chat id we will show in history
+        const upperBound = Math.min(this.chatHistory.length, lowId + this.options['chat-max-batch-size']); // highest chat id we will show in history
+        console.info(`lowID: ${lowId}, lowerBound: ${lowerBound}, upperBound: ${upperBound}`);
+        // TODO: rewrite this stay in bounds of max tokens available
         // Add recent chat history to the prompt
         for (let i = lowerBound; i < lowId; i++) {
             const message = this.chatHistory[i];
@@ -117,8 +126,7 @@ class MessageManager {
         }
 
         const prompt = this.persona.directive + "\n"
-            + this.options['prompt'] + this.persona.name + "!\n"
-            + text + `${this.persona.name}:`;
+            + this.chatPrompt + text + `${this.persona.name}:`;
         
         this.ooba.send(prompt);
         this.messageQueue = [];

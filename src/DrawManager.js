@@ -15,7 +15,7 @@ class DrawManager extends EventEmitter{
             // save image to output
             const filename = path.join(process.cwd(), this.settings.output_location);
             fs.writeFileSync(filename, image, 'base64');
-            this.emit('image', image);
+            //this.emit('image', image);
         });
     }
 

@@ -14,10 +14,7 @@ console.log(config);
 const persona = new Persona(config.persona_file);
 
 // Connect to Oobabooga
-const ooba = new OobaClient({
-    baseUrl: config.oobabooga.url,
-    requestParams: {}
-});
+const ooba = new OobaClient(config.oobabooga);
 
 // Initialize message manager
 const messageManager = new MessageManager(ooba, persona, config.messages);
@@ -25,7 +22,7 @@ const messageManager = new MessageManager(ooba, persona, config.messages);
 // If stable diffusion is enabled, initialize a draw manager and attach to message manager
 if (config.stable_diffusion.enabled === true) {
     const StableDiffClient = require('./src/StableDiffClient');
-    const stableDiffClient = new StableDiffClient();
+    const stableDiffClient = new StableDiffClient(config.stable_diffusion);
     const DrawManager = require('./src/DrawManager');
     const drawManager = new DrawManager(stableDiffClient);
     messageManager.setDrawManager(drawManager);

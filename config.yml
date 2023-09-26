@@ -9,12 +9,14 @@ messages:
     sentiment-threshold: -0.5
     prompt: "You are hosting a Twitch livestream and responding to your viewers comments in the chat. Below are the most recent messages in the chat history. Give only your response below as if you were speaking to them on stream as "
 oobabooga:
-    url: "ws://127.0.0.1:5005"
+    baseUrl: "ws://127.0.0.1:5005"
+    requestParams: {}
 stable_diffusion:
     enabled: true
     trigger: "please draw"
-    url: "127.0.0.1:7860"
+    baseUrl: "http://127.0.0.1:7860"
     negative_prompt: "EasyNegative, lewd, nsfw, sex, naked, nude, suicide, animal harm, loli, rape, blood, gore"
+    requestParams: {}
 voice:
     enabled: true
     output_device: 1

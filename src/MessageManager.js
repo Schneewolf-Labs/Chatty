@@ -118,36 +118,65 @@ class MessageManager {
 
     respondToChatFromMessageQueue() {
         const directiveTokens = this.persona.numTokens;
-        const maxTokens = this.options['max-tokens'] - directiveTokens -  this.promptTokens - 1;
+        const maxTokens = this.options['max-tokens'] - directiveTokens - this.promptTokens - 2;
         console.info(`max tokens remaining for chat: ${maxTokens}`);
         
-        let text = '';
+        let messages = [];
+        let tokens = 0;
+        let dequeuedMessages = 0;
         const lowId = this.messageQueue[0]; // first id of messages we want to respond to
         const lowerBound = Math.max(0, lowId - this.options['chat-history-length']); // lowest chat id we will show in history
         const upperBound = Math.min(this.chatHistory.length, lowId + this.options['chat-max-batch-size']); // highest chat id we will show in history
-        console.info(`lowID: ${lowId}, lowerBound: ${lowerBound}, upperBound: ${upperBound}`);
-        // TODO: rewrite this stay in bounds of max tokens available
-        // Add recent chat history to the prompt
-        for (let i = lowerBound; i < lowId; i++) {
-            const message = this.chatHistory[i];
-            text += `${message.username}: ${message.text}\n`;
-            if (this.responseHistory[i+1]) {
-                text += `${this.persona.name}: ${this.responseHistory[i+1]}\n`;
-            }
-        }
+        //console.info(`lowID: ${lowId}, lowerBound: ${lowerBound}, upperBound: ${upperBound}`);
+
+        let txt, tokensPerMessage;
         // Add enqueued messages to the prompt
-        for (let i = 0; i < this.messageQueue.length; i++) {
-            const id = this.messageQueue[i];
-            const message = this.chatHistory[id];
-            text += `${message.username}: ${message.text}\n`;
+        for (let i = lowId; i < upperBound; i++) {
+            const message = this.chatHistory[i];
+            txt = `${message.username}: ${message.text}\n`;
+            tokensPerMessage = this._getTokensPerMessage(txt);
+            if (tokens + tokensPerMessage > maxTokens) {
+                console.warn(`max tokens reached, unable to add enqueued message`);
+                break;
+            }
+            messages.push(txt);
+            tokens += tokensPerMessage;
+            dequeuedMessages++;
+        }
+        // Add chat history to the prompt
+        for (let i = lowId-1; i >= lowerBound; i--) {
+            // Add the AI's own responses to the history
+            if (this.responseHistory[i+1]) {
+                txt = `${this.persona.name}: ${this.responseHistory[i+1]}\n`;
+                tokensPerMessage = this._getTokensPerMessage(txt);
+                if (tokens + tokensPerMessage > maxTokens) {
+                    console.warn(`max tokens reached, unable to add historical response`);
+                    break;
+                }
+                messages.unshift(txt);
+                tokens += tokensPerMessage;
+            }
+
+            const message = this.chatHistory[i];
+            txt = `${message.username}: ${message.text}\n`;
+            tokensPerMessage = this._getTokensPerMessage(txt);
+            if (tokens + tokensPerMessage > maxTokens) {
+                console.warn(`max tokens reached, unable to add chat history`);
+                break;
+            }
+            messages.unshift(txt);
+            tokens += tokensPerMessage;
         }
 
         const prompt = this.persona.directive + "\n"
-            + this.chatPrompt + text + `${this.persona.name}:`;
+            + this.chatPrompt + messages.join('') + `${this.persona.name}:`;
         
         this.ooba.send(prompt);
-        this.messageQueue = [];
-        this.lastResponseID = this.chatHistory.length;
+        console.log(`Used ${tokens} tokens to respond to ${messages.length} messages`);
+        // Dequeue messages
+        console.log(`dequeuing ${dequeuedMessages} messages from message queue`);
+        this.messageQueue = this.messageQueue.slice(dequeuedMessages);
+        this.lastResponseID = lowId + dequeuedMessages;
     }
 
     setDrawManager(drawManager) {
@@ -158,6 +187,9 @@ class MessageManager {
         this.voiceHandler = voiceHandler;
     }
 
+    _getTokensPerMessage(message) {
+        return message.split(' ').length;
+    }
 }
 
 module.exports = MessageManager;

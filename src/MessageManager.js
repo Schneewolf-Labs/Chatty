@@ -22,9 +22,9 @@ class MessageManager {
             console.log(`Received message from Oobabooga: ${message}`);
 
             // Check the response didn't add hallucinated dialog
-            const hallucinated = message.includes(this.persona.name);
+            const hallucinated = message.includes(this.persona.name+":");
             if (hallucinated) {
-                console.warn(`Response from Oobabooga contains hallucinated dialog`);
+                console.warn(`Response from Oobabooga may contain hallucinated dialog`);
                 // strip everything beyond the first message
                 message = message.split('\n')[0];
             }

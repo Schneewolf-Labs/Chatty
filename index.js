@@ -10,6 +10,11 @@ const Persona = require('./src/Persona');
 const config = YAML.parse(fs.readFileSync('./config.yml', 'utf8'));
 console.log(config);
 
+// Create an output directory if it doesn't exist
+if (!fs.existsSync(config.output_dir)) {
+    fs.mkdirSync(config.output_dir);
+}
+
 // Load the AI's persona
 const persona = new Persona(config.persona_file);
 

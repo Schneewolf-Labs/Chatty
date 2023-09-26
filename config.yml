@@ -1,4 +1,5 @@
 persona_file: "persona.yaml"
+output_dir: "output"
 messages:
     max-tokens: 2048
     response-interval: 5000

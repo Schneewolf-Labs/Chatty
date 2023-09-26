@@ -17,11 +17,12 @@ stable_diffusion:
     enabled: true
     trigger: "please draw"
     baseUrl: "http://127.0.0.1:7860"
-    negative_prompt: "EasyNegative, lewd, nsfw, sex, naked, nude, suicide, animal harm, loli, rape, blood, gore"
+    negative_prompt: "EasyNegative, lewd, nsfw, sex, naked, nude, suicide, murder, rape, blood, gore, risque, sexy, horny"
     requestParams: {}
     output_location: "output/drawing.png"
     prompt_output_location: "output/prompt.txt"
     next_prompt_output_location: "output/nextprompt.txt"
+    next_prompt_output_prefix: "Next prompt: "
 voice:
     enabled: true
     audio_device: 1

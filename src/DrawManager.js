@@ -33,6 +33,7 @@ class DrawManager extends EventEmitter{
     _drawNext() {
         if (this.drawQueue.length === 0) {
             this.isDrawing = false;
+            this._outputNextPrompt('');
             return;
         }
         console.info(`DrawManager drawing next image`);
@@ -40,7 +41,7 @@ class DrawManager extends EventEmitter{
         try {
             this.lastPrompt = prompt;
             // output this prompt as next prompt
-            fs.writeFileSync(this.settings.next_prompt_output_location, prompt, 'utf8');
+            this._outputNextPrompt(this.settings.next_prompt_output_prefix + prompt);
             // Call Stable Diffusion API
             this.stableDiffClient.txt2img({
                 prompt: prompt,
@@ -74,6 +75,10 @@ class DrawManager extends EventEmitter{
             }
         }
         return prompt;
+    }
+
+    _outputNextPrompt(text) {
+        fs.writeFileSync(this.settings.next_prompt_output_location, text, 'utf8');
     }
 }
 

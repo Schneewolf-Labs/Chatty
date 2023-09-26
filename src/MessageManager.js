@@ -53,6 +53,14 @@ class MessageManager {
 
             // Strip any URLs from the message
             message = message.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '');
+            // Strip things contained in [] brackets
+            message = message.replace(/\[.*?\]/g, '');
+
+            // Check if message is now empty
+            if (message.length === 0) {
+                console.warn(`Response from Oobabooga is empty`);
+                return;
+            }
 
             // Add response to response history
             this.responseHistory[this.lastResponseID] = message;

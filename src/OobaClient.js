@@ -4,6 +4,7 @@ const EventEmitter = require('events');
 class OobaClient extends EventEmitter{
     constructor(settings) {
         super();
+        this.settings = settings;
         this.baseUrl = settings.baseUrl;
         this.requestParams = settings.requestParams;
 

@@ -20,6 +20,7 @@ class DrawManager extends EventEmitter{
     }
 
     draw(prompt) {
+        console.info(`DrawManager enqueuing prompt: ${prompt}`);
         this.drawQueue.push(prompt);
         if (!this.isDrawing) {
             this.isDrawing = true;
@@ -28,19 +29,25 @@ class DrawManager extends EventEmitter{
     }
 
     _drawNext() {
+        console.info(`DrawManager drawing next image`);
         if (this.drawQueue.length === 0) {
             this.isDrawing = false;
             return;
         }
         const prompt = this.drawQueue.shift();
-        this.stableDiffClient.txt2img({
-            prompt: prompt,
-            negative_prompt: this.settings.negative_prompt,
-            ...this.settings.requestParams
-        }).then(image => {
-            this.emit('image', image);
+        try {
+            this.stableDiffClient.txt2img({
+                prompt: prompt,
+                negative_prompt: this.settings.negative_prompt,
+                ...this.settings.requestParams
+            }).then(image => {
+                this.emit('image', image);
+                this._drawNext();
+            });
+        } catch (err) {
+            console.error("Error encountered while drawing image", err);
             this._drawNext();
-        });
+        }
     }
 
     extractPrompt(message) {

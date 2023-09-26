@@ -33,7 +33,6 @@ class StableDiffClient {
             },
             body: JSON.stringify(params)
         }).then(res => {
-            console.log(res);
             if (res.ok) {
                 return res.json();
             } else {

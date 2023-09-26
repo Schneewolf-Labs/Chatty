@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const badwords = require('bad-words');
 const filter = new badwords();
 const Sentiment = require('sentiment');
@@ -49,8 +51,17 @@ class MessageManager {
                 }
             }
 
+            // Strip any URLs from the message
+            message = message.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '');
+            // Remove any non-alphanumeric characters from the message
+            message = message.replace(/[^a-zA-Z0-9 ]/g, '');
+
             // Add response to response history
             this.responseHistory[this.lastResponseID] = message;
+            // Save the output to a file
+            const output_location = this.ooba.settings.output_location;
+            const filename = path.join(process.cwd(), output_location);
+            fs.writeFileSync(filename, message, 'utf8');
             // Speak response if voice is enabled
             if (this.voiceHandler) {
                 this.voiceHandler.speak(message);
@@ -90,7 +101,7 @@ class MessageManager {
             if (prompt) {
                 console.log(`Extracted drawing prompt: ${prompt}`);
                 this.drawManager.draw(prompt);
-                return;
+                //return;
             }
         }
 

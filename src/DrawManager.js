@@ -9,12 +9,14 @@ class DrawManager extends EventEmitter{
         this.settings = stableDiffClient.settings;
         this.drawQueue = [];
         this.isDrawing = false;
+        this.lastPrompt = "";
 
         this.on('image', image => {
             console.log('DrawManager recieved image');
             // save image to output
             const filename = path.join(process.cwd(), this.settings.output_location);
             fs.writeFileSync(filename, image, 'base64');
+            fs.writeFileSync(this.settings.prompt_output_location, this.lastPrompt, 'utf8');
             //this.emit('image', image);
         });
     }
@@ -29,13 +31,17 @@ class DrawManager extends EventEmitter{
     }
 
     _drawNext() {
-        console.info(`DrawManager drawing next image`);
         if (this.drawQueue.length === 0) {
             this.isDrawing = false;
             return;
         }
+        console.info(`DrawManager drawing next image`);
         const prompt = this.drawQueue.shift();
         try {
+            this.lastPrompt = prompt;
+            // output this prompt as next prompt
+            fs.writeFileSync(this.settings.next_prompt_output_location, prompt, 'utf8');
+            // Call Stable Diffusion API
             this.stableDiffClient.txt2img({
                 prompt: prompt,
                 negative_prompt: this.settings.negative_prompt,

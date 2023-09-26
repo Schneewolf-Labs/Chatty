@@ -20,6 +20,8 @@ stable_diffusion:
     negative_prompt: "EasyNegative, lewd, nsfw, sex, naked, nude, suicide, animal harm, loli, rape, blood, gore"
     requestParams: {}
     output_location: "output/drawing.png"
+    prompt_output_location: "output/prompt.txt"
+    next_prompt_output_location: "output/nextprompt.txt"
 voice:
     enabled: true
     audio_device: 1

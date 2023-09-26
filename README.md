@@ -26,3 +26,6 @@ TWITCH_USERNAME=your_twitch_username
 TWITCH_OAUTH_TOKEN=your_twitch_oauth_token
 TWITCH_CHANNEL=your_twitch_channel
 ```
+
+## Voice Synthesis (TTS)
+Chatty supports voice synthesis on Windows using the Windows Speech API via [WinTTS](https://github.com/Schneewolf-Labs/WinTTS). Install .NET 6.0 and point the `config.yml` to the WinTTS executable. You can also choose an output device via the config file.

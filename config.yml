@@ -8,7 +8,8 @@ messages:
     reject-profanity: true
     reject-negativity: false
     sentiment-threshold: -0.5
-    prompt: "You are hosting a Twitch livestream and responding to your viewers comments in the chat. Below are the most recent messages in the chat history. Give only your response below as if you were speaking to them on stream as "
+    prompt: "You are hosting a Twitch livestream and responding to your viewers comments in the chat. Below are the most recent messages in the chat history. Give only your response below as if you were speaking to them on stream as {NAME}.\n"
+    prompt-response-prefix: "{NAME}'s response: "
 oobabooga:
     baseUrl: "ws://127.0.0.1:5005"
     requestParams: {}

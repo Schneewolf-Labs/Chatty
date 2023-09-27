@@ -13,7 +13,8 @@ class MessageManager {
         this.drawManager = null;
         this.voiceHandler = null;
 
-        this.chatPrompt = this.options['prompt'] + this.persona.name + "!\n";
+        this.chatPrompt = persona.insertName(this.options['prompt']);
+        this.responsePrefix = persona.insertName(this.options['prompt-response-prefix']);
         this.promptTokens = this.chatPrompt.split(' ').length;
 
         this.chatHistory = [];
@@ -169,7 +170,7 @@ class MessageManager {
         }
 
         const prompt = this.persona.directive + "\n"
-            + this.chatPrompt + messages.join('') + `${this.persona.name}:`;
+            + this.chatPrompt + messages.join('') + `\n${this.responsePrefix}`;
         
         this.ooba.send(prompt);
         console.log(`Used ${tokens} tokens to respond to ${messages.length} messages`);

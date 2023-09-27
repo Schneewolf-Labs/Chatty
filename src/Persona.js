@@ -18,6 +18,11 @@ class Persona {
             this.directive = '';
         }
     }
+
+    insertName(text) {
+        // replace {NAME} with persona name
+        return text.replace('{NAME}', this.name);
+    }
 }
 
 module.exports = Persona;

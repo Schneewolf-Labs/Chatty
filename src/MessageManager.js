@@ -33,16 +33,22 @@ class MessageManager {
             this.awaitingResponse = false;
             console.log(`Received message from Oobabooga: ${message}`);
 
-            // End response at the first \"
+            // End response before first \"
             const end = message.indexOf('\"');
             if (end > 0) message = message.substring(0, end);
             // Strip any trailing whitespace
             message = message.trim();
+            // Check if message is empty
+            if (message.length === 0) {
+                console.warn(`Response from Oobabooga is empty`);
+                return;
+            }
 
             // Check for profanity
             if (this.options['reject-profanity'] && filter.isProfane(message)) {
                 console.info(`rejected profane message from Oobabooga`);
                 message = this.options['profanity-replacement'];
+                this.speechBuffer = message;
                 //return;
             }
             // Check for negativity
@@ -225,11 +231,11 @@ class MessageManager {
 
     _pushSpeechToken(token, speak = false) {
         if (this.voiceHandler) {
+            const streamSpeech = this.voiceHandler.options['stream_speech'];
             this.speechBuffer += token;
             // if token contains punctuation, or newlines, or is a single character, dump the buffer
-            if (speak || token.includes('.') || token.includes(',') || token.includes('\n')) {
-                const streamSpeech = this.voiceHandler.options['stream-speech'];
-                if (streamSpeech || speak) this._dumpSpeechBuffer();
+            if ((streamSpeech || speak) && (token.includes('.') || token.includes(',') || token.includes('\n'))) {
+                this._dumpSpeechBuffer();
             }
         }
     }

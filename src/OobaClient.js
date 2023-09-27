@@ -29,7 +29,7 @@ class OobaClient extends EventEmitter{
                 this.recievingMessage = false;
             }
         });
-        this.ws('error', (err) => {
+        this.ws.on('error', (err) => {
             console.error("Error connecting to Oobabooga: "+err);
         });
         this.ws.on('close', () => {

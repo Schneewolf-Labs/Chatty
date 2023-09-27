@@ -23,6 +23,7 @@ class OobaClient extends EventEmitter{
                 if (!this.recievingMessage) console.log('Message stream from Oobabooga started...');
                 this.recievingMessage = true;
                 this.messageQueue.push(json.text);
+                this.emit('token', json.text);
             } else if (json.event === 'stream_end') {
                 const message = this.flush();
                 this.emit('message', message);

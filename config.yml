@@ -1,15 +1,18 @@
 persona_file: "persona.yaml"
 output_dir: "output"
 messages:
-    max-tokens: 2048
-    response-interval: 5000
-    chat-history-length: 7
-    chat-max-batch-size: 10
+    max-tokens: 1024
+    response-interval: 3000
+    chat-history-length: 32
+    chat-max-batch-size: 8
     reject-profanity: true
+    profane-response: "I'm sorry, I don't respond to profanity."
+    profanity-replacement: "Sorry, I can't use profanity."
     reject-negativity: false
     sentiment-threshold: -0.5
     prompt: "You are hosting a Twitch livestream and responding to your viewers comments in the chat. Below are the most recent messages in the chat history. Give only your response below as if you were speaking to them on stream as {NAME}.\n"
-    prompt-response-prefix: "{NAME}'s response: "
+    prompt-response-prefix: "Please write only {NAME}'s response here: \""
+    response-expire-time: 30000
 oobabooga:
     baseUrl: "ws://127.0.0.1:5005"
     requestParams: {}
@@ -23,10 +26,12 @@ stable_diffusion:
     output_location: "output/drawing.png"
     prompt_output_location: "output/prompt.txt"
     next_prompt_output_location: "output/nextprompt.txt"
-    next_prompt_output_prefix: "Next prompt: "
+    next_prompt_output_prefix: " Next prompt: "
 voice:
     enabled: true
+    voice_index: 1
     audio_device: 1
-    exe_location: "F:/TTS/wintts/WinTTS.exe"
+    exe_location: "F:/TTS/wintts-stream/WinTTS-Stream.exe"
     output_location: "output/voice.wav"
     alphanumeric_only: true
+    stream_speech: true

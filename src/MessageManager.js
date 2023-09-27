@@ -17,29 +17,33 @@ class MessageManager {
         this.responsePrefix = persona.insertName(this.options['prompt-response-prefix']);
         this.promptTokens = this.chatPrompt.split(' ').length;
 
+        const output_location = this.ooba.settings.output_location;
+        this.responseFile = path.join(process.cwd(), output_location);
+
         this.chatHistory = [];
         this.responseHistory = {};
         this.lastResponseID = 0;
         this.messageQueue = [];
         this.promptQueue = [];
+        this.speechBuffer = '';
+        this.awaitingResponse = false;
 
         // Receive replies from the AI
         this.ooba.on('message', (message) => {
+            this.awaitingResponse = false;
             console.log(`Received message from Oobabooga: ${message}`);
 
-            // Check the response didn't add hallucinated dialog
-            const hallucinated = message.includes(this.persona.name+":");
-            if (hallucinated) {
-                console.warn(`Response from Oobabooga may contain hallucinated dialog`);
-                // strip everything beyond the first message
-                message = message.split('\n')[0];
-                console.info(`Stripped message: ${message}`);
-            }
+            // End response at the first \"
+            const end = message.indexOf('\"');
+            if (end > 0) message = message.substring(0, end);
+            // Strip any trailing whitespace
+            message = message.trim();
 
             // Check for profanity
             if (this.options['reject-profanity'] && filter.isProfane(message)) {
                 console.info(`rejected profane message from Oobabooga`);
-                return;
+                message = this.options['profanity-replacement'];
+                //return;
             }
             // Check for negativity
             if (this.options['reject-negativity']) {
@@ -65,22 +69,39 @@ class MessageManager {
 
             // Add response to response history
             this.responseHistory[this.lastResponseID] = message;
-            // Save the output to a file
-            const output_location = this.ooba.settings.output_location;
-            const filename = path.join(process.cwd(), output_location);
-            fs.writeFileSync(filename, message, 'utf8');
             // Speak response if voice is enabled
-            if (this.voiceHandler) {
-                this.voiceHandler.speak(message);
-            }
+            this._dumpSpeechBuffer();
+            // Set response output to expire
+            const thisId = this.lastResponseID;
+            setTimeout((lastId) => {
+                // Check if another response has been received since this one
+                if (lastId != this.lastResponseID) return;
+                // Check if another response is already being written
+                if (this.awaitingResponse) return;
+                // Check if voice handler is enabled and is speaking
+                if (this.voiceHandler && this.voiceHandler.is_speaking) return;
+                // Clear output file
+                console.info(`Response output expired, clearing file`);
+                this._clearResponseOutput();
+            }, this.options['response-expire-time'], thisId);
+        });
+        
+        this.ooba.on('token', (token) => {
+            //console.log(`Received token from Oobabooga: ${token}`);
+            // check if end of token is \"
+            const end = token.indexOf('\"');
+            if (end > 0) token = token.substring(0, end);
+            if (!token) return;
+            this._pushSpeechToken(token);
+            this._streamTokenToResponseOutput(token);
         });
 
         // Setup interval to flush message queue to AI
         setInterval(() => {
             const queueLength = this.messageQueue.length;
-            console.log(`Message queue length: ${queueLength}`);
-            // Exit if queue is empty or if the voice handler is busy speaking or if a message is being generated already
-            if (queueLength == 0 || this.voiceHandler.is_speaking || this.ooba.recievingMessage) return;
+            //console.log(`Message queue length: ${queueLength}`);
+            // Exit if queue is empty, we are awaiting a response, or the voice handler is speaking
+            if (queueLength == 0 || this.awaitingResponse || this.voiceHandler.is_speaking) return;
             this.respondToChatFromMessageQueue();
         }, this.options['response-interval']);
     }
@@ -178,6 +199,8 @@ class MessageManager {
         console.log(`dequeuing ${dequeuedMessages} messages from message queue`);
         this.messageQueue = this.messageQueue.slice(dequeuedMessages);
         this.lastResponseID = lowId + dequeuedMessages;
+        this.awaitingResponse = true;
+        this._clearResponseOutput();
     }
 
     setDrawManager(drawManager) {
@@ -190,6 +213,32 @@ class MessageManager {
 
     _getTokensPerMessage(message) {
         return message.split(' ').length;
+    }
+
+    _clearResponseOutput() {
+        fs.writeFileSync(this.responseFile, '', 'utf8');
+    }
+
+    _streamTokenToResponseOutput(token) {
+        fs.appendFileSync(this.responseFile, token, 'utf8');
+    }
+
+    _pushSpeechToken(token, speak = false) {
+        if (this.voiceHandler) {
+            this.speechBuffer += token;
+            // if token contains punctuation, or newlines, or is a single character, dump the buffer
+            if (speak || token.includes('.') || token.includes(',') || token.includes('\n')) {
+                const streamSpeech = this.voiceHandler.options['stream-speech'];
+                if (streamSpeech || speak) this._dumpSpeechBuffer();
+            }
+        }
+    }
+
+    _dumpSpeechBuffer() {
+        if (this.voiceHandler) {
+            this.voiceHandler.speak(this.speechBuffer);
+            this.speechBuffer = '';
+        }
     }
 }
 

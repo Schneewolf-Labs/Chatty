@@ -42,10 +42,31 @@ if (process.platform === 'win32' && config.voice.enabled === true) {
 
 // Connect to Twitch
 if (config.twitch.enabled === true) {
-    const twitch = new TwitchClient(messageManager, 
+    const twitch = new TwitchClient( 
         process.env.TWITCH_USERNAME, 
         process.env.TWITCH_CHANNEL, 
         process.env.TWITCH_OAUTH_TOKEN,
         config.twitch);
+    twitch.on('message', (message) => {
+        if (config.twitch['chat-enabled']) messageManager.receiveMessage(message);
+    });
     twitch.connect();
+    // Send response to chat
+    if (config.twitch['reply-in-chat']) {
+        messageManager.on('response', (response) => {
+            twitch.sendMessage(response);
+        });
+    }
+}
+
+// Connect to Discord
+if (config.discord.enabled === true) {
+    const DiscordClient = require('./src/client/DiscordClient');
+    const discord = new DiscordClient(
+        process.env.DISCORD_TOKEN,
+        process.env.DISCORD_CHANNEL,
+        config.discord);
+    discord.on('message', (message) => {
+        if (config.discord['chat-enabled']) messageManager.receiveMessage(message);
+    });
 }

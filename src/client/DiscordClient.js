@@ -11,14 +11,16 @@ class DiscordClient {
 
         this.client.on('messageCreate', (message) => {
             if (message.channel.id === this.channelId && !message.author.bot) {
-                this.handleMessage(message);
+                this._handleMessage(message);
             }
         });
-
-        this.client.login(token);
     }
 
-    handleMessage(message) {
+    connect() {
+        this.client.login(this.token);
+    }
+
+    _handleMessage(message) {
         console.log(`Received message from ${message.author.tag}: ${message.content}`);
     }
 

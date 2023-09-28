@@ -1,9 +1,11 @@
 const fs = require('fs');
 const path = require('path');
+const EventEmitter = require('events');
 const MessageSanitizer = require('./MessageSanitizer');
 
-class MessageManager {
+class MessageManager extends EventEmitter {
     constructor(ooba, persona, options) {
+        super();
         this.ooba = ooba;
         this.persona = persona;
         this.options = options;
@@ -173,6 +175,11 @@ class MessageManager {
         this._dumpSpeechBuffer();
         // Set response output to expire
         const thisId = this.lastResponseID;
+        // Emit final response message for other services to consume
+        this.emit('response', message);
+        
+        // Set a timeout to clear the response output file
+        // XXX: this should be an interval that can retry when it is blocked
         setTimeout((lastId) => {
             // Check if another response has been received since this one
             if (lastId != this.lastResponseID) return;

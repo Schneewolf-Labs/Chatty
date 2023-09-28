@@ -3,6 +3,10 @@ output_dir: "output"
 twitch:
     enabled: true
     chat-enabled: true
+    reply-in-chat: false
+discord:
+    enabled: false
+    chat-enabled: true
     reply-in-chat: true
 messages:
     max-tokens: 1024

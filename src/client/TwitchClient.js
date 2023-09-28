@@ -1,9 +1,11 @@
 const tmi = require('tmi.js');
 
+const EventEmitter = require('events');
+
 // Twitch CLient class
-class TwitchClient {
-    constructor(messageManager, username, channel, token) {
-        this.messageManager = messageManager;
+class TwitchClient extends EventEmitter {
+    constructor(username, channel, token) {
+        super();
         this.username = username;
         this.channel = channel;
         this.token = token;
@@ -44,7 +46,7 @@ class TwitchClient {
                 tags: tags,
                 channel: channel
             };
-            this.messageManager.receiveMessage(msg);
+            this.emit('message', msg);
     }
 }
 

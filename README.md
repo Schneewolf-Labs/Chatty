@@ -9,7 +9,6 @@ A framework for connecting AI to chat services like Twitch and Discord.
 - Voice synthesis (Windows only)
 - Text, image, and audio file output for OBS
 - API for managing and monitoring
-- Integration with StreamLabs API
 
 ## Installation
 1. Install [Node.js](https://nodejs.org/en/download/)

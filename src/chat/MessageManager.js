@@ -1,3 +1,4 @@
+const logger = require('../log/logger');
 const fs = require('fs');
 const path = require('path');
 const EventEmitter = require('events');
@@ -37,7 +38,7 @@ class MessageManager extends EventEmitter {
         });
         
         this.ooba.on('token', (token) => {
-            //console.log(`Received token from Oobabooga: ${token}`);
+            logger.debug(`Received token from Oobabooga: ${token}`);
             if (this.abortStream) return;
             // check if end of token is \"
             const end = token.indexOf('\"');
@@ -55,7 +56,7 @@ class MessageManager extends EventEmitter {
         // Setup interval to flush message queue to AI
         setInterval(() => {
             const queueLength = this.messageQueue.length;
-            //console.log(`Message queue length: ${queueLength}`);
+            logger.debug(`Message queue length: ${queueLength}`);
             // Exit if queue is empty, we are awaiting a response, or the voice handler is speaking
             if (queueLength == 0 || this.awaitingResponse || this.voiceHandler.is_speaking) return;
             this.respondToChatFromMessageQueue();
@@ -63,10 +64,10 @@ class MessageManager extends EventEmitter {
     }
 
     receiveMessage(message) {
-        console.log(`MessageManager got: ${message.text}`);
+        logger.debug(`MessageManager got: ${message.text}`);
         const isProfane = this.sanitizer.shouldReject(message.text);
         if (isProfane) {
-            console.info(`rejected message from ${message.username}`);
+            logger.info(`rejected message from ${message.username}`);
             return;
         }
 
@@ -74,7 +75,7 @@ class MessageManager extends EventEmitter {
         if (this.drawManager) {
             const prompt = this.drawManager.extractPrompt(message.text);
             if (prompt) {
-                console.log(`Extracted drawing prompt: ${prompt}`);
+                logger.debug(`Extracted drawing prompt: ${prompt}`);
                 this.drawManager.draw(prompt);
                 //return;
             }

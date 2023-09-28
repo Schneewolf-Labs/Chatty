@@ -1,19 +1,11 @@
 require('dotenv').config(); // Load environment variables from .env file
-const fs = require('fs');
-const YAML = require('yaml');
 const TwitchClient = require('./src/client/TwitchClient');
 const OobaClient = require('./src/client/OobaClient');
 const MessageManager = require('./src/chat/MessageManager');
 const Persona = require('./src/chat/Persona');
 
-// Load Config
-const config = YAML.parse(fs.readFileSync('./config.yml', 'utf8'));
-console.log(config);
-
-// Create an output directory if it doesn't exist
-if (!fs.existsSync(config.output_dir)) {
-    fs.mkdirSync(config.output_dir);
-}
+// Load config
+const config = require('./src/config/Config');
 
 // Load the AI's persona
 const persona = new Persona(config.persona_file);

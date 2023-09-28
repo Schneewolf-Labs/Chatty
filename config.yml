@@ -1,5 +1,13 @@
 persona_file: "persona.yaml"
 output_dir: "output"
+config:
+    output: false
+api:
+    enabled: true
+    port: 3000
+logger:
+    level: "debug"
+    pretty: true
 twitch:
     enabled: true
     chat-enabled: true

@@ -1,3 +1,4 @@
+const logger = require('../util/Logger');
 const fs = require('fs');
 const path = require('path');
 const EventEmitter = require('events');
@@ -12,7 +13,7 @@ class DrawManager extends EventEmitter{
         this.lastPrompt = "";
 
         this.on('image', image => {
-            console.log('DrawManager recieved image');
+            logger.debug('DrawManager recieved image');
             // save image to output
             const filename = path.join(process.cwd(), this.settings.output_location);
             fs.writeFileSync(filename, image, 'base64');
@@ -22,7 +23,7 @@ class DrawManager extends EventEmitter{
     }
 
     draw(prompt) {
-        console.info(`DrawManager enqueuing prompt: ${prompt}`);
+        logger.info(`DrawManager enqueuing prompt: ${prompt}`);
         this.drawQueue.push(prompt);
         if (!this.isDrawing) {
             this.isDrawing = true;
@@ -36,7 +37,7 @@ class DrawManager extends EventEmitter{
             this._outputNextPrompt('');
             return;
         }
-        console.info(`DrawManager drawing next image`);
+        logger.debug(`DrawManager drawing next image`);
         const prompt = this.drawQueue.shift();
         try {
             this.lastPrompt = prompt;
@@ -52,7 +53,7 @@ class DrawManager extends EventEmitter{
                 this._drawNext();
             });
         } catch (err) {
-            console.error("Error encountered while drawing image", err);
+            logger.error("Error encountered while drawing image", err);
             this._drawNext();
         }
     }

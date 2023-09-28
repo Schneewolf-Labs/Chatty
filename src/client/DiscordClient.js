@@ -1,3 +1,4 @@
+const logger = require('../util/Logger');
 const { Client, Events, GatewayIntentBits } = require('discord.js');
 const EventEmitter = require('events');
 
@@ -9,7 +10,7 @@ class DiscordClient extends EventEmitter {
         this.client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
         
         this.client.once(Events.ClientReady, c => {
-            console.log(`Discord Ready! Logged in as ${c.user.tag}`);
+            logger.info(`Discord Ready! Logged in as ${c.user.tag}`);
         });
 
         this.client.on(Events.MessageCreate, message => {
@@ -28,7 +29,7 @@ class DiscordClient extends EventEmitter {
         // chunk messages by discord max length
         const max = 2000;
         const chunks = message.match(new RegExp(`.{1,${max}}`, 'g'));
-        //console.log(`Sending ${chunks.length} chunks`);
+        logger.debug(`Sending ${chunks.length} chunks`);
         chunks.forEach(chunk => {
             this._sendMessage(chunk);
         });
@@ -50,7 +51,7 @@ class DiscordClient extends EventEmitter {
     }
 
     _handleMessage(message) {
-        console.log(`Received message from ${message.author.tag}: ${message.content}`);
+        logger.debug(`Received message from ${message.author.tag}: ${message.content}`);
         const msg = {
             username: message.author.username,
             display_name: message.author.username,

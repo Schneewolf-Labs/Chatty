@@ -13,7 +13,7 @@ class MessageManager {
         this.drawManager = null;
         this.voiceHandler = null;
 
-        this.chatPrompt = persona.insertName(this.options['prompt']);
+        this.chatPrompt = persona.insertName(this.options['prompt']) + persona.insertName(this.options['safety-prompt']);
         this.responsePrefix = persona.insertName(this.options['prompt-response-prefix']);
         this.promptTokens = this.chatPrompt.split(' ').length;
 

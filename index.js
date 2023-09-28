@@ -1,10 +1,10 @@
 require('dotenv').config(); // Load environment variables from .env file
 const fs = require('fs');
 const YAML = require('yaml');
-const TwitchClient = require('./src/TwitchClient');
-const OobaClient = require('./src/OobaClient');
-const MessageManager = require('./src/MessageManager');
-const Persona = require('./src/Persona');
+const TwitchClient = require('./src/client/TwitchClient');
+const OobaClient = require('./src/client/OobaClient');
+const MessageManager = require('./src/chat/MessageManager');
+const Persona = require('./src/chat/Persona');
 
 // Load Config
 const config = YAML.parse(fs.readFileSync('./config.yml', 'utf8'));
@@ -26,16 +26,16 @@ const messageManager = new MessageManager(ooba, persona, config.messages);
 
 // If stable diffusion is enabled, initialize a draw manager and attach to message manager
 if (config.stable_diffusion.enabled === true) {
-    const StableDiffClient = require('./src/StableDiffClient');
+    const StableDiffClient = require('./src/client/StableDiffClient');
     const stableDiffClient = new StableDiffClient(config.stable_diffusion);
-    const DrawManager = require('./src/DrawManager');
+    const DrawManager = require('./src/draw/DrawManager');
     const drawManager = new DrawManager(stableDiffClient);
     messageManager.setDrawManager(drawManager);
 }
 
 // If using Windows and voice is enabled, initialize voice synthesis
 if (process.platform === 'win32' && config.voice.enabled === true) {
-    const VoiceHandler = require('./src/VoiceHandler');
+    const VoiceHandler = require('./src/tts/VoiceHandler');
     const voiceHandler = new VoiceHandler(config.voice);
     messageManager.setVoiceHandler(voiceHandler);
 }

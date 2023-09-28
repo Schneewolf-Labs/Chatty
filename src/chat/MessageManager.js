@@ -89,7 +89,7 @@ class MessageManager extends EventEmitter {
     respondToChatFromMessageQueue() {
         const directiveTokens = this.persona.numTokens;
         const maxTokens = this.options['max-tokens'] - directiveTokens - this.promptTokens - 2;
-        console.info(`max tokens remaining for chat: ${maxTokens}`);
+        logger.debug(`max tokens remaining for chat: ${maxTokens}`);
         
         let messages = [];
         let tokens = 0;
@@ -97,7 +97,7 @@ class MessageManager extends EventEmitter {
         const lowId = this.messageQueue[0]; // first id of messages we want to respond to
         const lowerBound = Math.max(0, lowId - this.options['chat-history-length']); // lowest chat id we will show in history
         const upperBound = Math.min(this.chatHistory.length, lowId + this.options['chat-max-batch-size']); // highest chat id we will show in history
-        //console.info(`lowID: ${lowId}, lowerBound: ${lowerBound}, upperBound: ${upperBound}`);
+        logger.debug(`lowID: ${lowId}, lowerBound: ${lowerBound}, upperBound: ${upperBound}`);
 
         let txt, tokensPerMessage;
         // Add enqueued messages to the prompt
@@ -106,7 +106,7 @@ class MessageManager extends EventEmitter {
             txt = `${message.username}: ${message.text}\n`;
             tokensPerMessage = this._getTokensPerMessage(txt);
             if (tokens + tokensPerMessage > maxTokens) {
-                console.warn(`max tokens reached, unable to add enqueued message`);
+                logger.warn(`max tokens reached, unable to add enqueued message`);
                 break;
             }
             messages.push(txt);
@@ -121,7 +121,7 @@ class MessageManager extends EventEmitter {
                 txt = `${this.persona.name}: ${this.responseHistory[i+1]}\n`;
                 tokensPerMessage = this._getTokensPerMessage(txt);
                 if (tokens + tokensPerMessage > maxTokens) {
-                    console.warn(`max tokens reached, unable to add historical response`);
+                    logger.warn(`max tokens reached, unable to add historical response`);
                     break;
                 }
                 messages.unshift(txt);
@@ -132,7 +132,7 @@ class MessageManager extends EventEmitter {
             txt = `${message.username}: ${message.text}\n`;
             tokensPerMessage = this._getTokensPerMessage(txt);
             if (tokens + tokensPerMessage > maxTokens) {
-                console.warn(`max tokens reached, unable to add chat history`);
+                logger.warn(`max tokens reached, unable to add chat history`);
                 break;
             }
             messages.unshift(txt);
@@ -143,9 +143,9 @@ class MessageManager extends EventEmitter {
             + this.chatPrompt + messages.join('') + `\n${this.responsePrefix}`;
         
         this.ooba.send(prompt);
-        console.log(`Used ${tokens} tokens to respond to ${messages.length} messages`);
+        logger.debug(`Used ${tokens} tokens to respond to ${messages.length} messages`);
         // Dequeue messages
-        console.log(`dequeuing ${dequeuedMessages} messages from message queue`);
+        logger.debug(`dequeuing ${dequeuedMessages} messages from message queue`);
         this.messageQueue = this.messageQueue.slice(dequeuedMessages);
         this.lastResponseID = lowId + dequeuedMessages;
         this.awaitingResponse = true;
@@ -161,18 +161,18 @@ class MessageManager extends EventEmitter {
     }
 
     _handleMessage(message) {
-        console.log(`Received message from Oobabooga: ${message}`);
+        logger.debug(`Received message from Oobabooga: ${message}`);
         message = this.sanitizer.trimResponse(message);
         message = this.sanitizer.sanitize(message);
         // Check if message is empty
         if (message.length === 0) {
-            console.warn(`Response from Oobabooga is empty`);
+            logger.warn(`Response from Oobabooga is empty`);
             return;
         }
 
         // Check if the message should be rejected
         if (this.sanitizer.shouldReject(message)) {
-            console.warn(`Response from Oobabooga was rejected`);
+            logger.warn(`Response from Oobabooga was rejected`);
             // Replace the profane message and remove the response from the speech output buffer
             message = this.options['profanity-replacement'];
             this.speechBuffer = message;
@@ -198,7 +198,7 @@ class MessageManager extends EventEmitter {
             // Check if voice handler is enabled and is speaking
             if (this.voiceHandler && this.voiceHandler.is_speaking) return;
             // Clear output file
-            console.info(`Response output expired, clearing file`);
+            logger.debug(`Response output expired, clearing file`);
             this._clearResponseOutput();
         }, this.options['response-expire-time'], thisId);
     }

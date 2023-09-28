@@ -54,21 +54,12 @@ class MessageManager {
 
     receiveMessage(message) {
         console.log(`Received message from Twitch: ${message.text}`);
-        // Check for profanity, if enabled
-        if (this.options['reject-profanity'] && filter.isProfane(message.text)) {
-            console.info(`rejected profane message from ${message.username}`);
+        const isProfane = this.sanitizer.shouldReject(message.text);
+        if (isProfane) {
+            console.info(`rejected message from ${message.username}`);
             return;
         }
-        // Check for negative sentiment, if enabled
-        if (this.options['reject-negativity']) {
-            const score = sentiment.analyze(message.text).score;
-            const threshold = this.options['sentiment-threshold'];
-            console.info(`sentiment score: ${score}`);
-            if (score < threshold) {
-                console.info(`rejected negative (${score}) message from ${message.username}`);
-                return;
-            }
-        }
+
         // Check for a drawing trigger, if stable diffusion is enabled
         if (this.drawManager) {
             const prompt = this.drawManager.extractPrompt(message.text);

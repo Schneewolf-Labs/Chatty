@@ -27,19 +27,27 @@ class MessageManager extends EventEmitter {
         this.speechBuffer = '';
         this.awaitingResponse = false;
         this.sanitizer = new MessageSanitizer(this.options);
+        this.abortStream = false;
 
         // Receive replies from the AI
         this.ooba.on('message', (message) => {
             this.awaitingResponse = false;
+            this.abortStream = false;
             this._handleMessage(message);
         });
         
         this.ooba.on('token', (token) => {
             //console.log(`Received token from Oobabooga: ${token}`);
+            if (this.abortStream) return;
             // check if end of token is \"
             const end = token.indexOf('\"');
-            if (end > 0) token = token.substring(0, end);
+            const reachedSpeechDelimiter = end > 0;
+            if (reachedSpeechDelimiter){
+                token = token.substring(0, end);
+                this.abortStream = true;
+            }
             if (!token) return;
+            // XXX: profane response may end up being streamed to outputs
             this._pushSpeechToken(token);
             this._streamTokenToResponseOutput(token);
         });

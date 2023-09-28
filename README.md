@@ -1,6 +1,8 @@
 # Chatty
 A framework for connecting AI to chat services like Twitch and Discord.
 
+![NikuNiku900 on Twitch, thanks to Chatty!](https://raw.githubusercontent.com/Schneewolf-Labs/Chatty/main/nikuscreen.png)
+
 ## Features
 - Streams chat messages with tmi.js and Discord.js
 - Profanity detection and sentiment analysis

@@ -69,4 +69,11 @@ if (config.discord.enabled === true) {
     discord.on('message', (message) => {
         if (config.discord['chat-enabled']) messageManager.receiveMessage(message);
     });
+    discord.connect();
+    // Send response to chat
+    if (config.discord['reply-in-chat']) {
+        messageManager.on('response', (response) => {
+            discord.sendMessage(response);
+        });
+    }
 }

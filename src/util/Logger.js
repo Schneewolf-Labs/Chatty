@@ -1,5 +1,5 @@
 const pino = require('pino');
-const config = require('../config/Config');
+const config = require('./Config');
 
 const options = {
     level: config.logger.level

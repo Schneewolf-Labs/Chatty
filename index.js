@@ -5,7 +5,7 @@ const MessageManager = require('./src/chat/MessageManager');
 const Persona = require('./src/chat/Persona');
 
 // Load config
-const config = require('./src/config/Config');
+const config = require('./src/util/Config');
 
 // Load the AI's persona
 const persona = new Persona(config.persona_file);

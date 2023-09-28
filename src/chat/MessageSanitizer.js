@@ -1,3 +1,4 @@
+const logger = require('../util/Logger');
 const badwords = require('bad-words');
 const filter = new badwords();
 const Sentiment = require('sentiment');
@@ -11,7 +12,7 @@ class MessageSanitizer {
     shouldReject(message) {
         // Check for profanity
         if (this.options['reject-profanity'] && filter.isProfane(message)) {
-            //console.info(`rejected profane message from Oobabooga`);
+            logger.debug(`got profrane message`);
             message = this.options['profanity-replacement'];
             this.speechBuffer = message;
             return true;
@@ -20,9 +21,9 @@ class MessageSanitizer {
         if (this.options['reject-negativity']) {
             const score = sentiment.analyze(message).score;
             const threshold = this.options['sentiment-threshold'];
-            console.info(`sentiment score: ${score}`);
+            logger.debug(`sentiment score: ${score}`);
             if (score < threshold) {
-                console.info(`rejected negative (${score}) message from Oobabooga`);
+                logger.debug(`rejected negative (${score}) message`);
                 return true;
             }
         }

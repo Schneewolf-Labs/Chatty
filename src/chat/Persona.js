@@ -1,3 +1,4 @@
+const logger = require('../util/Logger');
 const fs = require('fs');
 const YAML = require('yaml');
 
@@ -10,10 +11,10 @@ class Persona {
             // get number of tokens in directive
             const tokens = this.directive.split(' ');
             this.numTokens = tokens.length;
-            console.info('Loaded persona: ' + this.name + ' with ' + this.numTokens + ' token directive');
+            logger.info('Loaded persona: ' + this.name + ' with ' + this.numTokens + ' token directive');
 
         } catch (e) {
-            console.error('Error loading persona file: ' + e);
+            logger.error('Error loading persona file: ' + e);
             this.name = '';
             this.directive = '';
         }

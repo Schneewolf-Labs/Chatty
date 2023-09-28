@@ -55,7 +55,7 @@ class MessageManager extends EventEmitter {
     }
 
     receiveMessage(message) {
-        console.log(`Received message from Twitch: ${message.text}`);
+        console.log(`MessageManager got: ${message.text}`);
         const isProfane = this.sanitizer.shouldReject(message.text);
         if (isProfane) {
             console.info(`rejected message from ${message.username}`);

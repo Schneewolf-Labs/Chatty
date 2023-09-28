@@ -6,7 +6,7 @@ twitch:
     reply-in-chat: true
 discord:
     enabled: true
-    chat-enabled: false
+    chat-enabled: true
     reply-in-chat: true
 messages:
     max-tokens: 1024

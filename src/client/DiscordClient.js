@@ -6,7 +6,7 @@ class DiscordClient extends EventEmitter {
         super();
         this.token = token;
         this.channelId = channelId;
-        this.client = new Client({ intents: [GatewayIntentBits.Guilds] });
+        this.client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
         
         this.client.once(Events.ClientReady, c => {
             console.log(`Discord Ready! Logged in as ${c.user.tag}`);
@@ -25,8 +25,18 @@ class DiscordClient extends EventEmitter {
     }
 
     sendMessage(message) {
-        this.client.channels.fetch(this.channelId)
-            .then(channel => channel.send(message));
+        // chunk messages by discord max length
+        const max = 2000;
+        const chunks = message.match(new RegExp(`.{1,${max}}`, 'g'));
+        //console.log(`Sending ${chunks.length} chunks`);
+        chunks.forEach(chunk => {
+            this._sendMessage(chunk);
+        });
+    }
+
+    _sendMessage(message) {
+        const channel = this.client.channels.cache.get(this.channelId);
+        channel.send(message);
     }
 
     _handleMessage(message) {

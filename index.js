@@ -76,4 +76,10 @@ if (config.discord.enabled === true) {
             discord.sendMessage(response);
         });
     }
+    // Post image output to discord
+    if (config.discord['post-image-output'] && messageManager.drawManager) {
+        messageManager.drawManager.on('image', (image) => {
+            discord.sendImage(image);
+        });
+    }
 }

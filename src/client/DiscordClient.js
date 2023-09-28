@@ -34,6 +34,16 @@ class DiscordClient extends EventEmitter {
         });
     }
 
+    sendImage(image) {
+        // convert base64 string to buffer
+        const buffer = Buffer.from(image, 'base64');
+        // send buffer as attachment
+        const channel = this.client.channels.cache.get(this.channelId);
+        channel.send({
+            files: [buffer]
+        });
+    }
+
     _sendMessage(message) {
         const channel = this.client.channels.cache.get(this.channelId);
         channel.send(message);

@@ -8,6 +8,7 @@ discord:
     enabled: true
     chat-enabled: true
     reply-in-chat: true
+    post-image-output: true
 messages:
     max-tokens: 1024
     response-interval: 3000

@@ -1,5 +1,5 @@
+const logger = require('../util/Logger');
 const tmi = require('tmi.js');
-
 const EventEmitter = require('events');
 
 // Twitch CLient class
@@ -10,7 +10,7 @@ class TwitchClient extends EventEmitter {
         this.channel = channel;
         this.token = token;
         this.client = new tmi.Client({
-            options: { debug: true },
+            options: { debug: false },
             connection: {
                 secure: true,
                 reconnect: true
@@ -20,6 +20,11 @@ class TwitchClient extends EventEmitter {
                 password: this.token
             },
             channels: [ this.channel ]
+        });
+
+        // On connect:
+        this.client.on('connected', (address, port) => {
+            logger.info(`Connected to Twitch channel ${this.channel} at ${address}:${port}`);
         });
         
         // Listen to Twitch chat:

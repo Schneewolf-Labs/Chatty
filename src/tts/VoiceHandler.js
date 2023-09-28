@@ -18,7 +18,7 @@ class VoiceHandler {
         this.voice_process.stdout.on('data', (data) => {
             const message = data.toString().trim();
             if (message === 'TOKEN_PLAYBACK_FINISHED') {
-                logger.info(`WinTTS finished speaking`);
+                logger.debug(`WinTTS finished speaking`);
                 this._dequeue();
             }
         });

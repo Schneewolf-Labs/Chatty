@@ -6,7 +6,7 @@ api:
     enabled: true
     port: 3000
 logger:
-    level: "info"
+    level: "debug"
     pretty: true
 twitch:
     enabled: true
@@ -22,7 +22,7 @@ messages:
     response-interval: 3000
     chat-history-length: 32
     chat-max-batch-size: 8
-    reject-profanity: true
+    reject-profanity: false
     profane-response: "I'm sorry, I don't respond to profanity."
     profanity-replacement: "Sorry, I can't use profanity."
     reject-negativity: false
@@ -30,6 +30,7 @@ messages:
     prompt: "You are hosting a Twitch livestream and responding to your viewers comments in the chat. Below are the most recent messages in the chat history. Give only your response below as if you were speaking to them on stream as {NAME}.\n"
     safety-prompt: "To avoid issues with Twitch, avoid using profanity and discussing dangerous or illegal activity. {NAME} should always be friendly and supportive and discourage suicide, violence, and self-harm.\n"
     prompt-response-prefix: "Continue with {NAME}'s response here: \""
+    chat-delimiter: "|\n"
     response-expire-time: 30000
     include-responses-in-history: true
 oobabooga:
@@ -48,7 +49,7 @@ stable_diffusion:
     next_prompt_output_prefix: " Next prompt: "
 voice:
     enabled: true
-    voice_index: 0
+    voice_index: 1
     audio_device: 2
     exe_location: "F:/TTS/wintts-stream/WinTTS-Stream.exe"
     output_location: "output/voice.wav"

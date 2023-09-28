@@ -16,6 +16,7 @@ class MessageManager extends EventEmitter {
         this.chatPrompt = persona.insertName(this.options['prompt']) + persona.insertName(this.options['safety-prompt']);
         this.responsePrefix = persona.insertName(this.options['prompt-response-prefix']);
         this.promptTokens = this.chatPrompt.split(' ').length;
+        this.chatDelimiter = this.options['chat-delimiter'];
 
         const output_location = this.ooba.settings.output_location;
         this.responseFile = path.join(process.cwd(), output_location);
@@ -103,7 +104,7 @@ class MessageManager extends EventEmitter {
         // Add enqueued messages to the prompt
         for (let i = lowId; i < upperBound; i++) {
             const message = this.chatHistory[i];
-            txt = `${message.username}: ${message.text}\n`;
+            txt = `${message.username}: ${message.text}${this.chatDelimiter}\n`;
             tokensPerMessage = this._getTokensPerMessage(txt);
             if (tokens + tokensPerMessage > maxTokens) {
                 logger.warn(`max tokens reached, unable to add enqueued message`);
@@ -118,7 +119,7 @@ class MessageManager extends EventEmitter {
         for (let i = lowId-1; i >= lowerBound; i--) {
             // Add the AI's own responses to the history
             if (includeResponses && this.responseHistory[i+1]) {
-                txt = `${this.persona.name}: ${this.responseHistory[i+1]}\n`;
+                txt = `${this.persona.name}: ${this.responseHistory[i+1]}${this.chatDelimiter}\n`;
                 tokensPerMessage = this._getTokensPerMessage(txt);
                 if (tokens + tokensPerMessage > maxTokens) {
                     logger.warn(`max tokens reached, unable to add historical response`);
@@ -129,7 +130,7 @@ class MessageManager extends EventEmitter {
             }
 
             const message = this.chatHistory[i];
-            txt = `${message.username}: ${message.text}\n`;
+            txt = `${message.username}: ${message.text}${this.chatDelimiter}\n`;
             tokensPerMessage = this._getTokensPerMessage(txt);
             if (tokens + tokensPerMessage > maxTokens) {
                 logger.warn(`max tokens reached, unable to add chat history`);

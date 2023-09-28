@@ -41,7 +41,7 @@ class VoiceHandler {
         console.info(`WinTTS speaking: ${token}`);
         // strip non-alphanumeric (except puncutation) characters if enabled
         if (this.alphanumeric_only) {
-            token = token.replace(/[^a-zA-Z0-9\s.,!?]/g, '');
+            token = token.replace(/[^a-zA-Z0-9\s.,!?']/g, '');
         }
         if (!token) {
             console.warn(`WinTTS stripped token, skipping`);

@@ -1,5 +1,5 @@
 # Chatty
-A framework for connecting AI to Twitch chat.
+A framework for connecting AI to chat services like Twitch and Discord.
 
 ## Features
 - Streams chat messages with tmi.js

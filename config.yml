@@ -1,5 +1,9 @@
 persona_file: "persona.yaml"
 output_dir: "output"
+twitch:
+    enabled: true
+    chat-enabled: true
+    reply-in-chat: true
 messages:
     max-tokens: 1024
     response-interval: 3000

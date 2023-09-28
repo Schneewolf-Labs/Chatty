@@ -18,6 +18,7 @@
   "homepage": "https://github.com/Schneewolf-Labs/Chatty#readme",
   "dependencies": {
     "bad-words": "^3.0.4",
+    "discord.js": "^14.13.0",
     "dotenv": "^16.3.1",
     "sentiment": "^5.0.2",
     "tmi.js": "^1.8.5",

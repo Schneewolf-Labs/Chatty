@@ -1,9 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const badwords = require('bad-words');
-const filter = new badwords();
-const Sentiment = require('sentiment');
-const sentiment = new Sentiment();
+const MessageSanitizer = require('./MessageSanitizer');
 
 class MessageManager {
     constructor(ooba, persona, options) {
@@ -27,69 +24,12 @@ class MessageManager {
         this.promptQueue = [];
         this.speechBuffer = '';
         this.awaitingResponse = false;
+        this.sanitizer = new MessageSanitizer(this.options);
 
         // Receive replies from the AI
         this.ooba.on('message', (message) => {
             this.awaitingResponse = false;
-            console.log(`Received message from Oobabooga: ${message}`);
-
-            // End response before first \"
-            const end = message.indexOf('\"');
-            if (end > 0) message = message.substring(0, end);
-            // Strip any trailing whitespace
-            message = message.trim();
-            // Check if message is empty
-            if (message.length === 0) {
-                console.warn(`Response from Oobabooga is empty`);
-                return;
-            }
-
-            // Check for profanity
-            if (this.options['reject-profanity'] && filter.isProfane(message)) {
-                console.info(`rejected profane message from Oobabooga`);
-                message = this.options['profanity-replacement'];
-                this.speechBuffer = message;
-                //return;
-            }
-            // Check for negativity
-            if (this.options['reject-negativity']) {
-                const score = sentiment.analyze(message).score;
-                const threshold = this.options['sentiment-threshold'];
-                console.info(`sentiment score: ${score}`);
-                if (score < threshold) {
-                    console.info(`rejected negative (${score}) message from Oobabooga`);
-                    return;
-                }
-            }
-
-            // Strip any URLs from the message
-            message = message.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '');
-            // Strip things contained in [] brackets
-            message = message.replace(/\[.*?\]/g, '');
-
-            // Check if message is now empty
-            if (message.length === 0) {
-                console.warn(`Response from Oobabooga is empty`);
-                return;
-            }
-
-            // Add response to response history
-            this.responseHistory[this.lastResponseID] = message;
-            // Speak response if voice is enabled
-            this._dumpSpeechBuffer();
-            // Set response output to expire
-            const thisId = this.lastResponseID;
-            setTimeout((lastId) => {
-                // Check if another response has been received since this one
-                if (lastId != this.lastResponseID) return;
-                // Check if another response is already being written
-                if (this.awaitingResponse) return;
-                // Check if voice handler is enabled and is speaking
-                if (this.voiceHandler && this.voiceHandler.is_speaking) return;
-                // Clear output file
-                console.info(`Response output expired, clearing file`);
-                this._clearResponseOutput();
-            }, this.options['response-expire-time'], thisId);
+            this._handleMessage(message);
         });
         
         this.ooba.on('token', (token) => {
@@ -215,6 +155,44 @@ class MessageManager {
 
     setVoiceHandler(voiceHandler) {
         this.voiceHandler = voiceHandler;
+    }
+
+    _handleMessage(message) {
+        console.log(`Received message from Oobabooga: ${message}`);
+        message = this.sanitizer.trimResponse(message);
+        message = this.sanitizer.sanitize(message);
+        // Check if message is empty
+        if (message.length === 0) {
+            console.warn(`Response from Oobabooga is empty`);
+            return;
+        }
+
+        // Check if the message should be rejected
+        if (this.sanitizer.shouldReject(message)) {
+            console.warn(`Response from Oobabooga was rejected`);
+            // Replace the profane message and remove the response from the speech output buffer
+            message = this.options['profanity-replacement'];
+            this.speechBuffer = message;
+            //return;
+        }
+
+        // Add response to response history
+        this.responseHistory[this.lastResponseID] = message;
+        // Speak response if voice is enabled
+        this._dumpSpeechBuffer();
+        // Set response output to expire
+        const thisId = this.lastResponseID;
+        setTimeout((lastId) => {
+            // Check if another response has been received since this one
+            if (lastId != this.lastResponseID) return;
+            // Check if another response is already being written
+            if (this.awaitingResponse) return;
+            // Check if voice handler is enabled and is speaking
+            if (this.voiceHandler && this.voiceHandler.is_speaking) return;
+            // Clear output file
+            console.info(`Response output expired, clearing file`);
+            this._clearResponseOutput();
+        }, this.options['response-expire-time'], thisId);
     }
 
     _getTokensPerMessage(message) {

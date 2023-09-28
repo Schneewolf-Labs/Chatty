@@ -41,8 +41,11 @@ if (process.platform === 'win32' && config.voice.enabled === true) {
 }
 
 // Connect to Twitch
-const twitch = new TwitchClient(messageManager, 
-    process.env.TWITCH_USERNAME, 
-    process.env.TWITCH_CHANNEL, 
-    process.env.TWITCH_OAUTH_TOKEN);
-twitch.connect();
+if (config.twitch.enabled === true) {
+    const twitch = new TwitchClient(messageManager, 
+        process.env.TWITCH_USERNAME, 
+        process.env.TWITCH_CHANNEL, 
+        process.env.TWITCH_OAUTH_TOKEN,
+        config.twitch);
+    twitch.connect();
+}

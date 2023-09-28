@@ -22,7 +22,20 @@ class TwitchClient {
         
         // Listen to Twitch chat:
         this.client.on('message', (channel, tags, message, self) => {
-            if (self) return;
+            this._handleMessage(channel, tags, message, self);
+        });
+    }
+
+    connect() {
+        this.client.connect();
+    }
+
+    sendMessage(message) {
+        this.client.say(this.channel, message);
+    }
+
+    _handleMessage(channel, tags, message, self) {
+        if (self) return;
             const msg = {
                 username: tags.username,
                 display_name: tags['display-name'],
@@ -32,13 +45,7 @@ class TwitchClient {
                 channel: channel
             };
             this.messageManager.receiveMessage(msg);
-        });
     }
-
-    connect() {
-        this.client.connect();
-    }
-
 }
 
 module.exports = TwitchClient;

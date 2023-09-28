@@ -6,7 +6,7 @@ api:
     enabled: true
     port: 3000
 logger:
-    level: "debug"
+    level: "info"
     pretty: true
 twitch:
     enabled: true
@@ -54,3 +54,8 @@ voice:
     output_location: "output/voice.wav"
     alphanumeric_only: true
     stream_speech: true
+http:
+    enabled: true
+    analyze-links: true
+    analyze-images: true
+    allow-downloading: true

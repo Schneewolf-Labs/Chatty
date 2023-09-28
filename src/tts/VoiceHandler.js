@@ -29,7 +29,7 @@ class VoiceHandler {
 
     speak(token, force=false) {
         if (!force && this.is_speaking) {
-            logger.warn(`WinTTS is already speaking`);
+            logger.debug(`WinTTS is already speaking, enqueueing token: ${token}`);
             this.queue.push(token);
             return;
         }

@@ -113,9 +113,10 @@ class MessageManager extends EventEmitter {
             dequeuedMessages++;
         }
         // Add chat history to the prompt
+        const includeResponses = this.options['include-responses-in-history'];
         for (let i = lowId-1; i >= lowerBound; i--) {
             // Add the AI's own responses to the history
-            if (this.responseHistory[i+1]) {
+            if (includeResponses && this.responseHistory[i+1]) {
                 txt = `${this.persona.name}: ${this.responseHistory[i+1]}\n`;
                 tokensPerMessage = this._getTokensPerMessage(txt);
                 if (tokens + tokensPerMessage > maxTokens) {

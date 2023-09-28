@@ -22,6 +22,7 @@ messages:
     safety-prompt: "To avoid issues with Twitch, avoid using profanity and discussing dangerous or illegal activity. {NAME} should always be friendly and supportive and discourage suicide, violence, and self-harm.\n"
     prompt-response-prefix: "Continue with {NAME}'s response here: \""
     response-expire-time: 30000
+    include-responses-in-history: true
 oobabooga:
     baseUrl: "ws://127.0.0.1:5005"
     requestParams: {}

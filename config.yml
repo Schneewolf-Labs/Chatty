@@ -11,7 +11,7 @@ messages:
     reject-negativity: false
     sentiment-threshold: -0.5
     prompt: "You are hosting a Twitch livestream and responding to your viewers comments in the chat. Below are the most recent messages in the chat history. Give only your response below as if you were speaking to them on stream as {NAME}.\n"
-    prompt-response-prefix: "Please write only {NAME}'s response here: \""
+    prompt-response-prefix: "Continue with {NAME}'s response here: \""
     response-expire-time: 30000
 oobabooga:
     baseUrl: "ws://127.0.0.1:5005"
@@ -29,8 +29,8 @@ stable_diffusion:
     next_prompt_output_prefix: " Next prompt: "
 voice:
     enabled: true
-    voice_index: 1
-    audio_device: 1
+    voice_index: 0
+    audio_device: 2
     exe_location: "F:/TTS/wintts-stream/WinTTS-Stream.exe"
     output_location: "output/voice.wav"
     alphanumeric_only: true

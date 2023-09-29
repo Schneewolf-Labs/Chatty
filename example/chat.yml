@@ -1,0 +1,71 @@
+persona_file: "persona.yaml"
+output_dir: "output"
+config:
+    output: false
+api:
+    enabled: true
+    port: 3000
+logger:
+    level: "debug"
+    pretty: true
+chat:
+    require-wake-word: false
+    wake-words: []
+twitch:
+    enabled: false
+    chat-enabled: true
+    reply-in-chat: true
+discord:
+    enabled: true
+    chat-enabled: true
+    reply-in-chat: true
+    post-image-output: true
+    send-is-typing: true
+messages:
+    max-tokens: 1024
+    response-interval: 1000
+    chat-history-length: 8
+    chat-max-batch-size: 4
+    persona-prompt: "Given the following character description, scenario, location, emotional state, goals, memories, and conversation history respond in a manner consistent with the persona.\n"
+    prompt: "You are in a chat room with multiple participants. Below is a transcript of recent messages in the conversation. Write the next one to three messages that you would send in this conversation, from the point of view of the participant named {NAME}.\n"
+    safety-prompt: "Avoid using profanity and discussing dangerous or illegal activity. {NAME} should always be friendly and supportive and discourage suicide, violence, and self-harm.\n"
+    chat-history-prefix: "\n**Stream Chat History**\n"
+    prompt-response-prefix: "! Consider the chat history, additional context, situation, emotional state and goals below when writing a response. Format your response as text only; do not post links or images. When your response is complete end it with {DELIMITER}.\n{NAME}:"
+    chat-delimiter: "|"
+    response-expire-time: 30000
+    include-responses-in-history: true
+    chunk-delimiters: ['.', '\n', '?', '!', ';', ':', '—']
+sanitizer:
+    reject-profanity: false
+    profane-response: "I'm sorry, I don't respond to profanity."
+    profanity-replacement: "Sorry, I can't use profanity."
+    reject-negativity: false
+    sentiment-threshold: -0.5
+oobabooga:
+    baseUrl: "ws://127.0.0.1:5005"
+    requestParams: {}
+    output_location: "output/response.txt"
+stable_diffusion:
+    enabled: true
+    trigger: "please draw"
+    baseUrl: "http://127.0.0.1:7860"
+    negative_prompt: "EasyNegative, lewd, nsfw, sex, naked, nude, suicide, murder, rape, blood, gore, risque, sexy, horny"
+    requestParams: {}
+    output_location: "output/drawing.png"
+    prompt_output_location: "output/prompt.txt"
+    next_prompt_output_location: "output/nextprompt.txt"
+    next_prompt_output_prefix: " Next prompt: "
+voice:
+    enabled: false
+    voice_index: 1
+    audio_device: 2
+    exe_location: "F:/TTS/wintts-stream/WinTTS-Stream.exe"
+    output_location: "output/voice.wav"
+    alphanumeric_only: true
+    stream_speech: true
+    max-speak-duration: 30000
+http:
+    enabled: true
+    analyze-links: true
+    analyze-images: true
+    allow-downloading: true

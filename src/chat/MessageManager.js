@@ -1,77 +1,29 @@
 const logger = require('../util/Logger');
-const fs = require('fs');
-const path = require('path');
 const EventEmitter = require('events');
-const MessageSanitizer = require('./MessageSanitizer');
 
 class MessageManager extends EventEmitter {
-    constructor(ooba, persona, options) {
+    constructor(options, responseHandler) {
         super();
-        this.ooba = ooba;
-        this.persona = persona;
         this.options = options;
+        this.responseHandler = responseHandler;
         this.drawManager = null;
-        this.voiceHandler = null;
-
-        this.chatPrompt = persona.insertName(this.options['prompt']) + persona.insertName(this.options['safety-prompt']);
-        this.responsePrefix = persona.insertName(this.options['prompt-response-prefix']);
-        this.promptTokens = this.chatPrompt.split(' ').length;
-        this.chatDelimiter = this.options['chat-delimiter'];
-
-        const output_location = this.ooba.settings.output_location;
-        this.responseFile = path.join(process.cwd(), output_location);
 
         this.chatHistory = [];
-        this.responseHistory = {};
-        this.lastResponseID = 0;
         this.messageQueue = [];
-        this.promptQueue = [];
-        this.speechBuffer = '';
-        this.awaitingResponse = false;
-        this.sanitizer = new MessageSanitizer(this.options);
-        this.abortStream = false;
 
-        // Receive replies from the AI
-        this.ooba.on('message', (message) => {
-            this.awaitingResponse = false;
-            this.abortStream = false;
-            this._handleMessage(message);
-        });
-        
-        this.ooba.on('token', (token) => {
-            logger.debug(`Received token from Oobabooga: ${token}`);
-            if (this.abortStream) return;
-            // check if end of token is \"
-            const end = token.indexOf('\"');
-            const reachedSpeechDelimiter = end > 0;
-            if (reachedSpeechDelimiter){
-                token = token.substring(0, end);
-                this.abortStream = true;
-            }
-            if (!token) return;
-            // XXX: profane response may end up being streamed to outputs
-            this._pushSpeechToken(token);
-            this._streamTokenToResponseOutput(token);
-        });
-
-        // Setup interval to flush message queue to AI
+        // Setup interval to respond to message queue
         setInterval(() => {
             const queueLength = this.messageQueue.length;
             logger.debug(`Message queue length: ${queueLength}`);
-            // Exit if queue is empty, we are awaiting a response, or the voice handler is speaking
-            if (queueLength == 0 || this.awaitingResponse || this.voiceHandler.is_speaking) return;
+            // Exit if queue is empty, or we are awaiting a response
+            if (queueLength == 0 || this.responseHandler.awaitingResponse) return;
             this.respondToChatFromMessageQueue();
         }, this.options['response-interval']);
     }
 
     receiveMessage(message) {
         logger.debug(`MessageManager got: ${message.text}`);
-        const isProfane = this.sanitizer.shouldReject(message.text);
-        if (isProfane) {
-            logger.info(`rejected message from ${message.username}`);
-            return;
-        }
-
+        
         // Check for a drawing trigger, if stable diffusion is enabled
         if (this.drawManager) {
             const prompt = this.drawManager.extractPrompt(message.text);
@@ -88,150 +40,43 @@ class MessageManager extends EventEmitter {
     }
 
     respondToChatFromMessageQueue() {
-        const directiveTokens = this.persona.numTokens;
-        const maxTokens = this.options['max-tokens'] - directiveTokens - this.promptTokens - 2;
-        logger.debug(`max tokens remaining for chat: ${maxTokens}`);
+        const messages = [];
+        const history = [];
         
-        let messages = [];
-        let tokens = 0;
-        let dequeuedMessages = 0;
         const lowId = this.messageQueue[0]; // first id of messages we want to respond to
         const lowerBound = Math.max(0, lowId - this.options['chat-history-length']); // lowest chat id we will show in history
         const upperBound = Math.min(this.chatHistory.length, lowId + this.options['chat-max-batch-size']); // highest chat id we will show in history
         logger.debug(`lowID: ${lowId}, lowerBound: ${lowerBound}, upperBound: ${upperBound}`);
 
-        let txt, tokensPerMessage;
-        // Add enqueued messages to the prompt
+        // Add enqueued messages
         for (let i = lowId; i < upperBound; i++) {
             const message = this.chatHistory[i];
-            txt = `${message.username}: ${message.text}${this.chatDelimiter}\n`;
-            tokensPerMessage = this._getTokensPerMessage(txt);
-            if (tokens + tokensPerMessage > maxTokens) {
-                logger.warn(`max tokens reached, unable to add enqueued message`);
-                break;
-            }
-            messages.push(txt);
-            tokens += tokensPerMessage;
-            dequeuedMessages++;
+            messages.push(message);
         }
         // Add chat history to the prompt
         const includeResponses = this.options['include-responses-in-history'];
         for (let i = lowId-1; i >= lowerBound; i--) {
             // Add the AI's own responses to the history
-            if (includeResponses && this.responseHistory[i+1]) {
-                txt = `${this.persona.name}: ${this.responseHistory[i+1]}${this.chatDelimiter}\n`;
-                tokensPerMessage = this._getTokensPerMessage(txt);
-                if (tokens + tokensPerMessage > maxTokens) {
-                    logger.warn(`max tokens reached, unable to add historical response`);
-                    break;
-                }
-                messages.unshift(txt);
-                tokens += tokensPerMessage;
+            const historicalResponse = this.responseHandler.getResponse(i+1);
+            if (includeResponses && historicalResponse) {
+                history.push({
+                    username: this.responseHandler.persona.name,
+                    text: historicalResponse
+                });
             }
-
-            const message = this.chatHistory[i];
-            txt = `${message.username}: ${message.text}${this.chatDelimiter}\n`;
-            tokensPerMessage = this._getTokensPerMessage(txt);
-            if (tokens + tokensPerMessage > maxTokens) {
-                logger.warn(`max tokens reached, unable to add chat history`);
-                break;
-            }
-            messages.unshift(txt);
-            tokens += tokensPerMessage;
+            history.push(this.chatHistory[i]);
         }
 
-        const prompt = this.persona.directive + "\n"
-            + this.chatPrompt + messages.join('') + `\n${this.responsePrefix}`;
-        
-        this.ooba.send(prompt);
-        logger.debug(`Used ${tokens} tokens to respond to ${messages.length} messages`);
+        // Send response
+        const dequeuedMessages = this.responseHandler.sendResponse(messages, history);
+
         // Dequeue messages
         logger.debug(`dequeuing ${dequeuedMessages} messages from message queue`);
         this.messageQueue = this.messageQueue.slice(dequeuedMessages);
-        this.lastResponseID = lowId + dequeuedMessages;
-        this.awaitingResponse = true;
-        this._clearResponseOutput();
     }
 
     setDrawManager(drawManager) {
         this.drawManager = drawManager;
-    }
-
-    setVoiceHandler(voiceHandler) {
-        this.voiceHandler = voiceHandler;
-    }
-
-    _handleMessage(message) {
-        logger.debug(`Received message from Oobabooga: ${message}`);
-        message = this.sanitizer.trimResponse(message);
-        message = this.sanitizer.sanitize(message);
-        // Check if message is empty
-        if (message.length === 0) {
-            logger.warn(`Response from Oobabooga is empty`);
-            return;
-        }
-
-        // Check if the message should be rejected
-        if (this.sanitizer.shouldReject(message)) {
-            logger.warn(`Response from Oobabooga was rejected`);
-            // Replace the profane message and remove the response from the speech output buffer
-            message = this.options['profanity-replacement'];
-            this.speechBuffer = message;
-            //return;
-        }
-
-        // Add response to response history
-        this.responseHistory[this.lastResponseID] = message;
-        // Speak response if voice is enabled
-        this._dumpSpeechBuffer();
-        // Set response output to expire
-        const thisId = this.lastResponseID;
-        // Emit final response message for other services to consume
-        this.emit('response', message);
-        
-        // Set a timeout to clear the response output file
-        // XXX: this should be an interval that can retry when it is blocked
-        setTimeout((lastId) => {
-            // Check if another response has been received since this one
-            if (lastId != this.lastResponseID) return;
-            // Check if another response is already being written
-            if (this.awaitingResponse) return;
-            // Check if voice handler is enabled and is speaking
-            if (this.voiceHandler && this.voiceHandler.is_speaking) return;
-            // Clear output file
-            logger.debug(`Response output expired, clearing file`);
-            this._clearResponseOutput();
-        }, this.options['response-expire-time'], thisId);
-    }
-
-    _getTokensPerMessage(message) {
-        return message.split(' ').length;
-    }
-
-    _clearResponseOutput() {
-        fs.writeFileSync(this.responseFile, '', 'utf8');
-    }
-
-    _streamTokenToResponseOutput(token) {
-        fs.appendFileSync(this.responseFile, token, 'utf8');
-    }
-
-    _pushSpeechToken(token, speak = false) {
-        if (this.voiceHandler) {
-            const streamSpeech = this.voiceHandler.options['stream_speech'];
-            this.speechBuffer += token;
-            // if token contains punctuation, or newlines, or is a single character, dump the buffer
-            if ((streamSpeech || speak) && (token.includes('.') || token.includes(',') || token.includes('\n'))) {
-                this._dumpSpeechBuffer();
-            }
-        }
-    }
-
-    _dumpSpeechBuffer() {
-        if (this.voiceHandler) {
-            this.voiceHandler.speak(this.speechBuffer);
-            this.speechBuffer = '';
-        }
     }
 }
 

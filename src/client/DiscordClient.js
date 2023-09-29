@@ -1,24 +1,29 @@
 const logger = require('../util/Logger');
 const { Client, Events, GatewayIntentBits } = require('discord.js');
-const EventEmitter = require('events');
+const ChatServiceInterface = require('../chat/ChatServiceInterface');
 
-class DiscordClient extends EventEmitter {
-    constructor(token, channelId) {
+class DiscordClient extends ChatServiceInterface {
+    constructor(token, channelId, settings) {
         super();
         this.token = token;
         this.channelId = channelId;
         this.client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
+        this.settings = settings;
         
         this.client.once(Events.ClientReady, c => {
             logger.info(`Discord Ready! Logged in as ${c.user.tag}`);
         });
 
-        this.client.on(Events.MessageCreate, message => {
-            if (message.channel.id === this.channelId) {
-                if (message.author.bot) return; // TODO: configurable
-                this._handleMessage(message);
-            }
-        });
+        if (settings['chat-enabled']) {
+            this.client.on(Events.MessageCreate, message => {
+                if (message.channel.id === this.channelId) {
+                    if (message.author.bot) return; // TODO: configurable
+                    this._handleMessage(message);
+                }
+            });
+        }
+
+        this.connect();
     }
 
     connect() {
@@ -26,6 +31,7 @@ class DiscordClient extends EventEmitter {
     }
 
     sendMessage(message) {
+        if (!this.settings['reply-in-chat']) return;
         // chunk messages by discord max length
         const max = 2000;
         const chunks = message.match(new RegExp(`.{1,${max}}`, 'g'));
@@ -36,6 +42,7 @@ class DiscordClient extends EventEmitter {
     }
 
     sendImage(image) {
+        if (!this.settings['post-image-output']) return;
         // convert base64 string to buffer
         const buffer = Buffer.from(image, 'base64');
         // send buffer as attachment

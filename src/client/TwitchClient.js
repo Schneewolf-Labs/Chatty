@@ -1,10 +1,10 @@
 const logger = require('../util/Logger');
 const tmi = require('tmi.js');
-const EventEmitter = require('events');
+const ChatServiceInterface = require('../chat/ChatServiceInterface');
 
 // Twitch CLient class
-class TwitchClient extends EventEmitter {
-    constructor(username, channel, token) {
+class TwitchClient extends ChatServiceInterface {
+    constructor(username, channel, token, settings) {
         super();
         this.username = username;
         this.channel = channel;
@@ -21,6 +21,7 @@ class TwitchClient extends EventEmitter {
             },
             channels: [ this.channel ]
         });
+        this.settings = settings;
 
         // On connect:
         this.client.on('connected', (address, port) => {
@@ -28,9 +29,13 @@ class TwitchClient extends EventEmitter {
         });
         
         // Listen to Twitch chat:
-        this.client.on('message', (channel, tags, message, self) => {
-            this._handleMessage(channel, tags, message, self);
-        });
+        if (settings['chat-enabled']) {
+            this.client.on('message', (channel, tags, message, self) => {
+                this._handleMessage(channel, tags, message, self);
+            });
+        }
+
+        this.connect();
     }
 
     connect() {
@@ -38,20 +43,25 @@ class TwitchClient extends EventEmitter {
     }
 
     sendMessage(message) {
+        if (!this.settings['reply-in-chat']) return;
         this.client.say(this.channel, message);
+    }
+
+    sendImage() {
+        logger.warn('Twitch does not support sending images');
     }
 
     _handleMessage(channel, tags, message, self) {
         if (self) return;
-            const msg = {
-                username: tags.username,
-                display_name: tags['display-name'],
-                text: message,
-                timestamp: Date.now(),
-                tags: tags,
-                channel: channel
-            };
-            this.emit('message', msg);
+        const msg = {
+            username: tags.username,
+            display_name: tags['display-name'],
+            text: message,
+            timestamp: Date.now(),
+            tags: tags,
+            channel: channel
+        };
+        this.emit('message', msg);
     }
 }
 

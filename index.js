@@ -1,54 +1,19 @@
 require('dotenv').config(); // Load environment variables from .env file
-const TwitchClient = require('./src/client/TwitchClient');
-const OobaClient = require('./src/client/OobaClient');
-const MessageManager = require('./src/chat/MessageManager');
-const Persona = require('./src/chat/Persona');
+const config = require('./src/util/Config'); // Load config file
+const Chatty = require('./src/Chatty'); // Load Chatty class
 
-// Load config
-const config = require('./src/util/Config');
-
-// Load the AI's persona
-const persona = new Persona(config.persona_file);
-
-// Connect to Oobabooga
-const ooba = new OobaClient(config.oobabooga);
-
-// Initialize message manager
-const messageManager = new MessageManager(ooba, persona, config.messages);
-
-// If stable diffusion is enabled, initialize a draw manager and attach to message manager
-if (config.stable_diffusion.enabled === true) {
-    const StableDiffClient = require('./src/client/StableDiffClient');
-    const stableDiffClient = new StableDiffClient(config.stable_diffusion);
-    const DrawManager = require('./src/draw/DrawManager');
-    const drawManager = new DrawManager(stableDiffClient);
-    messageManager.setDrawManager(drawManager);
-}
-
-// If using Windows and voice is enabled, initialize voice synthesis
-if (process.platform === 'win32' && config.voice.enabled === true) {
-    const VoiceHandler = require('./src/tts/VoiceHandler');
-    const voiceHandler = new VoiceHandler(config.voice);
-    messageManager.setVoiceHandler(voiceHandler);
-}
+// Initialize Chatty
+const chatty = new Chatty(config);
 
 // Connect to Twitch
 if (config.twitch.enabled === true) {
+    const TwitchClient = require('./src/client/TwitchClient');
     const twitch = new TwitchClient( 
         process.env.TWITCH_USERNAME, 
         process.env.TWITCH_CHANNEL, 
         process.env.TWITCH_OAUTH_TOKEN,
         config.twitch);
-    twitch.on('message', (message) => {
-        if (config.twitch['chat-enabled']) messageManager.receiveMessage(message);
-    });
-    twitch.connect();
-    // Send response to chat
-    if (config.twitch['reply-in-chat']) {
-        messageManager.on('response', (response) => {
-            twitch.sendMessage(response);
-        });
-    }
+    chatty.registerChatService(twitch);
 }
 
 // Connect to Discord
@@ -58,20 +23,5 @@ if (config.discord.enabled === true) {
         process.env.DISCORD_TOKEN,
         process.env.DISCORD_CHANNEL,
         config.discord);
-    discord.on('message', (message) => {
-        if (config.discord['chat-enabled']) messageManager.receiveMessage(message);
-    });
-    discord.connect();
-    // Send response to chat
-    if (config.discord['reply-in-chat']) {
-        messageManager.on('response', (response) => {
-            discord.sendMessage(response);
-        });
-    }
-    // Post image output to discord
-    if (config.discord['post-image-output'] && messageManager.drawManager) {
-        messageManager.drawManager.on('image', (image) => {
-            discord.sendImage(image);
-        });
-    }
+    chatty.registerChatService(discord);
 }

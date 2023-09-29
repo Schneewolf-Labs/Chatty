@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const logger = require('../../util/Logger');
 
 class ResponseOutputFile {
     constructor(config, responseHandler) {
@@ -14,7 +15,8 @@ class ResponseOutputFile {
         this.responses.push(response);
         this.updateResponseFile();
         setTimeout(() => {
-            this.responses.pop();
+            const response = this.responses.shift();
+            logger.debug(`ResponseOutputFile expiring response: ${response}`);
             this.updateResponseFile();
         }, this.config.messages['response-expire-time']);
     }

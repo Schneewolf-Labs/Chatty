@@ -1,7 +1,7 @@
 const logger = require('../util/Logger');
-const ResponseHandler = require('./ResponseHandler');
-const MessageManager = require('./MessageManager');
-const MessageSanitizer = require('./MessageSanitizer');
+const ResponseHandler = require('./response/ResponseHandler');
+const MessageManager = require('./message/MessageManager');
+const MessageSanitizer = require('./message/MessageSanitizer');
 
 class ChatHandler {
     constructor(config, persona) {

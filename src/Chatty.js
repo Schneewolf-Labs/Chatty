@@ -1,5 +1,5 @@
 const logger = require('./util/Logger');
-const Persona = require('./chat/Persona');
+const Persona = require('./util/Persona');
 const ChatHandler = require('./chat/ChatHandler');
 
 class Chatty {

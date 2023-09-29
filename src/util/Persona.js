@@ -1,4 +1,4 @@
-const logger = require('../util/Logger');
+const logger = require('./Logger');
 const fs = require('fs');
 const YAML = require('yaml');
 

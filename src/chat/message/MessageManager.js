@@ -1,4 +1,4 @@
-const logger = require('../util/Logger');
+const logger = require('../../util/Logger');
 const EventEmitter = require('events');
 
 class MessageManager extends EventEmitter {

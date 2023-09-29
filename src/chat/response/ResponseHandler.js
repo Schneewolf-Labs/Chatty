@@ -1,8 +1,6 @@
-const logger = require('../util/Logger');
-const fs = require('fs');
-const path = require('path');
+const logger = require('../../util/Logger');
 const EventEmitter = require('events');
-const OobaClient = require('../client/OobaClient');
+const OobaClient = require('../../client/OobaClient');
 const ResponseStreamer = require('./ResponseStreamer');
 const ResponseOutputFile = require('./ResponseOutputFile');
 
@@ -66,7 +64,7 @@ class ResponseHandler extends EventEmitter {
         // If using Windows and voice is enabled, initialize voice synthesis
         this.voiceHandler = null;
         if (process.platform === 'win32' && config.voice.enabled === true) {
-            const VoiceHandler = require('../tts/VoiceHandler');
+            const VoiceHandler = require('../../tts/VoiceHandler');
             const voiceHandler = new VoiceHandler(config.voice);
             this.voiceHandler = voiceHandler;
         }

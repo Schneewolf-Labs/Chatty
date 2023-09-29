@@ -8,6 +8,7 @@ class ResponseStreamer extends EventEmitter {
         this.responseHandler = responseHandler;
 
         this.tokens = [];
+        this.enclosureState = null;
     }
 
     receiveToken(token) {
@@ -19,21 +20,32 @@ class ResponseStreamer extends EventEmitter {
     processTokens() {
         const options = this.options.messages;
         // Check if we can chunk these tokens
-        const chunkSize = options['response-chunk-size'];
+        //const chunkSize = options['response-chunk-size'];
         // TODO: use chunk size to limit chunk length
         const lastToken = this.tokens[this.tokens.length - 1];
         // if token contains punctuation, or newline emit the chunk
         const punctuation = options['chunk-delimiters'];
         const containsPunctuation = punctuation.some(p => lastToken.includes(p));
-        if (containsPunctuation) {
-            // check if token should be split
+
+        // Check for enclosures
+        const openingEnclosures = ['{', '[', '('];
+        const closingEnclosures = ['}', ']', ')'];
+
+        if (openingEnclosures.includes(lastToken)) {
+            this.enclosureState = lastToken;
+        } else if (this.enclosureState && closingEnclosures.includes(lastToken)) {
+            if (openingEnclosures.indexOf(this.enclosureState) === closingEnclosures.indexOf(lastToken)) {
+                this.enclosureState = null;
+                this.emitChunk();
+                return;
+            }
+        }
+
+        if (!this.enclosureState && containsPunctuation) {
             const shouldSplit = lastToken.length > 1 && lastToken[1] === ' ';
             if (shouldSplit) {
-                // split token
                 const split = lastToken.split(' ');
-                // replace last token with first split
                 this.tokens[this.tokens.length - 1] = split[0];
-                // emit then receive second split
                 this.emitChunk();
                 this.receiveToken(split[1]);
             } else {

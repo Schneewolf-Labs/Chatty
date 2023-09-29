@@ -20,7 +20,7 @@ class ResponseOutputFile {
     }
 
     updateResponseFile() {
-        const response = this.responses.join(' ');
+        const response = this.responses.join('');
         fs.writeFileSync(this.outputPath, response);
     }
 

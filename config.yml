@@ -30,7 +30,7 @@ messages:
     response-expire-time: 30000
     include-responses-in-history: true
 sanitizer:
-    reject-profanity: false
+    reject-profanity: true
     profane-response: "I'm sorry, I don't respond to profanity."
     profanity-replacement: "Sorry, I can't use profanity."
     reject-negativity: false

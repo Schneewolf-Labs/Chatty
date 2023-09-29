@@ -26,7 +26,7 @@ class ChatHandler {
         }
 
         // Send responses to all registered chat services
-        this.messageManager.on('response', (response) => {
+        this.responseHandler.on('response', (response) => {
             // Ensure the response is just the persona's
             response = this.sanitizer.trimResponse(response);
             // Remove links and other garbage

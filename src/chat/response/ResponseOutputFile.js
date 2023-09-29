@@ -36,7 +36,7 @@ class ResponseOutputFile extends ChatServiceInterface {
     }
 
     updateResponseFile() {
-        const response = this.responses.join('');
+        const response = this.responses.join(' ');
         fs.writeFileSync(this.outputPath, response);
     }
 

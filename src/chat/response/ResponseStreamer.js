@@ -26,7 +26,19 @@ class ResponseStreamer extends EventEmitter {
         const punctuation = options['chunk-delimiters'];
         const containsPunctuation = punctuation.some(p => lastToken.includes(p));
         if (containsPunctuation) {
-            this.emitChunk();
+            // check if token should be split
+            const shouldSplit = lastToken.length > 1 && lastToken[1] === ' ';
+            if (shouldSplit) {
+                // split token
+                const split = lastToken.split(' ');
+                // replace last token with first split
+                this.tokens[this.tokens.length - 1] = split[0];
+                // emit then receive second split
+                this.emitChunk();
+                this.receiveToken(split[1]);
+            } else {
+                this.emitChunk();
+            }
         }
     }
 

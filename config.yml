@@ -63,6 +63,7 @@ voice:
     output_location: "output/voice.wav"
     alphanumeric_only: true
     stream_speech: true
+    max-speak-duration: 30000
 http:
     enabled: true
     analyze-links: true

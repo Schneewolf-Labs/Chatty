@@ -8,6 +8,8 @@ class VoiceHandler {
         this.voice_index = options.voice_index;
         this.audio_device = options.audio_device;
         this.alphanumeric_only = options.alphanumeric_only;
+        this.maxDuration = options['max-speak-duration'];
+        this.durationTimer = null;
 
         this.is_speaking = false;
         this.queue = [];
@@ -19,6 +21,7 @@ class VoiceHandler {
             const message = data.toString().trim();
             if (message === 'TOKEN_PLAYBACK_FINISHED') {
                 logger.debug(`WinTTS finished speaking`);
+                if (this.durationTimer) clearTimeout(this.durationTimer);
                 this._dequeue();
             }
         });
@@ -51,9 +54,15 @@ class VoiceHandler {
         }
         this.is_speaking = true;
         this.voice_process.stdin.write(token+'\n');
+        // Set a timer to dequeue the next token if the current one takes too long
+        this.durationTimer = setTimeout(() => {
+            logger.warn(`WinTTS took too long to speak, dequeuing`);
+            this._dequeue();
+        }, this.maxDuration);
     }
 
     _dequeue() {
+        if (this.durationTimer) clearTimeout(this.durationTimer);
         if (this.queue.length > 0) {
             const token = this.queue.shift();
             this.speak(token, true);

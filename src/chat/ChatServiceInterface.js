@@ -15,6 +15,11 @@ class ChatServiceInterface extends EventEmitter {
     sendImage(image) {
         throw new Error('sendImage not implemented');
     }
+
+    // Send a typing indicator to the chat service
+    sendIsTyping() {
+        throw new Error('sendIsTyping not implemented');
+    }
 }
 
 module.exports = ChatServiceInterface;

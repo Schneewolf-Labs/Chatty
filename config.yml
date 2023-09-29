@@ -20,6 +20,7 @@ discord:
     chat-enabled: true
     reply-in-chat: true
     post-image-output: true
+    send-is-typing: true
 messages:
     max-tokens: 1024
     response-interval: 3000
@@ -31,6 +32,7 @@ messages:
     chat-delimiter: "|\n"
     response-expire-time: 30000
     include-responses-in-history: true
+    chunk-delimiters: ['.', '\n', '?', '!', ';', ':', '—']
 sanitizer:
     reject-profanity: true
     profane-response: "I'm sorry, I don't respond to profanity."

@@ -43,6 +43,15 @@ class ChatHandler {
                 service.sendMessage(response);
             });
         });
+
+        // Notify all registered chat services when the AI is "typing"
+        this.responseHandler.on('token', (token) => {
+            logger.debug(`ChatHandler got token: ${token}`)
+            if (!token) return;
+            this.chatServices.forEach((service) => {
+                service.sendIsTyping();
+            });
+        });
     }
 
     registerChatService(service) {

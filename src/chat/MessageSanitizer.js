@@ -5,8 +5,9 @@ const Sentiment = require('sentiment');
 const sentiment = new Sentiment();
 
 class MessageSanitizer {
-    constructor(options) {
+    constructor(options, persona) {
         this.options = options;
+        this.persona = persona;
     }
 
     shouldReject(message) {
@@ -31,6 +32,10 @@ class MessageSanitizer {
     }
 
     sanitize(message) {
+        // Strip persona name chat prefix
+        message = message.replace(this.persona.name+":", '');
+        // Strip any mentions from the message
+        message = message.replace(/@[\S]+/g, '');
         // Strip any URLs from the message
         message = message.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '');
         // Strip things contained in [] brackets

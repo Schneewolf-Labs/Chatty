@@ -8,7 +8,7 @@ class ChatHandler {
         this.config = config;
         this.responseHandler = new ResponseHandler(config, persona);
         this.messageManager = new MessageManager(config.messages, this.responseHandler);
-        this.sanitizer = new MessageSanitizer(config.sanitizer);
+        this.sanitizer = new MessageSanitizer(config.sanitizer, persona);
         this.chatServices = [];
 
         // If stable diffusion is enabled, initialize a draw manager and attach to message manager

@@ -22,16 +22,16 @@ class ResponseHandler extends EventEmitter {
         this.responseBuffer = [];
 
         // Setup prompts from the config
-        this.personaPrompt = config.messages['persona-prompt'];
-        this.chatPrompt = persona.insertName(config.messages['prompt']) + persona.insertName(config.messages['safety-prompt']);
-        this.chatHistoryPrefix = config.messages['chat-history-prefix'];
+        this.personaPrompt = config.messages['persona-prompt'] + persona.directive + "\n";
+        this.chatPrompt = persona.insertName(config.messages['prompt']) 
+                        + persona.insertName(config.messages['safety-prompt'])
+                        + config.messages['chat-history-prefix'];
         this.chatDelimiter = config.messages['chat-delimiter'];
         this.responsePrefix = persona.insertName(config.messages['prompt-response-prefix']);
         // Replace {DELIMITER} with the chat delimiter in the response prefix
         this.responsePrefix = this.responsePrefix.replace('{DELIMITER}', this.chatDelimiter);
         // Calculate total prompt overhead
-        this.promptTokens = this.chatPrompt.split(' ').length;
-        
+        this.promptTokens = this.personaPrompt.split(' ') + this.chatPrompt.split(' ').length + this.responsePrefix.split(' ').length;
 
         // Handle events from the LLM API
         this.ooba.on('message', (message) => {
@@ -112,18 +112,6 @@ class ResponseHandler extends EventEmitter {
             this.processingResponseID = nextResponse[0];
             this._sendResponse(nextResponse[1]);
         }
-        // XXX: this should be an interval that can retry when it is blocked
-        // setTimeout((lastId) => {
-        //     // Check if another response has been received since this one
-        //     if (lastId != this.lastResponseID) return;
-        //     // Check if another response is already being written
-        //     if (this.awaitingResponse) return;
-        //     // Check if voice handler is enabled and is speaking
-        //     if (this.voiceHandler && this.voiceHandler.is_speaking) return;
-        //     // Clear output file
-        //     logger.debug(`Response output expired, clearing file`);
-        //     this._clearResponseOutput();
-        // }, this.config.messages['response-expire-time'], thisId);
     }
 
     getResponse(id) {
@@ -159,8 +147,7 @@ class ResponseHandler extends EventEmitter {
     }
 
     _generateResponsePrompt(messages, history) {
-        const directiveTokens = this.persona.numTokens;
-        const maxTokens = this.config.messages['max-tokens'] - directiveTokens - this.promptTokens - 2;
+        const maxTokens = this.config.messages['max-tokens'] - this.promptTokens - 2;
         logger.debug(`max tokens remaining for chat: ${maxTokens}`);
 
         let tokens = 0;
@@ -191,9 +178,8 @@ class ResponseHandler extends EventEmitter {
         }
 
         this.nextResponseID = this.lastResponseID + dequeuedMessages;
-        const prompt = this.personaPrompt + this.persona.directive + "\n"
-            + this.chatPrompt + this.chatHistoryPrefix 
-            + this.responseBuffer.join('') + `\n${this.responsePrefix}`;
+        const prompt = this.personaPrompt + this.chatPrompt + this.chatHistoryPrefix 
+                    + this.responseBuffer.join('') + `\n${this.responsePrefix}`;
         logger.debug(`Used ${tokens} tokens to respond to ${this.responseBuffer.length} messages`);
         this.responseBuffer = [];
         return prompt;

@@ -7,6 +7,7 @@ class MessageManager extends EventEmitter {
         this.options = options;
         this.responseHandler = responseHandler;
         this.drawManager = null;
+        this.voiceService = null;
 
         this.chatHistory = [];
         this.messageQueue = [];
@@ -15,9 +16,10 @@ class MessageManager extends EventEmitter {
         setInterval(() => {
             const queueLength = this.messageQueue.length;
             logger.debug(`Message queue length: ${queueLength}`);
-            // Exit if queue is empty or response handler is speaking
-            // TODO: add blocking if still talking
-            if (queueLength == 0) return;
+            // Exit if queue is empty or voice service is speaking
+            const isSpeaking = this.voiceService && this.voiceService.isBlocking();
+            if (isSpeaking) logger.debug(`Voice service is speaking, skipping response`);
+            if (queueLength == 0 || isSpeaking) return;
             this.respondToChatFromMessageQueue();
         }, this.options['response-interval']);
     }
@@ -78,6 +80,10 @@ class MessageManager extends EventEmitter {
 
     setDrawManager(drawManager) {
         this.drawManager = drawManager;
+    }
+
+    setVoiceService(voiceService) {
+        this.voiceService = voiceService;
     }
 }
 

@@ -12,6 +12,11 @@ class Chatty {
     registerChatService(service) {
         this.chatHandler.registerChatService(service);
     }
+
+    attachVoiceService(service) {
+        this.chatHandler.registerChatService(service);
+        this.chatHandler.messageManager.setVoiceService(service);
+    }
 }
 
 module.exports = Chatty;

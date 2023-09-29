@@ -5,6 +5,7 @@ const VoiceHandler = require('./VoiceHandler');
 class VoiceService extends ChatServiceInterface {
     constructor(config) {
         super();
+        this.config = config;
         this.voiceHandler = new VoiceHandler(config.voice);
 
         // TODO: support input from a microphone to be encoded as text and emitted as a message
@@ -22,6 +23,13 @@ class VoiceService extends ChatServiceInterface {
         logger.debug('VoiceService ignoring request to send typing indicator');
     }
 
+    isSpeaking() {
+        return this.voiceHandler.is_speaking;
+    }
+
+    isBlocking() {
+        return this.config.voice['block_responses'] && this.isSpeaking();
+    }
 }
 
 module.exports = VoiceService;

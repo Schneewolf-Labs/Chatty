@@ -16,7 +16,7 @@ if (config.oobabooga.output_responses === true) {
 if (process.platform === 'win32' && config.voice.enabled === true) {
     const VoiceService = require('./src/tts/VoiceService');
     const voice = new VoiceService(config);
-    chatty.registerChatService(voice);
+    chatty.attachVoiceService(voice);
 }
 
 // Connect to Twitch

@@ -26,11 +26,11 @@ messages:
     response-interval: 3000
     chat-history-length: 8
     chat-max-batch-size: 4
-    persona-prompt: "Given the following character description, scenario, location, emotional state, goals, memories, and conversation history respond in a manner consistent with the persona.\n"
-    prompt: "You are hosting a Twitch livestream and responding to your viewers comments in the chat. Below are the most recent messages in the chat history. Give only your response below as if you were speaking to them on stream as {NAME}.\n"
-    safety-prompt: "To avoid issues with Twitch, avoid using profanity and discussing dangerous or illegal activity. {NAME} should always be friendly and supportive and discourage suicide, violence, and self-harm.\n"
-    chat-history-prefix: "\n**Stream Chat History**\n"
-    prompt-response-prefix: "! Consider the chat history, additional context, situation, emotional state and goals below when writing a response. Format your response as text only; do not post links or images. When your response is complete end it with {DELIMITER}.\n{NAME}:"
+    persona-prompt: "### Given the following character description, scenario, location, emotional state, goals, memories, and conversation history respond in a manner consistent with the persona.\n"
+    prompt: "### You are hosting a Twitch livestream and responding to your viewers comments in the chat. Below are the most recent messages in the chat history. Give only your response below as if you were speaking to them on stream as {NAME}.\n"
+    safety-prompt: "### To avoid issues with Twitch, avoid using profanity and discussing dangerous or illegal activity. {NAME} should always be friendly and supportive and discourage suicide, violence, and self-harm.\n"
+    chat-history-prefix: "\n### Chat History:\n"
+    prompt-response-prefix: "### Consider the chat history, additional context, situation, emotional state and goals below when writing a response. Format your response as text only; do not post links or images. When your response is complete end it with {DELIMITER}.\n{NAME}:"
     chat-delimiter: "|"
     response-expire-time: 30000
     include-responses-in-history: true
@@ -63,8 +63,9 @@ voice:
     exe_location: "F:/TTS/wintts-stream/WinTTS-Stream.exe"
     output_location: "output/voice.wav"
     alphanumeric_only: true
-    stream_speech: true
+    block_responses: true
     max-speak-duration: 30000
+
 http:
     enabled: true
     analyze-links: true

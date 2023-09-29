@@ -17,7 +17,7 @@ class ChatServiceInterface extends EventEmitter {
     }
 
     // Send a typing indicator to the chat service
-    sendIsTyping() {
+    sendTyping() {
         throw new Error('sendIsTyping not implemented');
     }
 }

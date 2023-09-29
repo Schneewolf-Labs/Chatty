@@ -48,11 +48,11 @@ class TwitchClient extends ChatServiceInterface {
     }
 
     sendImage() {
-        logger.warn('Twitch does not support sending images');
+        logger.debug('Twitch does not support sending images');
     }
 
-    sendIsTyping() {
-        logger.warn('Twitch does not support sending typing indicators');
+    sendTyping() {
+        logger.debug('Twitch does not support sending typing indicators');
     }
 
     _handleMessage(channel, tags, message, self) {

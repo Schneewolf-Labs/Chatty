@@ -10,6 +10,7 @@ class ChatHandler {
         this.messageManager = new MessageManager(config.messages, this.responseHandler);
         this.sanitizer = new MessageSanitizer(config.sanitizer, persona, config.messages['chat-delimiter']);
         this.chatServices = [];
+        this.isTyping = false;
 
         // If stable diffusion is enabled, initialize a draw manager and attach to message manager
         if (config.stable_diffusion.enabled === true) {
@@ -27,6 +28,7 @@ class ChatHandler {
 
         // Send responses to all registered chat services
         this.responseHandler.on('response', (response) => {
+            this.isTyping = false;
             // Ensure the response is just the persona's
             response = this.sanitizer.trimResponse(response);
             // Remove links and other garbage
@@ -48,9 +50,12 @@ class ChatHandler {
         this.responseHandler.on('token', (token) => {
             logger.debug(`ChatHandler got token: ${token}`)
             if (!token) return;
-            this.chatServices.forEach((service) => {
-                service.sendIsTyping();
-            });
+            if (!this.isTyping) {
+                this.isTyping = true;
+                this.chatServices.forEach((service) => {
+                    service.sendTyping();
+                });
+            }
         });
     }
 

@@ -55,7 +55,7 @@ class DiscordClient extends ChatServiceInterface {
         });
     }
 
-    sendIsTyping() {
+    sendTyping() {
         if (!this.settings['send-is-typing']) return;
         const channel = this.client.channels.cache.get(this.channelId);
         channel.sendTyping();

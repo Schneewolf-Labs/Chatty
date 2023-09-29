@@ -7,7 +7,9 @@ class DiscordClient extends ChatServiceInterface {
         super();
         this.token = token;
         this.channelId = channelId;
-        this.client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
+        this.intents = [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages];
+        if (settings['chat-enabled']) this.intents.push(GatewayIntentBits.MessageContent);
+        this.client = new Client({ intents: this.intents });
         this.settings = settings;
         
         this.client.once(Events.ClientReady, c => {

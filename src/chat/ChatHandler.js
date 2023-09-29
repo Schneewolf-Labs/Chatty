@@ -5,6 +5,7 @@ const MessageSanitizer = require('./MessageSanitizer');
 
 class ChatHandler {
     constructor(config, persona) {
+        this.config = config;
         this.responseHandler = new ResponseHandler(config, persona);
         this.messageManager = new MessageManager(config.messages, this.responseHandler);
         this.sanitizer = new MessageSanitizer(config.sanitizer);
@@ -26,6 +27,18 @@ class ChatHandler {
 
         // Send responses to all registered chat services
         this.messageManager.on('response', (response) => {
+            // Ensure the response is just the persona's
+            response = this.sanitizer.trimResponse(response);
+            // Remove links and other garbage
+            response = this.sanitizer.sanitize(response);
+            // Check if the message should be rejected
+            if (this.sanitizer.shouldReject(response)) {
+                logger.warn(`Response from Oobabooga was rejected`);
+                // Replace the profane message and remove the response from the speech output buffer
+                response = this.config.sanitizer['profanity-replacement'];
+                // FIXME: the voice handler has probably already spoken at this point lol
+                //this.responseHandler.voiceHandler.speechBuffer = message;
+            }
             this.chatServices.forEach((service) => {
                 service.sendMessage(response);
             });

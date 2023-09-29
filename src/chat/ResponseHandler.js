@@ -64,22 +64,11 @@ class ResponseHandler extends EventEmitter {
 
     _handleMessage(message) {
         logger.debug(`Received message from Oobabooga: ${message}`);
-        //message = this.sanitizer.trimResponse(message);
-        //message = this.sanitizer.sanitize(message);
         // Check if message is empty
         if (message.length === 0) {
             logger.warn(`Response from Oobabooga is empty`);
             return;
         }
-
-        // Check if the message should be rejected
-        // if (this.sanitizer.shouldReject(message)) {
-        //     logger.warn(`Response from Oobabooga was rejected`);
-        //     // Replace the profane message and remove the response from the speech output buffer
-        //     message = this.config.sanitizer['profanity-replacement'];
-        //     this.speechBuffer = message;
-        //     //return;
-        // }
 
         // Add response to response history
         this.responseHistory[this.lastResponseID] = message;

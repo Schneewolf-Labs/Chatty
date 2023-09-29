@@ -78,9 +78,14 @@ class ResponseHandler extends EventEmitter {
             //return;
         }
 
-        // FIXME: make response history entries arrays of messages
         // Add response to response history
-        this.responseHistory[this.processingResponseID] = message;
+        let prevResponse = this.responseHistory[this.processingResponseID];
+        if (prevResponse) {
+            prevResponse += message;
+        } else {
+            prevResponse = message;
+        }
+        this.responseHistory[this.processingResponseID] = prevResponse;
 
         // FIXME: move voice handler and response output file to chat handler
         // Speak response if voice is enabled

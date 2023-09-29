@@ -156,8 +156,10 @@ class ResponseHandler extends EventEmitter {
         }
 
         this.nextResponseID = this.lastResponseID + dequeuedMessages;
-        const prompt = this.personaPrompt + this.chatPrompt + this.chatHistoryPrefix 
-                    + this.responseBuffer.join('') + `\n${this.responsePrefix}`;
+        const chatHistory = this.responseBuffer.join('');
+        logger.debug(`Chat history: ${chatHistory}`);
+        const prompt = this.personaPrompt + this.chatPrompt 
+                    + chatHistory + `\n${this.responsePrefix}`;
         logger.debug(`Used ${tokens} tokens to respond to ${this.responseBuffer.length} messages`);
         this.responseBuffer = [];
         return prompt;

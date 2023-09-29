@@ -5,9 +5,10 @@ const Sentiment = require('sentiment');
 const sentiment = new Sentiment();
 
 class MessageSanitizer {
-    constructor(options, persona) {
+    constructor(options, persona, chatDelimiter) {
         this.options = options;
         this.persona = persona;
+        this.chatDelimiter = chatDelimiter;
     }
 
     shouldReject(message) {
@@ -46,7 +47,7 @@ class MessageSanitizer {
 
     trimResponse(message) {
         // End response before first \"
-        const end = message.indexOf('\"');
+        const end = message.indexOf(this.chatDelimiter);
         if (end > 0) message = message.substring(0, end);
         // Strip any trailing whitespace
         message = message.trim();

@@ -22,10 +22,16 @@ class ResponseHandler extends EventEmitter {
         this.responseBuffer = [];
 
         // Setup prompts from the config
+        this.personaPrompt = config.messages['persona-prompt'];
         this.chatPrompt = persona.insertName(config.messages['prompt']) + persona.insertName(config.messages['safety-prompt']);
-        this.responsePrefix = persona.insertName(config.messages['prompt-response-prefix']);
-        this.promptTokens = this.chatPrompt.split(' ').length;
+        this.chatHistoryPrefix = config.messages['chat-history-prefix'];
         this.chatDelimiter = config.messages['chat-delimiter'];
+        this.responsePrefix = persona.insertName(config.messages['prompt-response-prefix']);
+        // Replace {DELIMITER} with the chat delimiter in the response prefix
+        this.responsePrefix = this.responsePrefix.replace('{DELIMITER}', this.chatDelimiter);
+        // Calculate total prompt overhead
+        this.promptTokens = this.chatPrompt.split(' ').length;
+        
 
         // Handle events from the LLM API
         this.ooba.on('message', (message) => {
@@ -40,19 +46,19 @@ class ResponseHandler extends EventEmitter {
             // Ooba is streaming tokens
             logger.debug(`Received token from Oobabooga: ${token}`);
             if (this.abortStream) return;
-            // check if end of token is \"
-            const end = token.indexOf('\"');
-            const reachedSpeechDelimiter = end > 0;
-            if (reachedSpeechDelimiter){
-                token = token.substring(0, end);
+            // check if end of token is |, if so abort stream
+            const endIdx = token.indexOf(this.chatDelimiter);
+            const reachedDelimiter = endIdx > -1;
+            if (reachedDelimiter) {
+                token = token.substring(0, endIdx);
                 this.abortStream = true;
             }
             if (!token) return;
             this.emit('token', token);
             this.responseStreamer.receiveToken(token);
-            if (reachedSpeechDelimiter) {
-                this.abortStream = false;
-            }
+            // if (reachedDelimiter) {
+            //     this.abortStream = false;
+            // }
         });
 
         // Handle events from the response streamer
@@ -183,8 +189,9 @@ class ResponseHandler extends EventEmitter {
         }
 
         this.nextResponseID = this.lastResponseID + dequeuedMessages;
-        const prompt = this.persona.directive + "\n"
-            + this.chatPrompt + this.responseBuffer.join('') + `\n${this.responsePrefix}`;
+        const prompt = this.personaPrompt + this.persona.directive + "\n"
+            + this.chatPrompt + this.chatHistoryPrefix 
+            + this.responseBuffer.join('') + `\n${this.responsePrefix}`;
         logger.debug(`Used ${tokens} tokens to respond to ${this.responseBuffer.length} messages`);
         this.responseBuffer = [];
         return prompt;

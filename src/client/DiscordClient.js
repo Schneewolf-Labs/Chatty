@@ -37,6 +37,7 @@ class DiscordClient extends ChatServiceInterface {
         // chunk messages by discord max length
         const max = 2000;
         const chunks = message.match(new RegExp(`.{1,${max}}`, 'g'));
+        if (!chunks) return;
         logger.debug(`Sending ${chunks.length} chunks`);
         chunks.forEach(chunk => {
             this._sendMessage(chunk);

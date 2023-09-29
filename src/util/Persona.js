@@ -22,7 +22,7 @@ class Persona {
 
     insertName(text) {
         // replace {NAME} with persona name
-        return text.replace('{NAME}', this.name);
+        return text.replaceAll('{NAME}', this.name);
     }
 }
 

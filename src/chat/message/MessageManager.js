@@ -15,8 +15,8 @@ class MessageManager extends EventEmitter {
         setInterval(() => {
             const queueLength = this.messageQueue.length;
             logger.debug(`Message queue length: ${queueLength}`);
-            // Exit if queue is empty
-            if (queueLength == 0) return;
+            // Exit if queue is empty or response handler is speaking
+            if (queueLength == 0 || this.responseHandler.voiceHandlerIsSpeaking()) return;
             this.respondToChatFromMessageQueue();
         }, this.options['response-interval']);
     }

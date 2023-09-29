@@ -1,8 +1,7 @@
-const logger = require('../../util/Logger');
+const logger = require('../../util/logger');
 const EventEmitter = require('events');
 const OobaClient = require('../../client/OobaClient');
 const ResponseStreamer = require('./ResponseStreamer');
-const ResponseOutputFile = require('./ResponseOutputFile');
 
 class ResponseHandler extends EventEmitter {
     constructor(config, persona) {
@@ -11,7 +10,6 @@ class ResponseHandler extends EventEmitter {
         this.ooba = new OobaClient(config.oobabooga);
         this.persona = persona;
         this.responseStreamer = new ResponseStreamer(config, this);
-        this.responseOutputFile = new ResponseOutputFile(config, this);
 
         this.responseQueue = [];
         this.responseHistory = {};
@@ -41,7 +39,7 @@ class ResponseHandler extends EventEmitter {
             logger.debug(`Received message from Oobabooga: ${message}`);
             this.responseStreamer.emitChunk();
             // insert a break in the file
-            this.responseOutputFile.receiveResponse('\n');
+            //this.responseOutputFile.receiveResponse('\n');
             //this._handleMessage(message);
         });
         this.ooba.on('token', (token) => {
@@ -68,14 +66,6 @@ class ResponseHandler extends EventEmitter {
             // A response has completed
             this._handleMessage(response);
         });
-
-        // If using Windows and voice is enabled, initialize voice synthesis
-        this.voiceHandler = null;
-        if (process.platform === 'win32' && config.voice.enabled === true) {
-            const VoiceHandler = require('../../tts/VoiceHandler');
-            const voiceHandler = new VoiceHandler(config.voice);
-            this.voiceHandler = voiceHandler;
-        }
     }
 
     _handleMessage(message) {
@@ -95,13 +85,6 @@ class ResponseHandler extends EventEmitter {
         }
         this.responseHistory[this.processingResponseID] = prevResponse;
 
-        // FIXME: move voice handler and response output file to chat handler
-        // Speak response if voice is enabled
-        if (this.voiceHandler) {
-            this.voiceHandler.speak(message);
-        }
-        // Write response to output file
-        this.responseOutputFile.receiveResponse(message);
         // Emit final response message for other services to consume
         this.emit('response', message);
 
@@ -116,11 +99,6 @@ class ResponseHandler extends EventEmitter {
 
     getResponse(id) {
         return this.responseHistory[id];
-    }
-
-    voiceHandlerIsSpeaking() {
-        if (!this.voiceHandler) return false;
-        return this.voiceHandler.is_speaking;
     }
 
     sendResponse(messages, history) {

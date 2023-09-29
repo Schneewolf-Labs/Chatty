@@ -1,4 +1,4 @@
-const logger = require('../util/Logger');
+const logger = require('../util/logger');
 const ResponseHandler = require('./response/ResponseHandler');
 const MessageManager = require('./message/MessageManager');
 const MessageSanitizer = require('./message/MessageSanitizer');
@@ -38,8 +38,6 @@ class ChatHandler {
                 logger.warn(`Response from Oobabooga was rejected`);
                 // Replace the profane message and remove the response from the speech output buffer
                 response = this.config.sanitizer['profanity-replacement'];
-                // FIXME: the voice handler has probably already spoken at this point lol
-                //this.responseHandler.voiceHandler.speechBuffer = message;
             }
             this.chatServices.forEach((service) => {
                 service.sendMessage(response);

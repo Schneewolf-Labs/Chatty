@@ -5,6 +5,20 @@ const Chatty = require('./src/Chatty'); // Load Chatty class
 // Initialize Chatty
 const chatty = new Chatty(config);
 
+// Setup file output
+if (config.oobabooga.output_responses === true) {
+    const ResponseOutputFile = require('./src/chat/response/ResponseOutputFile');
+    const responseOutputFile = new ResponseOutputFile(config);
+    chatty.registerChatService(responseOutputFile);
+}
+
+// Setup voice output
+if (process.platform === 'win32' && config.voice.enabled === true) {
+    const VoiceService = require('./src/tts/VoiceService');
+    const voice = new VoiceService(config);
+    chatty.registerChatService(voice);
+}
+
 // Connect to Twitch
 if (config.twitch.enabled === true) {
     const TwitchClient = require('./src/client/TwitchClient');

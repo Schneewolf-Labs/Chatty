@@ -1,4 +1,4 @@
-const logger = require('../../util/Logger');
+const logger = require('../../util/logger');
 const EventEmitter = require('events');
 
 class MessageManager extends EventEmitter {
@@ -16,7 +16,8 @@ class MessageManager extends EventEmitter {
             const queueLength = this.messageQueue.length;
             logger.debug(`Message queue length: ${queueLength}`);
             // Exit if queue is empty or response handler is speaking
-            if (queueLength == 0 || this.responseHandler.voiceHandlerIsSpeaking()) return;
+            // TODO: add blocking if still talking
+            if (queueLength == 0) return;
             this.respondToChatFromMessageQueue();
         }, this.options['response-interval']);
     }

@@ -44,6 +44,7 @@ sanitizer:
 oobabooga:
     baseUrl: "ws://127.0.0.1:5005"
     requestParams: {}
+    output_responses: true
     output_location: "output/response.txt"
 stable_diffusion:
     enabled: true

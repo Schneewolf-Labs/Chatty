@@ -38,7 +38,7 @@ class MessageSanitizer {
         // Strip any mentions from the message
         message = message.replace(/@[\S]+/g, '');
         // Strip any URLs from the message
-        message = message.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '');
+        message = message.replace(/(?:https?|ftp):\/\/[^\s]+/g, '');
         // Strip things contained in [] brackets
         message = message.replace(/\[.*?\]/g, '');
         // Remove actions in *'s

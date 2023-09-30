@@ -41,6 +41,8 @@ class MessageSanitizer {
         message = message.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '');
         // Strip things contained in [] brackets
         message = message.replace(/\[.*?\]/g, '');
+        // Remove actions in *'s
+        if (this.options['remove-actions']) message = message.replace(/\*.*?\*/g, '');
 
         return message;
     }

@@ -42,6 +42,7 @@ sanitizer:
     profanity-replacement: "Sorry, I can't use profanity."
     reject-negativity: false
     sentiment-threshold: -0.5
+    remove-actions: true
 oobabooga:
     baseUrl: "ws://127.0.0.1:5005"
     requestParams: {}

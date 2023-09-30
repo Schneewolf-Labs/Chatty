@@ -28,8 +28,9 @@ class ResponseHandler extends EventEmitter {
         this.responsePrefix = persona.insertName(config.messages['prompt-response-prefix']);
         // Replace {DELIMITER} with the chat delimiter in the response prefix
         this.responsePrefix = this.responsePrefix.replace('{DELIMITER}', this.chatDelimiter);
+        this.newChatPrefix = persona.insertName(config.messages['new-chat-prefix']);
         // Calculate total prompt overhead
-        this.promptTokens = this.personaPrompt.split(' ') + this.chatPrompt.split(' ').length + this.responsePrefix.split(' ').length;
+        this.promptTokens = this.personaPrompt.split(' ') + this.chatPrompt.split(' ').length + this.responsePrefix.split(' ').length + this.newChatPrefix.split(' ').length;
 
         // Handle events from the LLM API
         this.ooba.on('message', (message) => {
@@ -138,6 +139,7 @@ class ResponseHandler extends EventEmitter {
         const maxTokens = this.config.messages['max-tokens'] - this.promptTokens - 2;
         logger.debug(`max tokens remaining for chat: ${maxTokens}`);
 
+        this.responseBuffer.push(this.newChatPrefix);
         let tokens = 0;
         let dequeuedMessages = 0;
         let message, tokensPerMessage;

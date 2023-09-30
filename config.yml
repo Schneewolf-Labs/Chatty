@@ -30,7 +30,8 @@ messages:
     prompt: "### You are hosting a Twitch livestream and responding to your viewers comments in the chat. Below are the most recent messages in the chat history. Give only your response below as if you were speaking to them on stream as {NAME}.\n"
     safety-prompt: "### To avoid issues with Twitch, avoid using profanity and discussing dangerous or illegal activity. {NAME} should always be friendly and supportive and discourage violence or self-harm.\n"
     chat-history-prefix: "\n### Chat History:\n"
-    prompt-response-prefix: "### Consider the chat history, additional context, situation, emotional state and goals below when writing a response. Format your response as text only; do not post links or images. When your response is complete end it with {DELIMITER}.\n{NAME}:"
+    new-chat-prefix: "\n### New Messages:\n"
+    prompt-response-prefix: "### Now write a response to the new messages. Consider the chat history, additional context, situation, emotional state and goals below when writing a response. Format your response as text only; do not post links or images. When your response is complete end it with {DELIMITER}.\n{NAME}:"
     chat-delimiter: "|"
     response-expire-time: 30000
     include-responses-in-history: true

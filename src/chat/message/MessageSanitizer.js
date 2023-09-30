@@ -53,6 +53,12 @@ class MessageSanitizer {
         if (end > 0) message = message.substring(0, end);
         // Strip any trailing whitespace
         message = message.trim();
+        // If there is http(s) strip it and everything after
+        const httpIdx = message.indexOf('http');
+        if (httpIdx > -1) {
+            message = message.substring(0, httpIdx);
+            console.warn(`Stripped http(s) from response: ${message}`);
+        }
         return message;
     }
 }

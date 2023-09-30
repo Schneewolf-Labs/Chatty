@@ -101,6 +101,16 @@ class ResponseHandler extends EventEmitter {
         return this.responseHistory[id];
     }
 
+    addEventToHistory(event) {
+        event = `*${this.persona.name} ${event}*`
+        const response = this.responseHistory[this.lastResponseID];
+        if (response) {
+            this.responseHistory[this.lastResponseID] = `${response}\n${event}\n`;
+        } else {
+            this.responseHistory[this.lastResponseID] = event;
+        }
+    }
+
     sendResponse(messages, history) {
         // Generate a response prompt
         const prompt = this._generateResponsePrompt(messages, history);

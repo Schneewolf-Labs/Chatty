@@ -80,6 +80,9 @@ class MessageManager extends EventEmitter {
 
     setDrawManager(drawManager) {
         this.drawManager = drawManager;
+        this.drawManager.on('image', () => {
+            this.responseHandler.addEventToHistory('posted a drawing');
+        });
     }
 
     setVoiceService(voiceService) {

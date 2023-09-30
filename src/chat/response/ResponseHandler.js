@@ -39,9 +39,6 @@ class ResponseHandler extends EventEmitter {
             this.abortStream = false;
             logger.debug(`Received message from Oobabooga: ${message}`);
             this.responseStreamer.emitChunk();
-            // insert a break in the file
-            //this.responseOutputFile.receiveResponse('\n');
-            //this._handleMessage(message);
         });
         this.ooba.on('token', (token) => {
             // Ooba is streaming tokens

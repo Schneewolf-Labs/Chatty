@@ -1,4 +1,5 @@
-const logger = require('../util/Logger');
+const logger = require('../util/logger');
+const Buffer = require('buffer').Buffer;
 const { Client, Events, GatewayIntentBits } = require('discord.js');
 const ChatServiceInterface = require('../chat/ChatServiceInterface');
 

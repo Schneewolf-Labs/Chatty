@@ -1,4 +1,4 @@
-const logger = require('../util/Logger');
+const logger = require('../util/logger');
 const tmi = require('tmi.js');
 const ChatServiceInterface = require('../chat/ChatServiceInterface');
 

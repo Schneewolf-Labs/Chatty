@@ -15,7 +15,7 @@ class VoiceService extends ChatServiceInterface {
         this.voiceHandler.speak(message);
     }
 
-    sendImage(image) {
+    sendImage() {
         logger.debug('VoiceService ignoring request to send image');
     }
 

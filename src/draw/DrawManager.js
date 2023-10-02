@@ -1,4 +1,5 @@
-const logger = require('../util/Logger');
+const process = require('process');
+const logger = require('../util/logger');
 const fs = require('fs');
 const path = require('path');
 const EventEmitter = require('events');

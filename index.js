@@ -1,4 +1,5 @@
 require('dotenv').config(); // Load environment variables from .env file
+const process = require('process'); // Load process object
 const config = require('./src/util/Config'); // Load config file
 const Chatty = require('./src/Chatty'); // Load Chatty class
 

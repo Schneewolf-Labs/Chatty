@@ -1,3 +1,4 @@
+const process = require('process');
 const fs = require('fs');
 const path = require('path');
 const logger = require('../../util/logger');
@@ -17,7 +18,7 @@ class ResponseOutputFile extends ChatServiceInterface {
         this.receiveResponse(message);
     }
 
-    sendImage(image) {
+    sendImage() {
         logger.debug('ResponseOutputFile ignoring request to send image');
     }
 

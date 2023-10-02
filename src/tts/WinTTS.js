@@ -57,6 +57,7 @@ class WinTTS {
         // Set a timer to dequeue the next token if the current one takes too long
         this.durationTimer = setTimeout(() => {
             logger.warn(`WinTTS took too long to speak, dequeuing`);
+            this.is_speaking = false;
             this._dequeue();
         }, this.maxDuration);
     }

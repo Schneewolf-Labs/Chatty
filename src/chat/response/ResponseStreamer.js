@@ -9,6 +9,7 @@ class ResponseStreamer extends EventEmitter {
 
         this.tokens = [];
         this.enclosureState = null;
+        this.abortStream = false;
     }
 
     receiveToken(token) {
@@ -19,9 +20,7 @@ class ResponseStreamer extends EventEmitter {
 
     processTokens() {
         const options = this.options.messages;
-        // Check if we can chunk these tokens
-        //const chunkSize = options['response-chunk-size'];
-        // TODO: use chunk size to limit chunk length
+        
         const lastToken = this.tokens[this.tokens.length - 1];
         // if token contains punctuation, or newline emit the chunk
         const punctuation = options['chunk-delimiters'];
@@ -67,6 +66,12 @@ class ResponseStreamer extends EventEmitter {
 
     clear() {
         this.tokens = [];
+        this.enclosureState = null;
+    }
+
+    abort() {
+        this.abortStream = true;
+        this.clear();
     }
 }
 

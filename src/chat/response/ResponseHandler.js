@@ -2,6 +2,7 @@ const logger = require('../../util/logger');
 const EventEmitter = require('events');
 const OobaClient = require('../../client/OobaClient');
 const ResponseStreamer = require('./ResponseStreamer');
+const ResponsePrompter = require('./ResponsePrompter');
 
 class ResponseHandler extends EventEmitter {
     constructor(config, persona) {
@@ -10,6 +11,7 @@ class ResponseHandler extends EventEmitter {
         this.ooba = new OobaClient(config.oobabooga);
         this.persona = persona;
         this.responseStreamer = new ResponseStreamer(config, this);
+        this.responsePrompter = new ResponsePrompter(config, persona, this);
 
         this.responseQueue = [];
         this.responseHistory = {};
@@ -17,20 +19,6 @@ class ResponseHandler extends EventEmitter {
         this.nextResponseID = 0;
         this.processingResponseID = 0;
         this.awaitingResponse = false;
-        this.responseBuffer = [];
-
-        // Setup prompts from the config
-        this.personaPrompt = config.messages['persona-prompt'] + persona.directive + "\n";
-        this.chatPrompt = persona.insertName(config.messages['prompt']) 
-                        + persona.insertName(config.messages['safety-prompt'])
-                        + config.messages['chat-history-prefix'];
-        this.chatDelimiter = config.messages['chat-delimiter'];
-        this.responsePrefix = persona.insertName(config.messages['prompt-response-prefix']);
-        // Replace {DELIMITER} with the chat delimiter in the response prefix
-        this.responsePrefix = this.responsePrefix.replace('{DELIMITER}', this.chatDelimiter);
-        this.newChatPrefix = persona.insertName(config.messages['new-chat-prefix']);
-        // Calculate total prompt overhead
-        this.promptTokens = this.personaPrompt.split(' ') + this.chatPrompt.split(' ').length + this.responsePrefix.split(' ').length + this.newChatPrefix.split(' ').length;
 
         // Handle events from the LLM API
         this.ooba.on('message', (message) => {
@@ -111,7 +99,7 @@ class ResponseHandler extends EventEmitter {
 
     sendResponse(messages, history) {
         // Generate a response prompt
-        const prompt = this._generateResponsePrompt(messages, history);
+        const prompt = this.responsePrompter.generatePrompt(messages, history);
         const dequeuedMessages = this.nextResponseID - this.lastResponseID;
 
         this.lastResponseID = this.nextResponseID;
@@ -132,67 +120,6 @@ class ResponseHandler extends EventEmitter {
         this.awaitingResponse = true;
     }
 
-    _generateResponsePrompt(messages, history) {
-        const maxTokens = this.config.messages['max-tokens'] - this.promptTokens - 2;
-        logger.debug(`max tokens remaining for chat: ${maxTokens}`);
-
-        this.responseBuffer.push(this.newChatPrefix);
-        let tokens = 0;
-        let dequeuedMessages = 0;
-        let message, tokensPerMessage;
-        // Add as many new messages as possible
-        for (let i = 0; i < messages.length; i++) {
-            message = messages[i];
-            tokensPerMessage = this._addMessageToResponse(message, tokens, maxTokens);
-            if (tokensPerMessage === -1) {
-                logger.warn(`max tokens reached, unable to add enqueued message`);
-                break;
-            } else {
-                tokens += tokensPerMessage;
-                dequeuedMessages++;    
-            }
-        }
-        // Add as many historical messages as possible
-        for (let i = 0; i < history.length; i++) {
-            message = history[i];
-            tokensPerMessage = this._addMessageToResponse(message, tokens, maxTokens, true);
-            if (tokensPerMessage === -1) {
-                logger.warn(`max tokens reached, unable to add historical message`);
-                break;
-            } else {
-                tokens += tokensPerMessage;
-            }
-        }
-
-        this.nextResponseID = this.lastResponseID + dequeuedMessages;
-        const chatHistory = this.responseBuffer.join('');
-        logger.debug(`Chat history: ${chatHistory}`);
-        const prompt = this.personaPrompt + this.chatPrompt 
-                    + chatHistory + `\n${this.responsePrefix}`;
-        logger.debug(`Used ${tokens} tokens to respond to ${this.responseBuffer.length} messages`);
-        this.responseBuffer = [];
-        return prompt;
-    }
-
-    _addMessageToResponse(msg, tokens, maxTokens, front=false) {
-        logger.debug(`Adding message to response: ${msg.text}`)
-        const txt = `${msg.username}: ${msg.text}${this.chatDelimiter}\n`;
-        const tokensPerMessage = this._getTokensPerMessage(txt);
-        if (tokens + tokensPerMessage > maxTokens) {
-            logger.warn(`max tokens reached, unable to add enqueued message`);
-            return -1;
-        }
-        if (front) {
-            this.responseBuffer.unshift(txt);
-        } else {
-            this.responseBuffer.push(txt);
-        }
-        return tokensPerMessage;
-    }
-    
-    _getTokensPerMessage(message) {
-        return message.split(' ').length;
-    }
 }
 
 module.exports = ResponseHandler;

@@ -84,7 +84,7 @@ class ResponseHandler extends EventEmitter {
         // Add response to response history
         let prevResponse = this.responseHistory[this.lastResponseID];
         if (prevResponse) {
-            prevResponse += response;
+            prevResponse += ` ${response}`;
         } else {
             prevResponse = response;
         }

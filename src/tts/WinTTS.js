@@ -1,4 +1,4 @@
-const logger = require('../util/Logger');
+const logger = require('../util/logger');
 const { spawn } = require('child_process');
 
 class WinTTS {

@@ -39,6 +39,10 @@ class ChatHandler {
                 // Replace the profane message and remove the response from the speech output buffer
                 response = this.config.sanitizer['profanity-replacement'];
             }
+            // Put the sanitized response into history
+            this.responseHandler.addResponseToHistory(response);
+
+            // Send the response to all registered chat services
             this.chatServices.forEach((service) => {
                 service.sendMessage(response);
             });
@@ -62,7 +66,7 @@ class ChatHandler {
         service.on('message', (message) => {
             const isProfane = this.sanitizer.shouldReject(message.text);
             if (isProfane) {
-                logger.info(`rejected message from ${message.username}`);
+                logger.info(`rejected message from ${message.author}`);
                 return;
             }
             this.messageManager.receiveMessage(message);

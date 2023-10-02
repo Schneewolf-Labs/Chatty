@@ -3,6 +3,7 @@ const logger = require('../util/logger');
 const fs = require('fs');
 const path = require('path');
 const EventEmitter = require('events');
+const DrawImage = require('./DrawImage');
 
 class DrawManager extends EventEmitter{
     constructor(stableDiffClient) {
@@ -11,14 +12,13 @@ class DrawManager extends EventEmitter{
         this.settings = stableDiffClient.settings;
         this.drawQueue = [];
         this.isDrawing = false;
-        this.lastPrompt = "";
 
         this.on('image', image => {
             logger.debug('DrawManager recieved image');
             // save image to output
             const filename = path.join(process.cwd(), this.settings.output_location);
-            fs.writeFileSync(filename, image, 'base64');
-            fs.writeFileSync(this.settings.prompt_output_location, this.lastPrompt, 'utf8');
+            fs.writeFileSync(filename, image.data, 'base64');
+            fs.writeFileSync(this.settings.prompt_output_location, image.prompt, 'utf8');
             //this.emit('image', image);
         });
     }
@@ -41,7 +41,7 @@ class DrawManager extends EventEmitter{
         logger.debug(`DrawManager drawing next image`);
         const prompt = this.drawQueue.shift();
         try {
-            this.lastPrompt = prompt;
+            //this.lastPrompt = prompt;
             // output this prompt as next prompt
             this._outputNextPrompt(this.settings.next_prompt_output_prefix + prompt);
             // Call Stable Diffusion API
@@ -50,7 +50,7 @@ class DrawManager extends EventEmitter{
                 negative_prompt: this.settings.negative_prompt,
                 ...this.settings.requestParams
             }).then(image => {
-                this.emit('image', image);
+                this.emit('image', new DrawImage(image, prompt));
                 this._drawNext();
             });
         } catch (err) {

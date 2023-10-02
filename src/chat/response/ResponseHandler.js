@@ -62,8 +62,6 @@ class ResponseHandler extends EventEmitter {
             //return;
         }
 
-        
-
         // Emit final response message for other services to consume
         this.emit('response', message);
 

@@ -13,21 +13,9 @@ class WinTTS {
 
         this.is_speaking = false;
         this.queue = [];
-        this.voice_process = spawn(this.exe_location, [this.voice_index, this.audio_device]);
-        this.voice_process.on('error', (err) => {
-            logger.error(`Error WinTTS: ${err}`);
-        });
-        this.voice_process.stdout.on('data', (data) => {
-            const message = data.toString().trim();
-            if (message === 'TOKEN_PLAYBACK_FINISHED') {
-                logger.debug(`WinTTS finished speaking`);
-                if (this.durationTimer) clearTimeout(this.durationTimer);
-                this._dequeue();
-            }
-        });
-        this.voice_process.on('close', (code) => {
-            logger.error(`WinTTS exited with code ${code}`);
-        });
+
+        this.voice_process = null;
+        this._startProcess();
     }
 
     speak(token, force=false) {
@@ -70,6 +58,30 @@ class WinTTS {
         } else {
             this.is_speaking = false;
         }
+    }
+
+    _startProcess() {
+        if (this.voice_process) {
+            logger.debug(`WinTTS killing old process`);
+            this.voice_process.kill();
+        }
+        logger.debug(`WinTTS starting new process`);
+        this.voice_process = spawn(this.exe_location, [this.voice_index, this.audio_device]);
+        this.voice_process.on('error', (err) => {
+            logger.error(`Error WinTTS: ${err}`);
+        });
+        this.voice_process.stdout.on('data', (data) => {
+            const message = data.toString().trim();
+            if (message === 'TOKEN_PLAYBACK_FINISHED') {
+                logger.debug(`WinTTS finished speaking`);
+                if (this.durationTimer) clearTimeout(this.durationTimer);
+                this._dequeue();
+            }
+        });
+        this.voice_process.on('close', (code) => {
+            logger.warn(`WinTTS exited with code ${code}`);
+            this._startProcess();
+        });
     }
 }
 

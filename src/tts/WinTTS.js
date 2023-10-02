@@ -66,6 +66,7 @@ class WinTTS {
             this.voice_process.kill();
         }
         logger.debug(`WinTTS starting new process`);
+        this.is_speaking = false;
         this.voice_process = spawn(this.exe_location, [this.voice_index, this.audio_device]);
         this.voice_process.on('error', (err) => {
             logger.error(`Error WinTTS: ${err}`);

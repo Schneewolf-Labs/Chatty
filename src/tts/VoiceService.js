@@ -1,12 +1,12 @@
 const logger = require('../util/logger');
 const ChatServiceInterface = require('../chat/ChatServiceInterface');
-const VoiceHandler = require('./VoiceHandler');
+const WinTTS = require('./WinTTS');
 
 class VoiceService extends ChatServiceInterface {
     constructor(config) {
         super();
         this.config = config;
-        this.voiceHandler = new VoiceHandler(config.voice);
+        this.voiceHandler = new WinTTS(config.voice);
 
         // TODO: support input from a microphone to be encoded as text and emitted as a message
     }

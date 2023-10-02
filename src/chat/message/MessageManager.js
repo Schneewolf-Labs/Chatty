@@ -80,8 +80,11 @@ class MessageManager extends EventEmitter {
 
     setDrawManager(drawManager) {
         this.drawManager = drawManager;
-        this.drawManager.on('image', () => {
-            this.responseHandler.addEventToHistory('posted a drawing');
+        this.drawManager.on('prompt', (prompt) => {
+            this.responseHandler.addEventToHistory(`enqueued drawing of ${prompt}`);
+        });
+        this.drawManager.on('image', (image) => {
+            this.responseHandler.addEventToHistory(`drew ${image.prompt}`);
         });
     }
 

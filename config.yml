@@ -59,6 +59,7 @@ stable_diffusion:
     prompt_output_location: "output/prompt.txt"
     next_prompt_output_location: "output/nextprompt.txt"
     next_prompt_output_prefix: " Next prompt: "
+    max_prompt_length: 512
 voice:
     enabled: true
     voice_index: 1

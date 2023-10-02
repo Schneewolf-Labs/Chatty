@@ -30,6 +30,8 @@ class DrawManager extends EventEmitter{
             this.isDrawing = true;
             this._drawNext();
         }
+        // emit enqueued prompt
+        this.emit('prompt', prompt);
     }
 
     _drawNext() {
@@ -76,6 +78,11 @@ class DrawManager extends EventEmitter{
                 break;
             }
         }
+        // remove leading and trailing whitespace
+        prompt = prompt.trim();
+        // truncte prompt to max length
+        prompt = prompt.substring(0, this.settings.max_prompt_length);
+
         return prompt;
     }
 

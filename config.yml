@@ -22,22 +22,23 @@ discord:
     post-image-output: true
     send-is-typing: true
 messages:
-    max-tokens: 1024
+    max-tokens: 1600
     response-interval: 3000
-    chat-history-length: 8
+    chat-history-length: 32
     chat-max-batch-size: 4
-    persona-prompt: "### Given the following character description, scenario, location, emotional state, goals, memories, and conversation history respond in a manner consistent with the persona.\n"
-    prompt: "### You are {NAME} and you are hosting a Twitch livestream and responding to your viewers comments in the chat. Below are the most recent messages in the chat history. Give only your response below as if you were speaking to them on stream as {NAME}.\n"
+    persona-prompt: "Given the following character description, scenario, location, emotional state, goals, memories, and conversation history respond in a manner consistent with the persona.\n"
+    prompt: "Context:\nYou are {NAME} and you are hosting a Twitch livestream and responding to your viewers comments in the chat. Below are the most recent messages in the chat history. Give only your response below as if you were speaking to them on stream as {NAME}.\n"
     safety-prompt: "### To avoid issues with Twitch, avoid using profanity and discussing dangerous or illegal activity. {NAME} should always be friendly and supportive and discourage violence or self-harm.\n"
-    chat-history-prefix: "\n### Chat History:\n"
-    new-chat-prefix: "\n### New Messages:\n"
-    prompt-response-prefix: "### Now write a response to the new messages. Consider the chat history and additional context when writing a response, but keep your answer concise unless telling a story. Format your response as text only; do not add links or images. When your response is complete end it with {DELIMITER}.\n{NAME}:"
+    chat-history-prefix: "\nChat History:\n"
+    new-chat-prefix: "\nNew Messages:\n"
+    prompt-response-prefix: "Respond directly to the new messages. Provide your response as text only; do not add links or images. End your response with {DELIMITER}.\n### {NAME}:"
     chat-delimiter: "|"
+    chat-prefix: "###"
     response-expire-time: 30000
     include-responses-in-history: true
     chunk-delimiters: ['.', '\n', '?', '!', ';', ':', '—']
 sanitizer:
-    reject-profanity: true
+    reject-profanity: false
     profane-response: "I'm sorry, I don't respond to profanity."
     profanity-replacement: "Sorry, I can't use profanity."
     reject-negativity: false
@@ -67,7 +68,6 @@ voice:
     alphanumeric_only: true
     block_responses: true
     max-speak-duration: 30000
-
 http:
     enabled: true
     analyze-links: true

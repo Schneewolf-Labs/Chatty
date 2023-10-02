@@ -1,6 +1,7 @@
 const logger = require('../util/logger');
 const tmi = require('tmi.js');
 const ChatServiceInterface = require('../chat/ChatServiceInterface');
+const ChatMessage = require('../chat/message/ChatMessage');
 
 // Twitch CLient class
 class TwitchClient extends ChatServiceInterface {
@@ -57,15 +58,12 @@ class TwitchClient extends ChatServiceInterface {
 
     _handleMessage(channel, tags, message, self) {
         if (self) return;
-        const msg = {
-            username: tags.username,
-            display_name: tags['display-name'],
-            text: message,
-            timestamp: Date.now(),
-            tags: tags,
-            channel: channel
-        };
-        this.emit('message', msg);
+        const chatMessage = new ChatMessage(tags.username, message);
+        chatMessage.reply = (txt) => {
+            // reply to original twitch message
+            this.client.say(channel, `@${tags.username}, ${txt}`);
+        }
+        this.emit('message', chatMessage);
     }
 }
 

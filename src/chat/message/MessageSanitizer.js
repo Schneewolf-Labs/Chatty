@@ -1,4 +1,4 @@
-const logger = require('../../util/Logger');
+const logger = require('../../util/logger');
 const badwords = require('bad-words');
 const filter = new badwords();
 const Sentiment = require('sentiment');

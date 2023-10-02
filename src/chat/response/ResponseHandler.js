@@ -62,14 +62,7 @@ class ResponseHandler extends EventEmitter {
             //return;
         }
 
-        // Add response to response history
-        let prevResponse = this.responseHistory[this.processingResponseID];
-        if (prevResponse) {
-            prevResponse += message;
-        } else {
-            prevResponse = message;
-        }
-        this.responseHistory[this.processingResponseID] = prevResponse;
+        
 
         // Emit final response message for other services to consume
         this.emit('response', message);
@@ -85,6 +78,17 @@ class ResponseHandler extends EventEmitter {
 
     getResponse(id) {
         return this.responseHistory[id];
+    }
+
+    addResponseToHistory(response) {
+        // Add response to response history
+        let prevResponse = this.responseHistory[this.lastResponseID];
+        if (prevResponse) {
+            prevResponse += response;
+        } else {
+            prevResponse = response;
+        }
+        this.responseHistory[this.lastResponseID] = prevResponse;
     }
 
     addEventToHistory(event) {

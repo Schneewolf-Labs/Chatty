@@ -2,6 +2,7 @@ const logger = require('../util/logger');
 const Buffer = require('buffer').Buffer;
 const { Client, Events, GatewayIntentBits } = require('discord.js');
 const ChatServiceInterface = require('../chat/ChatServiceInterface');
+const ChatMessage = require('../chat/message/ChatMessage');
 
 class DiscordClient extends ChatServiceInterface {
     constructor(token, channelId, settings) {
@@ -69,15 +70,12 @@ class DiscordClient extends ChatServiceInterface {
 
     _handleMessage(message) {
         logger.debug(`Received message from ${message.author.tag}: ${message.content}`);
-        const msg = {
-            username: message.author.username,
-            display_name: message.author.username,
-            text: message.content,
-            timestamp: Date.now(),
-            tags: message.author,
-            channel: message.channel
-        };
-        this.emit('message', msg);
+        const chatMessage = new ChatMessage(message.author.username, message.content);
+        chatMessage.reply = (txt) => {
+            // reply to original discord message
+            message.reply(txt);
+        }
+        this.emit('message', chatMessage);
     }
 
 }

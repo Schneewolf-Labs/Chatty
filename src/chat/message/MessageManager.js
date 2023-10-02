@@ -63,7 +63,7 @@ class MessageManager extends EventEmitter {
             const historicalResponse = this.responseHandler.getResponse(i+1);
             if (includeResponses && historicalResponse) {
                 history.push({
-                    username: this.responseHandler.persona.name,
+                    author: this.responseHandler.persona.name,
                     text: historicalResponse
                 });
             }

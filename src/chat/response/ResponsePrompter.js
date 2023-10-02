@@ -67,7 +67,7 @@ class ResponsePrompter {
 
     _addMessageToPrompt(msg, tokens, maxTokens, front=false) {
         logger.debug(`Adding message to response: ${msg.text}`)
-        const txt = `${this.chatPrefix} ${msg.username}: ${msg.text}${this.chatDelimiter}\n`;
+        const txt = `${this.chatPrefix} ${msg.author}: ${msg.text}${this.chatDelimiter}\n`;
         const tokensPerMessage = this._getTokensPerMessage(txt);
         if (tokens + tokensPerMessage > maxTokens) {
             logger.warn(`max tokens reached, unable to add enqueued message`);

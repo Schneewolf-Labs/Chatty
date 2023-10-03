@@ -109,10 +109,17 @@ class ResponseStreamer extends EventEmitter {
     }
 
     emitChunk() {
-        const chunk = this.tokens.join('');
+        let chunk = this.tokens.join('');
         if (!chunk) {
             logger.debug(`ResponseStreamer got empty chunk, refusing to emit`);
             return;
+        }
+        // One last check for delimiters
+        const delimiterIndex = this.getDelimiterIndex(chunk);
+        if (delimiterIndex !== -1) {
+            logger.warn(`Chunk: ${chunk} contains delimiter, splitting`);
+            const split = [chunk.slice(0, delimiterIndex), chunk.slice(delimiterIndex)];
+            chunk = split[0];
         }
         logger.debug(`ResponseStreamer emitting chunk: ${chunk}`);
         this.emit('chunk', chunk);

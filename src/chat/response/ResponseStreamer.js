@@ -2,20 +2,72 @@ const logger = require('../../util/Logger');
 const EventEmitter = require('events');
 
 class ResponseStreamer extends EventEmitter {
-    constructor(options, responseHandler) {
+    constructor(options, responseHandler, ooba) {
         super();
         this.options = options;
         this.responseHandler = responseHandler;
+        this.ooba = ooba;
+        // Handle events from the LLM API
+        this.ooba.on('message', (message) => {
+            // A message has completed
+            logger.debug(`Received message from Oobabooga: ${message}`);
+            this.emitChunk();
+        });
+        this.ooba.on('token', (token) => {
+            // Ooba is streaming tokens
+            logger.debug(`Received token from Oobabooga: ${token}`);
+            if (!token) return;
+            //this.emit('token', token);
+            this.receiveToken(token);
+        });
 
         this.tokens = [];
         this.enclosureState = null;
         this.abortStream = false;
+
+        this.chatDelimiter = options.messages['chat-delimiter'];
+        this.chatPrefix = options.messages['chat-prefix'];
+        this.illegalTokens = options.messages['illegal-tokens'];
     }
 
     receiveToken(token) {
+        const isLegal = this.isTokenLegal(token);
+        if (!isLegal) {
+            logger.debug(`Token: ${token} is illegal, aborting stream`);
+            this.abort();
+            return;
+        }
+        const delimiterIndex = this.getDelimiterIndex(token);
+        if (delimiterIndex !== -1) {
+            logger.warn(`Token: ${token} contains delimiter, splitting`);
+            const split = [token.slice(0, delimiterIndex), token.slice(delimiterIndex)];
+            token = split[0];
+            this.pushToken(token);
+            this.abort();
+            return;
+        }
+        this.pushToken(token);
+        this.processTokens();
+    }
+
+    isTokenLegal(token) {
+        const illegalTokens = this.illegalTokens;
+        const isIllegal = illegalTokens.some(illegalToken => token.includes(illegalToken));
+        return !isIllegal;
+    }
+
+    getDelimiterIndex(token) {
+        // check for chat delimiter or prefix
+        const delimiterIndex = token.indexOf(this.chatDelimiter);
+        const prefixIndex = token.indexOf(this.chatPrefix);
+        const indices = [delimiterIndex, prefixIndex].filter(i => i !== -1);
+        if (indices.length === 0) return -1;
+        return Math.min(...indices);
+    }
+
+    pushToken(token) {
         this.tokens.push(token);
         this.emit('token', token);
-        this.processTokens();
     }
 
     processTokens() {
@@ -70,6 +122,7 @@ class ResponseStreamer extends EventEmitter {
     }
 
     abort() {
+        this.emitChunk();
         this.abortStream = true;
         this.clear();
     }

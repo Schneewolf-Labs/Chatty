@@ -37,6 +37,7 @@ messages:
     response-expire-time: 30000
     include-responses-in-history: true
     chunk-delimiters: ['.', '\n', '?', '!', ';', ':', '—']
+    illegal-response-tokens: ['http', '![']
 sanitizer:
     reject-profanity: false
     profane-response: "I'm sorry, I don't respond to profanity."

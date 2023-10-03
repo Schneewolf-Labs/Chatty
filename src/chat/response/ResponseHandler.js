@@ -10,7 +10,7 @@ class ResponseHandler extends EventEmitter {
         this.config = config;
         this.ooba = new OobaClient(config.oobabooga);
         this.persona = persona;
-        this.responseStreamer = new ResponseStreamer(config, this);
+        this.responseStreamer = new ResponseStreamer(config, this, ooba);
         this.responsePrompter = new ResponsePrompter(config, persona, this);
 
         this.responseQueue = [];
@@ -20,42 +20,19 @@ class ResponseHandler extends EventEmitter {
         this.processingResponseID = 0;
         this.awaitingResponse = false;
 
-        // Handle events from the LLM API
-        this.ooba.on('message', (message) => {
-            // A message has completed
-            this.awaitingResponse = false;
-            this.abortStream = false;
-            logger.debug(`Received message from Oobabooga: ${message}`);
-            this.responseStreamer.emitChunk();
-        });
-        this.ooba.on('token', (token) => {
-            // Ooba is streaming tokens
-            logger.debug(`Received token from Oobabooga: ${token}`);
-            if (this.abortStream) return;
-            // check if end of token is |, if so abort stream
-            const endIdx = token.indexOf(this.chatDelimiter);
-            const reachedDelimiter = endIdx > -1;
-            if (reachedDelimiter) {
-                token = token.substring(0, endIdx);
-                this.abortStream = true;
-            }
-            if (!token) return;
-            this.emit('token', token);
-            this.responseStreamer.receiveToken(token);
-            // if (reachedDelimiter) {
-            //     this.abortStream = false;
-            // }
-        });
-
         // Handle events from the response streamer
         this.responseStreamer.on('chunk', (response) => {
             // A response has completed
             this._handleMessage(response);
         });
+        this.responseStreamer.on('token', (token) => {
+            this.emit('token', token);
+        });
     }
 
     _handleMessage(message) {
         logger.debug(`Received message from ResponseStreamer: ${message}`);
+        this.awaitingResponse = false;
         // Check if message is empty
         if (message.length === 0) {
             logger.warn(`Response is empty`);

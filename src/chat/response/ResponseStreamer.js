@@ -12,10 +12,13 @@ class ResponseStreamer extends EventEmitter {
             // A message has completed
             logger.debug(`Received message from Oobabooga: ${message}`);
             this.emitChunk();
+            // reset abort flag
+            this.abortStream = false;
         });
         this.ooba.on('token', (token) => {
             // Ooba is streaming tokens
             logger.debug(`Received token from Oobabooga: ${token}`);
+            if (this.abortStream) return;
             if (!token) return;
             //this.emit('token', token);
             this.receiveToken(token);
@@ -27,7 +30,7 @@ class ResponseStreamer extends EventEmitter {
 
         this.chatDelimiter = options.messages['chat-delimiter'];
         this.chatPrefix = options.messages['chat-prefix'];
-        this.illegalTokens = options.messages['illegal-tokens'];
+        this.illegalTokens = options.messages['illegal-response-tokens'];
     }
 
     receiveToken(token) {

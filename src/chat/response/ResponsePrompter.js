@@ -10,9 +10,11 @@ class ResponsePrompter {
 
         // Setup prompts from the config
         this.personaPrompt = config.messages['persona-prompt'] + persona.directive + "\n";
+        this.drawPrompt = this.handler.config.stable_diffusion.enabled ? config.messages['draw-available-prompt'] : '';
         this.chatPrompt = persona.insertName(config.messages['prompt']) 
                         + persona.insertName(config.messages['safety-prompt'])
-                        + config.messages['chat-history-prefix'];
+                        + persona.insertName(config.messages['limitations-prompt'])
+                        + this.drawPrompt + config.messages['chat-history-prefix'];
         this.chatPrefix = config.messages['chat-prefix'];
         this.chatDelimiter = config.messages['chat-delimiter'];
         this.responsePrefix = persona.insertName(config.messages['prompt-response-prefix']);

@@ -10,7 +10,7 @@ class ResponseHandler extends EventEmitter {
         this.config = config;
         this.ooba = new OobaClient(config.oobabooga);
         this.persona = persona;
-        this.responseStreamer = new ResponseStreamer(config, this, ooba);
+        this.responseStreamer = new ResponseStreamer(config, this, this.ooba);
         this.responsePrompter = new ResponsePrompter(config, persona, this);
 
         this.responseQueue = [];

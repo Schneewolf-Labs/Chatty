@@ -1,4 +1,4 @@
-const logger = require('../../util/Logger');
+const logger = require('../../util/logger');
 const EventEmitter = require('events');
 
 class ResponseStreamer extends EventEmitter {

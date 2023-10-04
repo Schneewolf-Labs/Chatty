@@ -15,13 +15,15 @@ class ChattyAPI {
         this.app = express();
         this.httpServer = http.createServer(this.app);
         this.wss = new WebSocket.Server({ 
-            server: this.httpServer
+            server: this.httpServer,
+            path: '/api'
         });
         this.wss.on('connection', (ws) => {
+            logger.info('Client connected to API');
             ws.on('message', (message) => {
+                logger.debug(`API got message: ${message}`);
                 this._handleAPIMessage(ws, message);
             });
-            ws.send('WebSocket connection established');
         });
     }
 

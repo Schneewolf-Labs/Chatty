@@ -1,4 +1,5 @@
 const logger = require('../util/logger');
+const fetch = require('node-fetch');
 
 class StableDiffClient {
     constructor(settings) {

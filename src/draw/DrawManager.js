@@ -24,6 +24,14 @@ class DrawManager extends EventEmitter{
     }
 
     draw(prompt) {
+        const bannedTokens = this.settings.banned_tokens;
+        for (let i = 0; i < bannedTokens.length; i++) {
+            if (prompt.includes(bannedTokens[i])) {
+                logger.info(`DrawManager ignoring prompt: ${prompt}`);
+                return;
+            }
+        }
+
         logger.info(`DrawManager enqueuing prompt: ${prompt}`);
         this.drawQueue.push(prompt);
         if (!this.isDrawing) {

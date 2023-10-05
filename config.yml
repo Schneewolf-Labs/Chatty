@@ -53,7 +53,7 @@ oobabooga:
     output_responses: true
     output_location: "output/response.txt"
 stable_diffusion:
-    enabled: false
+    enabled: true
     trigger: "please draw"
     baseUrl: "http://127.0.0.1:7860"
     negative_prompt: "EasyNegative, lewd, nsfw, sex, naked, nude, suicide, murder, rape, blood, gore, risque, sexy, horny"
@@ -63,6 +63,7 @@ stable_diffusion:
     next_prompt_output_location: "output/nextprompt.txt"
     next_prompt_output_prefix: " Next prompt: "
     max_prompt_length: 512
+    banned_tokens: ['lewd', 'nude', 'sex', 'rape', 'nsfw', 'naked', 'penis', 'vagina', 'boobs', 'tits', 'ass']
 voice:
     enabled: true
     voice_index: 1

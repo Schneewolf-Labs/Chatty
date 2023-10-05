@@ -24,12 +24,9 @@ class DrawManager extends EventEmitter{
     }
 
     draw(prompt) {
-        const bannedTokens = this.settings.banned_tokens;
-        for (let i = 0; i < bannedTokens.length; i++) {
-            if (prompt.includes(bannedTokens[i])) {
-                logger.info(`DrawManager ignoring prompt: ${prompt}`);
-                return;
-            }
+        if (this.shouldRejectPrompt(prompt)) {
+            logger.warn(`DrawManager rejected prompt: ${prompt}`);
+            return false;
         }
 
         logger.info(`DrawManager enqueuing prompt: ${prompt}`);
@@ -40,6 +37,7 @@ class DrawManager extends EventEmitter{
         }
         // emit enqueued prompt
         this.emit('prompt', prompt);
+        return true;
     }
 
     _drawNext() {
@@ -92,6 +90,19 @@ class DrawManager extends EventEmitter{
         prompt = prompt.substring(0, this.settings.max_prompt_length);
 
         return prompt;
+    }
+
+    shouldRejectPrompt(prompt) {
+        const bannedTokens = this.settings.banned_tokens;
+        // Convert the prompt to lowercase and split it into words
+        const words = prompt.toLowerCase().split(/\W+/);
+        // Check if any of the words in the prompt match the illegal tokens
+        for (let word of words) {
+            if (bannedTokens.includes(word)) {
+                return true; // Found an illegal token
+            }
+        }
+        return false;
     }
 
     _outputNextPrompt(text) {

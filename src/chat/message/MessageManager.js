@@ -32,8 +32,12 @@ class MessageManager extends EventEmitter {
             const prompt = this.drawManager.extractPrompt(message.text);
             if (prompt) {
                 logger.debug(`Extracted drawing prompt: ${prompt}`);
-                this.drawManager.draw(prompt);
-                //return;
+                const enqueued = this.drawManager.draw(prompt);
+                if (!enqueued) {
+                    // TODO: respond with config message
+                    this.responseHandler.emitResponse(this.drawManager.settings.rejected_response);
+                    return;
+                }
             }
         }
 

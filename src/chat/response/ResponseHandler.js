@@ -40,7 +40,7 @@ class ResponseHandler extends EventEmitter {
         }
 
         // Emit final response message for other services to consume
-        this.emit('response', message);
+        this.emitResponse(message);
 
         // Dequeue next response
         if (this.responseQueue.length > 0) {
@@ -74,6 +74,10 @@ class ResponseHandler extends EventEmitter {
         } else {
             this.responseHistory[this.lastResponseID] = event;
         }
+    }
+
+    emitResponse(response) {
+        this.emit('response', response);
     }
 
     sendResponse(messages, history) {

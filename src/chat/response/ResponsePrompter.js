@@ -10,17 +10,15 @@ class ResponsePrompter {
 
         // Setup prompts from the config
         this.personaPrompt = config.messages['persona-prompt'] + persona.directive + "\n";
-        this.drawPrompt = this.handler.config.stable_diffusion.enabled ? config.messages['draw-available-prompt'] : '';
-        this.chatPrompt = persona.insertName(config.messages['prompt']) 
-                        + persona.insertName(config.messages['safety-prompt'])
-                        + persona.insertName(config.messages['limitations-prompt'])
+        this.drawPrompt = this.handler.config.stable_diffusion.enabled ? this._replacePlaceholders(config.messages['draw-available-prompt']) : '';
+        this.chatPrompt = this._replacePlaceholders(config.messages['prompt']) 
+                        + this._replacePlaceholders(config.messages['safety-prompt'])
+                        + this._replacePlaceholders(config.messages['limitations-prompt'])
                         + this.drawPrompt + config.messages['chat-history-prefix'];
         this.chatPrefix = config.messages['chat-prefix'];
         this.chatDelimiter = config.messages['chat-delimiter'];
-        this.responsePrefix = persona.insertName(config.messages['prompt-response-prefix']);
-        // Replace {DELIMITER} with the chat delimiter in the response prefix
-        this.responsePrefix = this.responsePrefix.replace('{DELIMITER}', this.chatDelimiter);
-        this.newChatPrefix = persona.insertName(config.messages['new-chat-prefix']);
+        this.responsePrefix = this._replacePlaceholders(config.messages['prompt-response-prefix']);
+        this.newChatPrefix = this._replacePlaceholders(config.messages['new-chat-prefix']);
         // Calculate total prompt overhead
         this.promptTokens = this.personaPrompt.split(' ') + this.chatPrompt.split(' ').length + this.responsePrefix.split(' ').length + this.newChatPrefix.split(' ').length;
     }
@@ -85,6 +83,11 @@ class ResponsePrompter {
     
     _getTokensPerMessage(message) {
         return message.split(' ').length;
+    }
+
+    _replacePlaceholders(message) {
+        message = this.persona.insertName(message);
+        return message.replace('{DELIMITER}', this.chatDelimiter);
     }
 }
 

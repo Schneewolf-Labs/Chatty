@@ -28,7 +28,7 @@ class ChattyAPI {
     }
 
     start() {
-        this.httpServer = this.app.listen(this.port, () => {
+        this.httpServer.listen(this.port, () => {
             logger.info(`Chatty API listening on port ${this.port}`);
         });
     }

@@ -20,7 +20,7 @@ class ResponsePrompter {
         this.responsePrefix = this._replacePlaceholders(config.messages['prompt-response-prefix']);
         this.newChatPrefix = this._replacePlaceholders(config.messages['new-chat-prefix']);
         // Calculate total prompt overhead
-        this.promptTokens = this.personaPrompt.split(' ') + this.chatPrompt.split(' ').length + this.responsePrefix.split(' ').length + this.newChatPrefix.split(' ').length;
+        this.promptTokens = this.personaPrompt.split(' ').length + this.chatPrompt.split(' ').length + this.responsePrefix.split(' ').length + this.newChatPrefix.split(' ').length;
     }
 
     generatePrompt(messages, history) {

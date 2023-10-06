@@ -21,7 +21,7 @@ discord:
     reply-in-chat: true
     post-image-output: true
     send-is-typing: true
-    channels: []
+    channels: ['1131254684330496172']
     allow-dms: true
 messages:
     max-tokens: 1600

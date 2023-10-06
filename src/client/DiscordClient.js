@@ -28,7 +28,6 @@ class DiscordClient extends ChatServiceInterface {
                 logger.debug(`Received message from ${message.author.tag} in ${message.channel.id}`);
                 const isDM = this.settings['allow-dms'] && message.channel.type === ChannelType.DM;
                 const isChannel = this.channels.includes(message.channel.id);
-
                 if (isChannel || isDM) {
                     if (message.author.bot) return; // TODO: configurable
                     this._handleMessage(message);

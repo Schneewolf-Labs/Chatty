@@ -12,7 +12,8 @@ class VoiceService extends ChatServiceInterface {
     }
 
     sendMessage(message) {
-        this.voiceHandler.speak(message);
+        const text = message.text;
+        this.voiceHandler.speak(text);
     }
 
     sendImage() {

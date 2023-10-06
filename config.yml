@@ -21,6 +21,8 @@ discord:
     reply-in-chat: true
     post-image-output: true
     send-is-typing: true
+    channels: []
+    allow-dms: true
 messages:
     max-tokens: 1600
     response-interval: 3000

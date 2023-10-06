@@ -6,6 +6,8 @@ class ChatMessage {
         this.text = text;
         this.timestamp = Date.now();
         this.options = options;
+
+        this.channel = null;
     }
 
     reply(message) {

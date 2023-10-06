@@ -22,7 +22,7 @@ class Chatty {
 
     attachVoiceService(service) {
         this.chatHandler.registerChatService(service);
-        this.chatHandler.messageManager.setVoiceService(service);
+        this.chatHandler.setVoiceService(service);
     }
 }
 

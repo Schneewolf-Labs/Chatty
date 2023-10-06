@@ -14,8 +14,9 @@ class ResponseOutputFile extends ChatServiceInterface {
     }
 
     sendMessage(message) {
-        logger.debug(`ResponseOutputFile got message: ${message}`);
-        this.receiveResponse(message);
+        const text = message.text;
+        logger.debug(`ResponseOutputFile got message: ${text}`);
+        this.receiveResponse(text);
     }
 
     sendImage() {

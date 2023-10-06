@@ -1,6 +1,6 @@
 const logger = require('../util/logger');
 const Buffer = require('buffer').Buffer;
-const { Client, Events, GatewayIntentBits } = require('discord.js');
+const { Client, Events, GatewayIntentBits, Partials } = require('discord.js');
 const ChatServiceInterface = require('../chat/ChatServiceInterface');
 const ChatMessage = require('../chat/message/ChatMessage');
 
@@ -9,9 +9,14 @@ class DiscordClient extends ChatServiceInterface {
         super();
         this.token = token;
         this.channelId = channelId;
+        this.partials = [];
         this.intents = [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages];
         if (settings['chat-enabled']) this.intents.push(GatewayIntentBits.MessageContent);
-        this.client = new Client({ intents: this.intents });
+        if (settings['allow-dms']) {
+            this.intents.push(GatewayIntentBits.DirectMessages);
+            this.partials.push(Partials.Channel, Partials.Message);
+        }
+        this.client = new Client({ intents: this.intents, partials: this.partials });
         this.settings = settings;
         
         this.client.once(Events.ClientReady, c => {
@@ -20,6 +25,7 @@ class DiscordClient extends ChatServiceInterface {
 
         if (settings['chat-enabled']) {
             this.client.on(Events.MessageCreate, message => {
+                logger.debug(`Received message from ${message.author.tag} in ${message.channel.id}`);
                 if (message.channel.id === this.channelId) {
                     if (message.author.bot) return; // TODO: configurable
                     this._handleMessage(message);
@@ -36,9 +42,10 @@ class DiscordClient extends ChatServiceInterface {
 
     sendMessage(message) {
         if (!this.settings['reply-in-chat']) return;
+        const text = message.text;
         // chunk messages by discord max length
         const max = 2000;
-        const chunks = message.match(new RegExp(`.{1,${max}}`, 'g'));
+        const chunks = text.match(new RegExp(`.{1,${max}}`, 'g'));
         if (!chunks) return;
         logger.debug(`Sending ${chunks.length} chunks`);
         chunks.forEach(chunk => {
@@ -71,6 +78,8 @@ class DiscordClient extends ChatServiceInterface {
     _handleMessage(message) {
         logger.debug(`Received message from ${message.author.tag}: ${message.content}`);
         const chatMessage = new ChatMessage(message.author.username, message.content);
+        const channel = this.client.channels.cache.get(this.channelId);
+        chatMessage.channel = channel;
         chatMessage.reply = (txt) => {
             // reply to original discord message
             message.reply(txt);

@@ -1,14 +1,13 @@
 const logger = require('../../util/logger');
 const EventEmitter = require('events');
-const OobaClient = require('../../client/OobaClient');
 const ResponseStreamer = require('./ResponseStreamer');
 const ResponsePrompter = require('./ResponsePrompter');
 
 class ResponseHandler extends EventEmitter {
-    constructor(config, persona) {
+    constructor(config, ooba, persona) {
         super();
         this.config = config;
-        this.ooba = new OobaClient(config.oobabooga);
+        this.ooba = ooba;
         this.persona = persona;
         this.responseStreamer = new ResponseStreamer(config, this, this.ooba);
         this.responsePrompter = new ResponsePrompter(config, persona, this);

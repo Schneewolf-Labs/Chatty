@@ -1,17 +1,20 @@
 const logger = require('../util/logger');
-const ResponseHandler = require('./response/ResponseHandler');
-const MessageManager = require('./message/MessageManager');
+const OobaClient = require('../client/OobaClient');
+const ChatChannel = require('./ChatChannel');
 const MessageSanitizer = require('./message/MessageSanitizer');
+const ChatMessage = require('./message/ChatMessage');
 
 class ChatHandler {
     constructor(config, persona) {
         this.config = config;
-        this.responseHandler = new ResponseHandler(config, persona);
-        this.messageManager = new MessageManager(config.messages, this.responseHandler);
+        this.ooba = new OobaClient(config.oobabooga);
+        this.persona = persona;
         this.sanitizer = new MessageSanitizer(config.sanitizer, persona, config.messages['chat-delimiter']);
+        this.chatChannels = {};
         this.chatServices = [];
         this.isTyping = false;
 
+        this.drawManager = null;
         // If stable diffusion is enabled, initialize a draw manager and attach to message manager
         if (config.stable_diffusion.enabled === true) {
             const StableDiffClient = require('../client/StableDiffClient');
@@ -23,11 +26,39 @@ class ChatHandler {
                     service.sendImage(image.data);
                 });
             });
-            this.messageManager.setDrawManager(drawManager);
+            this.drawManager = drawManager;
+        }
+        this.voiceService = null;
+    }
+
+    registerChatService(service) {
+        this.chatServices.push(service);
+        service.on('message', (message) => {
+            const isProfane = this.sanitizer.shouldReject(message.text);
+            if (isProfane) {
+                logger.info(`rejected message from ${message.author}`);
+                return;
+            }
+            const channelID = message.channel;
+            if (!this.chatChannels[channelID]) {
+                this.createChatChannel(channelID);
+            }
+            const chatChannel = this.chatChannels[channelID];
+            chatChannel.messageManager.receiveMessage(message);
+        });
+    }
+
+    createChatChannel(channelID) {
+        if (this.chatChannels[channelID]) {
+            logger.warn(`Chat channel ${channelID} already exists`);
+            return;
         }
 
+        const chatChannel = new ChatChannel(channelID, this.config, this.ooba, this.persona);
+        chatChannel.setDrawManager(this.drawManager);
+
         // Send responses to all registered chat services
-        this.responseHandler.on('response', (response) => {
+        chatChannel.on('response', (response) => {
             this.isTyping = false;
             // Ensure the response is just the persona's
             response = this.sanitizer.trimResponse(response);
@@ -40,36 +71,38 @@ class ChatHandler {
                 response = this.config.sanitizer['profanity-replacement'];
             }
             // Put the sanitized response into history
-            this.responseHandler.addResponseToHistory(response);
+            chatChannel.responseHandler.addResponseToHistory(response);
+
+            // Package in ChatMessage format
+            const message = new ChatMessage(this.persona.name, response);
+            message.channel = channelID;
 
             // Send the response to all registered chat services
             this.chatServices.forEach((service) => {
-                service.sendMessage(response);
+                service.sendMessage(message);
             });
         });
 
         // Notify all registered chat services when the AI is "typing"
-        this.responseHandler.on('token', (token) => {
+        chatChannel.on('token', (token) => {
             logger.debug(`ChatHandler got token: ${token}`)
             if (!token) return;
             if (!this.isTyping) {
                 this.isTyping = true;
                 this.chatServices.forEach((service) => {
-                    service.sendTyping();
+                    service.sendTyping(chatChannel.channelID);
                 });
             }
         });
+
+        this.chatChannels[channelID] = chatChannel;
     }
 
-    registerChatService(service) {
-        this.chatServices.push(service);
-        service.on('message', (message) => {
-            const isProfane = this.sanitizer.shouldReject(message.text);
-            if (isProfane) {
-                logger.info(`rejected message from ${message.author}`);
-                return;
-            }
-            this.messageManager.receiveMessage(message);
+    setVoiceService(voiceService) {
+        this.voiceService = voiceService;
+        // set voice service for all chat channels
+        Object.values(this.chatChannels).forEach((chatChannel) => {
+            chatChannel.setVoiceService(voiceService);
         });
     }
 }

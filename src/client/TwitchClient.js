@@ -45,7 +45,8 @@ class TwitchClient extends ChatServiceInterface {
 
     sendMessage(message) {
         if (!this.settings['reply-in-chat']) return;
-        this.client.say(this.channel, message);
+        const text = message.text;
+        this.client.say(this.channel, text);
     }
 
     sendImage() {

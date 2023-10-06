@@ -44,8 +44,13 @@ class DiscordClient extends ChatServiceInterface {
 
     sendMessage(message) {
         if (!this.settings['reply-in-chat']) return;
+        logger.debug(`Sending message to ${message.channel}: ${message.text}`);
         const text = message.text;
         const channel = this.client.channels.cache.get(message.channel);
+        if (!channel) {
+            logger.error(`Could not find channel ${message.channel}`);
+            return;
+        }
         // chunk messages by discord max length
         const max = 2000;
         const chunks = text.match(new RegExp(`.{1,${max}}`, 'g'));
@@ -80,7 +85,7 @@ class DiscordClient extends ChatServiceInterface {
     }
 
     _handleMessage(message) {
-        logger.debug(`Received message from ${message.author.tag}: ${message.content}`);
+        logger.debug(`Handling message from ${message.author.tag}: ${message.content}`);
         const chatMessage = new ChatMessage(message.author.username, message.content);
         chatMessage.channel = message.channel.id;
         chatMessage.reply = (txt) => {

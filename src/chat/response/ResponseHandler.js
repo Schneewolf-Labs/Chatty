@@ -2,6 +2,9 @@ const logger = require('../../util/logger');
 const EventEmitter = require('events');
 const ResponseStreamer = require('./ResponseStreamer');
 const ResponsePrompter = require('./ResponsePrompter');
+const ResponseHistory = require('./ResponseHistory');
+const ChatMessage = require('../message/ChatMessage');
+const ResponseToken = require('./ResponseToken');
 
 class ResponseHandler extends EventEmitter {
     constructor(config, ooba, persona) {
@@ -13,11 +16,13 @@ class ResponseHandler extends EventEmitter {
         this.responsePrompter = new ResponsePrompter(config, persona, this);
 
         this.responseQueue = [];
-        this.responseHistory = {};
-        this.lastResponseID = 0;
-        this.nextResponseID = 0;
-        this.processingResponseID = 0;
+        //this.responseHistory = {};
+        this.histories = {};
+        // this.lastResponseID = 0;
+        // this.nextResponseID = 0;
+        // this.processingResponseID = 0;
         this.awaitingResponse = false;
+        this.currentChannel = null;
 
         // Handle events from the response streamer
         this.responseStreamer.on('chunk', (response) => {
@@ -25,7 +30,8 @@ class ResponseHandler extends EventEmitter {
             this._handleMessage(response);
         });
         this.responseStreamer.on('token', (token) => {
-            this.emit('token', token);
+            const resToken = new ResponseToken(token, this.currentChannel);
+            this.emit('token', resToken);
         });
     }
 
@@ -39,58 +45,70 @@ class ResponseHandler extends EventEmitter {
         }
 
         // Emit final response message for other services to consume
-        this.emitResponse(message);
+        this.emitResponse(message, this.currentChannel);
 
         // Dequeue next response
         if (this.responseQueue.length > 0) {
             logger.debug(`Response queue is not empty, dequeuing next response`);
             const nextResponse = this.responseQueue.shift();
-            this.processingResponseID = nextResponse[0];
-            this._sendResponse(nextResponse[1]);
+            this.currentChannel = nextResponse.channel;
+            this._sendResponse(nextResponse.prompt);
         }
     }
 
-    getResponse(id) {
-        return this.responseHistory[id];
+    addChannel(channel) {
+        const channelID = channel.channelID;
+        this.histories[channelID] = new ResponseHistory(this.persona);
+        logger.debug(`Added channel ${channelID} to response handler`);
     }
 
-    addResponseToHistory(response) {
-        // Add response to response history
-        let prevResponse = this.responseHistory[this.lastResponseID];
-        if (prevResponse) {
-            prevResponse += ` ${response}`;
-        } else {
-            prevResponse = response;
-        }
-        this.responseHistory[this.lastResponseID] = prevResponse;
+    getHistory(channel) {
+        return this.histories[channel];
     }
 
-    addEventToHistory(event) {
-        event = `*${this.persona.name} ${event}*`
-        const response = this.responseHistory[this.lastResponseID];
-        if (response) {
-            this.responseHistory[this.lastResponseID] = `${response}\n${event}\n`;
-        } else {
-            this.responseHistory[this.lastResponseID] = event;
-        }
+    getResponse(id, channel) {
+        const history = this.histories[channel];
+        return history.getResponse(id);
     }
 
-    emitResponse(response) {
-        this.emit('response', response);
+    addResponseToHistory(response, channel) {
+        logger.debug(`Adding response to history: ${response} for channel ${channel}`);
+        const history = this.histories[channel];
+        history.addResponse(response);
     }
 
-    sendResponse(messages, history) {
+    addEventToHistory(event, channel) {
+        const history = this.histories[channel];
+        history.addEvent(event);
+    }
+
+    emitResponse(response, channel) {
+        // Package in ChatMessage format
+        const message = new ChatMessage(this.persona.name, response);
+        message.channel = channel;
+        this.emit('response', message);
+    }
+
+    sendResponse(messages, history, channel) {
+        // Get History
+        const channelHist = this.histories[channel];
         // Generate a response prompt
-        const prompt = this.responsePrompter.generatePrompt(messages, history);
-        const dequeuedMessages = this.nextResponseID - this.lastResponseID;
+        const { prompt, dequeuedMessages } = this.responsePrompter.generatePrompt(messages, history);
 
-        this.lastResponseID = this.nextResponseID;
+        channelHist.lastResponseID = channelHist.lastResponseID + dequeuedMessages;
+
         if (this.awaitingResponse) {
             logger.debug('Currently awaiting response, enqueuing response: ' + prompt);
-            this.responseQueue.push([this.lastResponseID, prompt]);
+            const resQueueItem = {
+                id: this.lastResponseID,
+                prompt: prompt,
+                channel: channel
+            }
+            this.responseQueue.push(resQueueItem);
         } else {
             logger.debug('Sending response: ' + prompt);
-            this.processingResponseID = this.lastResponseID;
+            //this.processingResponseID = this.lastResponseID;
+            this.currentChannel = channel;
             this._sendResponse(prompt);
         }
         

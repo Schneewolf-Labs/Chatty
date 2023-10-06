@@ -55,14 +55,17 @@ class ResponsePrompter {
             }
         }
 
-        this.handler.nextResponseID = this.handler.lastResponseID + dequeuedMessages;
+        //this.handler.nextResponseID = this.handler.lastResponseID + dequeuedMessages;
         const chatHistory = this.responseBuffer.join('');
         logger.debug(`Chat history: ${chatHistory}`);
         const prompt = this.personaPrompt + this.chatPrompt 
                     + chatHistory + `\n${this.responsePrefix}`;
         logger.debug(`Used ${tokens} tokens to respond to ${this.responseBuffer.length} messages`);
         this.responseBuffer = [];
-        return prompt;
+        return {
+            prompt,
+            dequeuedMessages
+        }
     }
 
     _addMessageToPrompt(msg, tokens, maxTokens, front=false) {

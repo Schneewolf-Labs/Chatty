@@ -2,10 +2,10 @@ const logger = require('../../util/logger');
 const EventEmitter = require('events');
 
 class MessageManager extends EventEmitter {
-    constructor(options, responseHandler) {
+    constructor(options, chatChannel) {
         super();
         this.options = options;
-        this.responseHandler = responseHandler;
+        this.chatChannel = chatChannel;
         this.drawManager = null;
         this.voiceService = null;
 
@@ -33,9 +33,8 @@ class MessageManager extends EventEmitter {
             if (prompt) {
                 logger.debug(`Extracted drawing prompt: ${prompt}`);
                 const enqueued = this.drawManager.draw(prompt);
-                if (!enqueued) {
-                    // TODO: respond with config message
-                    this.responseHandler.emitResponse(this.drawManager.settings.rejected_response);
+                if (!enqueued) { // drawing was rejected, let the user know
+                    this.chatChannel.sendResponse(this.drawManager.settings.rejected_response, message.channel);
                     return;
                 }
             }
@@ -64,10 +63,10 @@ class MessageManager extends EventEmitter {
         const includeResponses = this.options['include-responses-in-history'];
         for (let i = lowId-1; i >= lowerBound; i--) {
             // Add the AI's own responses to the history
-            const historicalResponse = this.responseHandler.getResponse(i+1);
+            const historicalResponse = this.chatChannel.getResponse(i+1);
             if (includeResponses && historicalResponse) {
                 history.push({
-                    author: this.responseHandler.persona.name,
+                    author: this.chatChannel.responseHandler.persona.name,
                     text: historicalResponse
                 });
             }
@@ -75,7 +74,7 @@ class MessageManager extends EventEmitter {
         }
 
         // Send response
-        const dequeuedMessages = this.responseHandler.sendResponse(messages, history);
+        const dequeuedMessages = this.chatChannel.enqueueResponse(messages, history);
 
         // Dequeue messages
         logger.debug(`dequeuing ${dequeuedMessages} messages from message queue`);
@@ -86,10 +85,10 @@ class MessageManager extends EventEmitter {
         this.drawManager = drawManager;
         if (!this.drawManager) return;
         this.drawManager.on('prompt', (prompt) => {
-            this.responseHandler.addEventToHistory(`enqueued drawing of ${prompt}`);
+            this.chatChannel.addEventToHistory(`enqueued drawing of ${prompt}`);
         });
         this.drawManager.on('image', (image) => {
-            this.responseHandler.addEventToHistory(`drew ${image.prompt}`);
+            this.chatChannel.addEventToHistory(`drew ${image.prompt}`);
         });
     }
 

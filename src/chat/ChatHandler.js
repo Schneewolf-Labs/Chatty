@@ -2,7 +2,7 @@ const logger = require('../util/logger');
 const OobaClient = require('../client/OobaClient');
 const ChatChannel = require('./ChatChannel');
 const MessageSanitizer = require('./message/MessageSanitizer');
-const ChatMessage = require('./message/ChatMessage');
+const ResponseHandler = require('./response/ResponseHandler');
 
 class ChatHandler {
     constructor(config, persona) {
@@ -10,6 +10,7 @@ class ChatHandler {
         this.ooba = new OobaClient(config.oobabooga);
         this.persona = persona;
         this.sanitizer = new MessageSanitizer(config.sanitizer, persona, config.messages['chat-delimiter']);
+        this.responseHandler = new ResponseHandler(config, this.ooba, persona);
         this.chatChannels = {};
         this.chatServices = [];
         this.isTyping = false;
@@ -54,32 +55,33 @@ class ChatHandler {
             return;
         }
 
-        const chatChannel = new ChatChannel(channelID, this.config, this.ooba, this.persona);
+        const chatChannel = new ChatChannel(channelID, this.config, this.ooba, this.responseHandler);
         chatChannel.setDrawManager(this.drawManager);
 
         // Send responses to all registered chat services
         chatChannel.on('response', (response) => {
+            logger.debug('ChatHandler got response: ' + response.text + ' from channel ' + response.channel);
+            let text = response.text;
             this.isTyping = false;
             // Ensure the response is just the persona's
-            response = this.sanitizer.trimResponse(response);
+            text = this.sanitizer.trimResponse(text);
             // Remove links and other garbage
-            response = this.sanitizer.sanitize(response);
+            text = this.sanitizer.sanitize(text);
             // Check if the message should be rejected
-            if (this.sanitizer.shouldReject(response)) {
+            if (this.sanitizer.shouldReject(text)) {
                 logger.warn(`Response from Oobabooga was rejected`);
                 // Replace the profane message and remove the response from the speech output buffer
-                response = this.config.sanitizer['profanity-replacement'];
+                text = this.config.sanitizer['profanity-replacement'];
             }
             // Put the sanitized response into history
-            chatChannel.responseHandler.addResponseToHistory(response);
-
-            // Package in ChatMessage format
-            const message = new ChatMessage(this.persona.name, response);
-            message.channel = channelID;
+            chatChannel.responseHandler.addResponseToHistory(text, chatChannel.channelID);
+            // Set response channel
+            response.channel = chatChannel.channelID;
+            response.text = text;
 
             // Send the response to all registered chat services
             this.chatServices.forEach((service) => {
-                service.sendMessage(message);
+                service.sendMessage(response);
             });
         });
 

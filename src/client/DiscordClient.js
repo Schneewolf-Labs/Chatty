@@ -1,14 +1,14 @@
 const logger = require('../util/logger');
 const Buffer = require('buffer').Buffer;
-const { Client, Events, GatewayIntentBits, Partials } = require('discord.js');
+const { Client, Events, GatewayIntentBits, Partials, ChannelType } = require('discord.js');
 const ChatServiceInterface = require('../chat/ChatServiceInterface');
 const ChatMessage = require('../chat/message/ChatMessage');
 
 class DiscordClient extends ChatServiceInterface {
-    constructor(token, channelId, settings) {
+    constructor(token, settings) {
         super();
         this.token = token;
-        this.channelId = channelId;
+        this.channels = settings['channels'];
         this.partials = [];
         this.intents = [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages];
         if (settings['chat-enabled']) this.intents.push(GatewayIntentBits.MessageContent);
@@ -26,7 +26,10 @@ class DiscordClient extends ChatServiceInterface {
         if (settings['chat-enabled']) {
             this.client.on(Events.MessageCreate, message => {
                 logger.debug(`Received message from ${message.author.tag} in ${message.channel.id}`);
-                if (message.channel.id === this.channelId) {
+                const isDM = this.settings['allow-dms'] && message.channel.type === ChannelType.DM;
+                const isChannel = this.channels.includes(message.channel.id);
+
+                if (isChannel || isDM) {
                     if (message.author.bot) return; // TODO: configurable
                     this._handleMessage(message);
                 }
@@ -43,13 +46,14 @@ class DiscordClient extends ChatServiceInterface {
     sendMessage(message) {
         if (!this.settings['reply-in-chat']) return;
         const text = message.text;
+        const channel = this.client.channels.cache.get(message.channel);
         // chunk messages by discord max length
         const max = 2000;
         const chunks = text.match(new RegExp(`.{1,${max}}`, 'g'));
         if (!chunks) return;
         logger.debug(`Sending ${chunks.length} chunks`);
         chunks.forEach(chunk => {
-            this._sendMessage(chunk);
+            this._sendMessage(chunk, channel);
         });
     }
 
@@ -64,22 +68,22 @@ class DiscordClient extends ChatServiceInterface {
         });
     }
 
-    sendTyping() {
+    sendTyping(channelID) {
         if (!this.settings['send-is-typing']) return;
-        const channel = this.client.channels.cache.get(this.channelId);
+        if (!channelID) return;
+        logger.debug(`Sending typing indicator to ${channelID}`);
+        const channel = this.client.channels.cache.get(channelID);
         channel.sendTyping();
     }
 
-    _sendMessage(message) {
-        const channel = this.client.channels.cache.get(this.channelId);
+    _sendMessage(message, channel) {
         channel.send(message);
     }
 
     _handleMessage(message) {
         logger.debug(`Received message from ${message.author.tag}: ${message.content}`);
         const chatMessage = new ChatMessage(message.author.username, message.content);
-        const channel = this.client.channels.cache.get(this.channelId);
-        chatMessage.channel = channel;
+        chatMessage.channel = message.channel.id;
         chatMessage.reply = (txt) => {
             // reply to original discord message
             message.reply(txt);

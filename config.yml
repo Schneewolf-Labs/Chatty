@@ -14,7 +14,7 @@ chat:
 twitch:
     enabled: true
     chat-enabled: true
-    reply-in-chat: true
+    reply-in-chat: false
 discord:
     enabled: true
     chat-enabled: true

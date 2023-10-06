@@ -36,7 +36,6 @@ if (config.discord.enabled === true) {
     const DiscordClient = require('./src/client/DiscordClient');
     const discord = new DiscordClient(
         process.env.DISCORD_TOKEN,
-        process.env.DISCORD_CHANNEL,
         config.discord);
     chatty.registerChatService(discord);
 }

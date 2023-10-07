@@ -43,6 +43,7 @@ class MessageManager extends EventEmitter {
         this.chatHistory.push(message);
         const id = this.chatHistory.length - 1;
         this.messageQueue.push(id);
+        if (this.options['prune-history']) this.pruneHistory();
     }
 
     respondToChatFromMessageQueue() {
@@ -94,6 +95,19 @@ class MessageManager extends EventEmitter {
 
     setVoiceService(voiceService) {
         this.voiceService = voiceService;
+    }
+
+    pruneHistory() {
+        // XXX: this might mess up how messages are addressed by id
+        const historyLength = this.chatHistory.length;
+        const maxLength = this.options['chat-history-length'];this.options['chat-history-length']
+        // Check if we need to prune
+        if (historyLength <= maxLength) return;
+        logger.debug(`Pruning chat history from ${historyLength} to ${maxLength}`);
+        // Prune chat history
+        this.chatHistory = this.chatHistory.slice(-maxLength);
+        // TODO: also prune response history
+        //this.chatChannel.responseHandler.histories[this.chatChannel.channelID].pruneResponses();
     }
 }
 

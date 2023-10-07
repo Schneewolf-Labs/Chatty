@@ -4,7 +4,6 @@ class ResponseHistory {
         this._history = [];
         this.lastResponseID = 0;
         this.nextResponseID = 0;
-        this.processingResponseID = 0;
     }
 
     addResponse(response) {

@@ -8,6 +8,7 @@ class ChatMessage {
         this.options = options;
 
         this.channel = null;
+        this.directReply = false;
     }
 
     reply(message) {

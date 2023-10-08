@@ -8,9 +8,6 @@ api:
 logger:
     level: "debug"
     pretty: true
-chat:
-    require-wake-word: false
-    wake-words: []
 twitch:
     enabled: true
     chat-enabled: true
@@ -43,6 +40,8 @@ messages:
     chunk-delimiters: ['.', '\n', '?', '!', ';', ':', '—']
     illegal-response-tokens: ['http', 'www', '![', '[', '#']
     prune-history: false
+    require-wake-word: false
+    wake-words: ['Alpha', 'Alphie']
 sanitizer:
     reject-profanity: false
     profane-response: "I'm sorry, I don't respond to profanity."

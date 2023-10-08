@@ -88,6 +88,14 @@ class DiscordClient extends ChatServiceInterface {
         logger.debug(`Handling message from ${message.author.tag}: ${message.content}`);
         const chatMessage = new ChatMessage(message.author.username, message.content);
         chatMessage.channel = message.channel.id;
+        const isReply = message.reference;
+        if (isReply) {
+            const referenceMessage = message.channel.messages.cache.get(message.reference.messageId);
+            if (referenceMessage && referenceMessage.author.id === this.client.user.id) {
+                logger.debug(`Message is a reply to a message from the bot`);
+                chatMessage.directReply = true;
+            }
+        }
         chatMessage.reply = (txt) => {
             // reply to original discord message
             message.reply(txt);

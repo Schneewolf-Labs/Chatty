@@ -27,6 +27,7 @@ class MessageManager extends EventEmitter {
     receiveMessage(message) {
         logger.debug(`MessageManager got: ${message.text}`);
         
+        // TODO: message parsing can be its own class
         // Check for a drawing trigger, if stable diffusion is enabled
         if (this.drawManager) {
             const prompt = this.drawManager.extractPrompt(message.text);
@@ -38,6 +39,15 @@ class MessageManager extends EventEmitter {
                     return;
                 }
             }
+        }
+        // Check for a wake word in the message
+        const wakewords = this.options['wake-words'];
+        const containsWakeword = wakewords.some((word) => {
+            return message.text.toLowerCase().includes(word.toLowerCase());
+        });
+        if (containsWakeword) {
+            // mark this message to be directly replied to
+            message.directReply = true;
         }
 
         this.chatHistory.push(message);

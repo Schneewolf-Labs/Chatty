@@ -46,10 +46,17 @@ class DiscordClient extends ChatServiceInterface {
         if (!this.settings['reply-in-chat']) return;
         logger.debug(`Sending message to ${message.channel}: ${message.text}`);
         const text = message.text;
-        const channel = this.client.channels.cache.get(message.channel);
+        let channel = this.client.channels.cache.get(message.channel);
         if (!channel) {
-            logger.error(`Could not find channel ${message.channel}`);
-            return;
+            if (!this.settings['fallback-to-default-channel']) return;
+            logger.warn(`Could not find channel ${message.channel}, falling back to default channel`);
+            const defaultIdx = this.settings['default-channel'];
+            const defaultChannel = this.client.channels.cache.get(this.channels[0]);
+            if (!defaultChannel) {
+                logger.error(`Could not find default channel ${defaultIdx}`);
+                return;
+            }
+            channel = defaultChannel;
         }
         // chunk messages by discord max length
         const max = 2000;

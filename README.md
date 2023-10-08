@@ -27,11 +27,25 @@ TWITCH_USERNAME=your_twitch_username
 TWITCH_OAUTH_TOKEN=your_twitch_oauth_token
 TWITCH_CHANNEL=your_twitch_channel
 DISCORD_TOKEN=your_discord_token
-DISCORD_CHANNEL=your_discord_channel
 ```
 
 ## Voice Synthesis (TTS)
-Chatty supports voice synthesis on Windows using the Windows Speech API via [WinTTS](https://github.com/Schneewolf-Labs/WinTTS). Install .NET 6.0 and point the `config.yml` to the WinTTS executable. You can also choose an output device via the config file.
+Chatty supports voice synthesis on Windows using the Windows Speech API via [WinTTS](https://github.com/Schneewolf-Labs/WinTTS-Stream). Install .NET 6.0 and point the `config.yml` to the WinTTS executable. You can also choose an output device via the config file.
 
 ## API
 Chatty has a built-in API for managing and monitoring the bot. The API is disabled by default. To enable it, set `api.enabled` to `true` in the `config.yml` file. The API will be available at `http://localhost:3000` by default. You can change the port in the config file.
+
+Messages should be formatted as JSON:
+```
+{
+    "event": "send_message",
+    "data": "Hey Chatty!"
+}
+```
+Responses will be formatted similarly:
+```
+{
+    "event": "recieve_message",
+    "data": "It's nice to meet you!"
+}
+```

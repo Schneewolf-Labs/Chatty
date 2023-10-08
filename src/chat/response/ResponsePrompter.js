@@ -59,7 +59,7 @@ class ResponsePrompter {
         const chatHistory = this.responseBuffer.join('');
         logger.debug(`Chat history: ${chatHistory}`);
         const prompt = this.personaPrompt + this.chatPrompt 
-                    + chatHistory + `\n${this.responsePrefix}`;
+                    + chatHistory + `${this.responsePrefix}`;
         logger.debug(`Used ${tokens} tokens to respond to ${this.responseBuffer.length} messages`);
         this.responseBuffer = [];
         return {
@@ -74,7 +74,7 @@ class ResponsePrompter {
             return -1;
         }
         logger.debug(`Adding message to response: ${msg.text}`)
-        const txt = `${this.chatPrefix} ${msg.author}: ${msg.text}${this.chatDelimiter}\n`;
+        const txt = `${this.chatPrefix}${msg.author}\n${msg.text}${this.chatDelimiter}\n`;
         const tokensPerMessage = this._getTokensPerMessage(txt);
         if (tokens + tokensPerMessage > maxTokens) {
             logger.warn(`max tokens reached, unable to add enqueued message`);

@@ -6,7 +6,7 @@ api:
     enabled: true
     port: 3000
 logger:
-    level: "info"
+    level: "debug"
     pretty: true
 twitch:
     enabled: true
@@ -24,23 +24,23 @@ discord:
     allow-dms: true
 messages:
     max-tokens: 1024
-    response-interval: 7000
+    response-interval: 3000
     chat-history-length: 32
     chat-max-batch-size: 4
-    persona-prompt: "Given the following character description, scenario, instructions, goals, events, memories, and chat history respond in a manner consistent with the persona.\n"
-    prompt: "Context:\nYou are {NAME} and you are hosting a Twitch livestream and responding to your viewers comments in the chat. Below are the most recent messages in the chat history. Give only your response below as if you were speaking to them on stream as {NAME}.\n"
+    persona-prompt: "<|im_start|>system\nGiven the following character description, scenario, instructions, goals, events, memories, and chat history respond in a manner consistent with the persona.\n"
+    prompt: "Context:\nYou are {NAME} and you are hosting a Twitch livestream and responding to your viewers comments in the chat. Below are the most recent messages in the chat history. Give only your response below as if you were speaking to them on stream as {NAME}. Do not write dialog for any other users.\n"
     safety-prompt: "To avoid issues with Twitch, avoid using profanity and discussing dangerous or illegal activity. {NAME} should always be friendly and supportive and discourage violence or self-harm.\n"
     limitations-prompt: "{NAME} does not have the ability to post links or access websites.\n"
     draw-available-prompt: "Users are able to request that {NAME} draw a picture. They may type \"please draw\" in the chat to prompt {NAME}.\n"
-    chat-history-prefix: "\nChat History:\n"
-    new-chat-prefix: "\nNew Chat Messages:\n"
-    prompt-response-prefix: "Speak directly to your audience and do not preface your response. End your response with {DELIMITER}.\n### {NAME}:"
-    chat-delimiter: "|"
-    chat-prefix: "###"
+    chat-history-prefix: "<|im_end|>\n"
+    new-chat-prefix: ""
+    prompt-response-prefix: "<|im_start|>{NAME}\n"
+    chat-delimiter: "<|im_end|>"
+    chat-prefix: "<|im_start|>"
     response-expire-time: 30000
     include-responses-in-history: true
     chunk-delimiters: ['.', '\n', '?', '!', ';', ':', '—']
-    illegal-response-tokens: ['http', 'www', '![', '[', '#']
+    illegal-response-tokens: ['<', 'http', 'www', '![', '[', '#']
     prune-history: false
     require-wake-word: false
     wake-words: ['Alpha', 'Alphie']

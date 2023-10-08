@@ -54,6 +54,9 @@ class MessageManager extends EventEmitter {
         const id = this.chatHistory.length - 1;
         this.messageQueue.push(id);
         if (this.options['prune-history']) this.pruneHistory();
+
+        // force a response to the message queue
+        if (containsWakeword) this.respondToChatFromMessageQueue();
     }
 
     respondToChatFromMessageQueue() {

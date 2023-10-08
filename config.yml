@@ -25,7 +25,7 @@ discord:
 messages:
     max-tokens: 1600
     response-interval: 3000
-    chat-history-length: 32
+    chat-history-length: 2
     chat-max-batch-size: 4
     persona-prompt: "Given the following character description, scenario, instructions, goals, events, memories, and chat history respond in a manner consistent with the persona.\n"
     prompt: "Context:\nYou are {NAME} and you are hosting a Twitch livestream and responding to your viewers comments in the chat. Below are the most recent messages in the chat history. Give only your response below as if you were speaking to them on stream as {NAME}.\n"
@@ -41,7 +41,7 @@ messages:
     include-responses-in-history: true
     chunk-delimiters: ['.', '\n', '?', '!', ';', ':', '—']
     illegal-response-tokens: ['http', 'www', '![', '[', '#']
-    prune-history: false
+    prune-history: true
     require-wake-word: false
     wake-words: ['Alpha', 'Alphie']
 sanitizer:

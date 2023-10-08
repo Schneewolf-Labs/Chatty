@@ -69,6 +69,10 @@ class ResponsePrompter {
     }
 
     _addMessageToPrompt(msg, tokens, maxTokens, front=false) {
+        if (!msg) {
+            logger.warn(`attempted to add null message to prompt`);
+            return -1;
+        }
         logger.debug(`Adding message to response: ${msg.text}`)
         const txt = `${this.chatPrefix} ${msg.author}: ${msg.text}${this.chatDelimiter}\n`;
         const tokensPerMessage = this._getTokensPerMessage(txt);

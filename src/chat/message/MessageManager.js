@@ -108,14 +108,17 @@ class MessageManager extends EventEmitter {
     }
 
     pruneHistory() {
-        // XXX: this might mess up how messages are addressed by id
         const historyLength = this.chatHistory.length;
-        const maxLength = this.options['chat-history-length'];this.options['chat-history-length']
+        const maxLength = this.options['chat-history-length'];
         // Check if we need to prune
         if (historyLength <= maxLength) return;
         logger.debug(`Pruning chat history from ${historyLength} to ${maxLength}`);
         // Prune chat history
-        this.chatHistory = this.chatHistory.slice(-maxLength);
+        //this.chatHistory = this.chatHistory.slice(-maxLength);
+        for (let i = historyLength - maxLength - 1; i > 0; i--) {
+            if (!this.chatHistory[i]) break; // don't delete messages that have already been deleted
+            delete this.chatHistory[i];
+        }
         // TODO: also prune response history
         //this.chatChannel.responseHandler.histories[this.chatChannel.channelID].pruneResponses();
     }

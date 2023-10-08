@@ -24,7 +24,7 @@ class ChatHandler {
             const drawManager = new DrawManager(stableDiffClient);
             drawManager.on('image', (image) => {
                 this.chatServices.forEach((service) => {
-                    service.sendImage(image.data);
+                    service.sendImage(image);
                 });
             });
             this.drawManager = drawManager;

@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const EventEmitter = require('events');
 const DrawImage = require('./DrawImage');
+const DrawPrompt = require('./DrawPrompt');
 
 class DrawManager extends EventEmitter{
     constructor(stableDiffClient) {
@@ -23,14 +24,16 @@ class DrawManager extends EventEmitter{
         });
     }
 
-    draw(prompt) {
+    draw(prompt, channel = null) {
         if (this.shouldRejectPrompt(prompt)) {
             logger.warn(`DrawManager rejected prompt: ${prompt}`);
             return false;
         }
 
         logger.info(`DrawManager enqueuing prompt: ${prompt}`);
-        this.drawQueue.push(prompt);
+        const promptObj = new DrawPrompt(prompt);
+        promptObj.channel = channel;
+        this.drawQueue.push(promptObj);
         if (!this.isDrawing) {
             this.isDrawing = true;
             this._drawNext();
@@ -48,17 +51,20 @@ class DrawManager extends EventEmitter{
         }
         logger.debug(`DrawManager drawing next image`);
         const prompt = this.drawQueue.shift();
+        const promptText = prompt.prompt;
         try {
             //this.lastPrompt = prompt;
             // output this prompt as next prompt
-            this._outputNextPrompt(this.settings.next_prompt_output_prefix + prompt);
+            this._outputNextPrompt(this.settings.next_prompt_output_prefix + promptText);
             // Call Stable Diffusion API
             this.stableDiffClient.txt2img({
-                prompt: prompt,
+                prompt: promptText,
                 negative_prompt: this.settings.negative_prompt,
                 ...this.settings.requestParams
             }).then(image => {
-                this.emit('image', new DrawImage(image, prompt));
+                const drawImage = new DrawImage(image, promptText);
+                drawImage.channel = prompt.channel;
+                this.emit('image', drawImage);
                 this._drawNext();
             });
         } catch (err) {

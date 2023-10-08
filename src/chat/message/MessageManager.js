@@ -33,7 +33,7 @@ class MessageManager extends EventEmitter {
             const prompt = this.drawManager.extractPrompt(message.text);
             if (prompt) {
                 logger.debug(`Extracted drawing prompt: ${prompt}`);
-                const enqueued = this.drawManager.draw(prompt);
+                const enqueued = this.drawManager.draw(prompt, message.channel);
                 if (!enqueued) { // drawing was rejected, let the user know
                     this.chatChannel.sendResponse(this.drawManager.settings.rejected_response, message.channel);
                     return;

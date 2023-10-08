@@ -46,18 +46,7 @@ class DiscordClient extends ChatServiceInterface {
         if (!this.settings['reply-in-chat']) return;
         logger.debug(`Sending message to ${message.channel}: ${message.text}`);
         const text = message.text;
-        let channel = this.client.channels.cache.get(message.channel);
-        if (!channel) {
-            if (!this.settings['fallback-to-default-channel']) return;
-            logger.warn(`Could not find channel ${message.channel}, falling back to default channel`);
-            const defaultIdx = this.settings['default-channel'];
-            const defaultChannel = this.client.channels.cache.get(this.channels[0]);
-            if (!defaultChannel) {
-                logger.error(`Could not find default channel ${defaultIdx}`);
-                return;
-            }
-            channel = defaultChannel;
-        }
+        const channel = this._getChannel(message.channel);
         // chunk messages by discord max length
         const max = 2000;
         const chunks = text.match(new RegExp(`.{1,${max}}`, 'g'));
@@ -71,9 +60,9 @@ class DiscordClient extends ChatServiceInterface {
     sendImage(image) {
         if (!this.settings['post-image-output']) return;
         // convert base64 string to buffer
-        const buffer = Buffer.from(image, 'base64');
+        const buffer = Buffer.from(image.data, 'base64');
         // send buffer as attachment
-        const channel = this.client.channels.cache.get(this.channelId);
+        const channel = this._getChannel(image.channel);
         channel.send({
             files: [buffer]
         });
@@ -108,6 +97,22 @@ class DiscordClient extends ChatServiceInterface {
             message.reply(txt);
         }
         this.emit('message', chatMessage);
+    }
+
+    _getChannel(channelID) {
+        let channel = this.client.channels.cache.get(channelID);
+        if (!channel) {
+            if (!this.settings['fallback-to-default-channel']) return;
+            logger.warn(`Could not find channel ${channelID}, falling back to default channel`);
+            const defaultIdx = this.settings['default-channel'];
+            const defaultChannel = this.client.channels.cache.get(this.channels[defaultIdx]);
+            if (!defaultChannel) {
+                logger.error(`Could not find default channel ${defaultIdx}`);
+                return;
+            }
+            channel = defaultChannel;
+        }
+        return channel;
     }
 
 }

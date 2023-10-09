@@ -42,7 +42,7 @@ messages:
     chunk-delimiters: ['.', '\n', '?', '!', ';', ':', '—']
     illegal-response-tokens: ['<', 'http', 'www', '![', '[', '#']
     prune-history: false
-    require-wake-word: true
+    require-wake-word: false
     wake-words: ['Alpha', 'Alphie']
     selective-responses: true
     base-response-chance: 0.25

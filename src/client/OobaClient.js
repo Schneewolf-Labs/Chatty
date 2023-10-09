@@ -36,7 +36,10 @@ class OobaClient extends EventEmitter{
         });
         this.ws.on('close', () => {
             logger.error("Connection to Oobabooga closed");
-            // TODO: reconnect
+            // Attempt to reconnect
+            setTimeout(() => {
+                this.ws = new WebSocket(uri);
+            }, 5000);
         });
     }
 

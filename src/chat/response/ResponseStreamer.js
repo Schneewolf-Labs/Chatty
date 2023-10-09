@@ -77,6 +77,12 @@ class ResponseStreamer extends EventEmitter {
         const options = this.options.messages;
         
         const lastToken = this.tokens[this.tokens.length - 1];
+        // Check if the token is part of a numbered list
+        const previousToken = this.tokens[this.tokens.length - 2];
+        if (previousToken && previousToken.match(/^\d+$/)) {
+            // The previous token is a number, this token is part of a numbered list
+            return;
+        }
         // if token contains punctuation, or newline emit the chunk
         const punctuation = options['chunk-delimiters'];
         const containsPunctuation = punctuation.some(p => lastToken.includes(p));

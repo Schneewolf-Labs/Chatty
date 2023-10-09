@@ -20,14 +20,21 @@ class ChatHandler {
         if (config.stable_diffusion.enabled === true) {
             const StableDiffClient = require('../client/StableDiffClient');
             const stableDiffClient = new StableDiffClient(config.stable_diffusion);
-            const DrawManager = require('../draw/DrawManager');
-            const drawManager = new DrawManager(stableDiffClient);
-            drawManager.on('image', (image) => {
-                this.chatServices.forEach((service) => {
-                    service.sendImage(image);
+            stableDiffClient.on('ok', () => {
+                logger.info('Stable Diffusion client OK, initializing DrawManager');
+                const DrawManager = require('../draw/DrawManager');
+                const drawManager = new DrawManager(stableDiffClient);
+                drawManager.on('image', (image) => {
+                    this.chatServices.forEach((service) => {
+                        service.sendImage(image);
+                    });
                 });
+                this.drawManager = drawManager;
             });
-            this.drawManager = drawManager;
+            stableDiffClient.on('error', () => {
+                logger.error('Stable Diffusion client error, aborting DrawManager initialization');
+                config.stable_diffusion.enabled = false;
+            });
         }
         this.voiceService = null;
     }

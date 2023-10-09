@@ -53,7 +53,7 @@ sanitizer:
     remove-actions: true
 oobabooga:
     baseUrl: "ws://127.0.0.1:5005"
-    requestParams: {}
+    requestParams: { 'max_new_tokens': 1024 }
     output_responses: true
     output_location: "output/response.txt"
 stable_diffusion:

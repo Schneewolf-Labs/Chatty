@@ -11,12 +11,15 @@ class ChatChannel extends EventEmitter {
         this.responseHandler = responseHandler;
         this.messageManager = new MessageManager(config.messages, this);
 
+        this.lastResponseTime = 0;
+
         this.responseHandler.addChannel(this);
         this.responseHandler.on('response', (response) => {
             logger.debug(`response channel: ${response.channel}, this channel: ${this.channelID}`);
             // check if this response is for this channel
             if (response.channel !== this.channelID) return;
             this.emit('response', response);
+            this.lastResponseTime = Date.now();
         });
         this.responseHandler.on('token', (token) => {
             logger.debug(`token channel: ${token.channel}, this channel: ${this.channelID}`);

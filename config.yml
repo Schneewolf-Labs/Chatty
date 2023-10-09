@@ -42,8 +42,11 @@ messages:
     chunk-delimiters: ['.', '\n', '?', '!', ';', ':', '—']
     illegal-response-tokens: ['<', 'http', 'www', '![', '[', '#']
     prune-history: false
-    require-wake-word: false
+    require-wake-word: true
     wake-words: ['Alpha', 'Alphie']
+    selective-responses: true
+    base-response-chance: 0.25
+    max-response-chance: 0.90
 sanitizer:
     reject-profanity: false
     profane-response: "I'm sorry, I don't respond to profanity."

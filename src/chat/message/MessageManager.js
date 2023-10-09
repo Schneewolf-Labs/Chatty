@@ -55,7 +55,7 @@ class MessageManager extends EventEmitter {
         this.messageQueue.push(id);
         if (this.options['prune-history']) this.pruneHistory();
 
-        // force a response to the message queue
+        // force a response to the message queue if directly mentioned
         if (containsWakeword) this.respondToChatFromMessageQueue();
     }
 
@@ -68,10 +68,12 @@ class MessageManager extends EventEmitter {
         const upperBound = Math.min(this.chatHistory.length, lowId + this.options['chat-max-batch-size']); // highest chat id we will show in history
         logger.debug(`lowID: ${lowId}, lowerBound: ${lowerBound}, upperBound: ${upperBound}`);
 
+        let directlyMentioned = false;
         // Add enqueued messages
         for (let i = lowId; i < upperBound; i++) {
             const message = this.chatHistory[i];
             messages.push(message);
+            if (message.directReply) directlyMentioned = true;
         }
         // Add chat history to the prompt
         const includeResponses = this.options['include-responses-in-history'];
@@ -87,8 +89,24 @@ class MessageManager extends EventEmitter {
             history.push(this.chatHistory[i]);
         }
 
+        // Check if we should actually respond to this batch
+        let dequeuedMessages = messages.length;
+        const selectiveResponses = this.options['selective-responses'];
+        let shouldRespond = directlyMentioned || !selectiveResponses; // respond if directly mentioned or if selective responses are disabled
+        if (!shouldRespond && selectiveResponses) {
+            let responseChance = this._calculateResponseChance();
+            shouldRespond = responseChance > Math.random(); // respond if random chance is greater than response chance
+            logger.debug(`response chance: ${responseChance}%`);
+        }
+        if (this.options['require-wake-word']) shouldRespond = directlyMentioned; // if wake word is required, only respond if directly mentioned
+
         // Send response
-        const dequeuedMessages = this.chatChannel.enqueueResponse(messages, history);
+        if (shouldRespond) {
+            logger.debug('Enqueuing response to message queue');
+            dequeuedMessages = this.chatChannel.enqueueResponse(messages, history);
+        } else {
+            logger.debug('Not enqueuing response to message queue');
+        }
 
         // Dequeue messages
         logger.debug(`dequeuing ${dequeuedMessages} messages from message queue`);
@@ -124,6 +142,21 @@ class MessageManager extends EventEmitter {
         }
         // TODO: also prune response history
         //this.chatChannel.responseHandler.histories[this.chatChannel.channelID].pruneResponses();
+    }
+
+    _calculateResponseChance() {
+        const currentTime = new Date();
+        // Convert the difference to seconds
+        const elapsedTime = (currentTime - this.chatChannel.lastResponseTime) / 1000; 
+        logger.debug(`elapsed time since last response: ${elapsedTime}`);
+    
+        const baseChance = this.options['base-response-chance'];
+        const maxChance = this.options['max-response-chance'];
+        const timeFactor = Math.log(elapsedTime + 1);
+        let chance = baseChance + (maxChance - baseChance) * timeFactor / 10;
+    
+        chance = Math.min(1.0, Math.max(0.0, chance));
+        return chance * 100;  // Convert to percentage
     }
 }
 

@@ -94,6 +94,7 @@ class MessageManager extends EventEmitter {
         const selectiveResponses = this.options['selective-responses'];
         let shouldRespond = directlyMentioned || !selectiveResponses; // respond if directly mentioned or if selective responses are disabled
         if (!shouldRespond && selectiveResponses) {
+            // TODO augment response chance with factors besides time since last response
             let responseChance = this._calculateResponseChance();
             shouldRespond = responseChance > Math.random(); // respond if random chance is greater than response chance
             logger.debug(`response chance: ${responseChance}%`);

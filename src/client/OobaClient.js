@@ -12,9 +12,28 @@ class OobaClient extends EventEmitter{
         this.messageQueue = [];
         this.recievingMessage = false;
 
-        const uri = this.baseUrl+"/api/v1/stream";
-        logger.debug(`Attempting to connect to oobabooga at ${uri}`);
-        this.ws = new WebSocket(uri);
+        this.uri = this.baseUrl+"/api/v1/stream";
+        logger.debug(`Attempting to connect to oobabooga at ${this.uri}`);
+        this._connect();
+    }
+
+    send(prompt) {
+        logger.debug(`Sending prompt to Oobabooga: ${prompt}`);
+        this.ws.send(JSON.stringify({
+            prompt: prompt,
+            ...this.requestParams
+        }));
+    }
+
+    flush() {
+        // empty message queue into a single string
+        const message = this.messageQueue.join('');
+        this.messageQueue = [];
+        return message;
+    }
+
+    _connect() {
+        this.ws = new WebSocket(this.uri);
         this.ws.on('open', () => {
             logger.info("Connected to Oobabooga");
         });
@@ -32,30 +51,16 @@ class OobaClient extends EventEmitter{
             }
         });
         this.ws.on('error', (err) => {
-            logger.error("Error connecting to Oobabooga: "+err);
+            logger.error("Error connecting to Oobabooga: " + err);
         });
         this.ws.on('close', () => {
             logger.error("Connection to Oobabooga closed");
             // Attempt to reconnect
             setTimeout(() => {
-                this.ws = new WebSocket(uri);
+                logger.info("Attempting to reconnect to Oobabooga...");
+                this._connect();
             }, 5000);
         });
-    }
-
-    send(prompt) {
-        logger.debug(`Sending prompt to Oobabooga: ${prompt}`);
-        this.ws.send(JSON.stringify({
-            prompt: prompt,
-            ...this.requestParams
-        }));
-    }
-
-    flush() {
-        // empty message queue into a single string
-        const message = this.messageQueue.join('');
-        this.messageQueue = [];
-        return message;
     }
 }
 

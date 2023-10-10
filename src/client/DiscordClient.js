@@ -77,6 +77,10 @@ class DiscordClient extends ChatServiceInterface {
     }
 
     _sendMessage(message, channel) {
+        if (!channel) {
+            logger.debug('Discord got null channel, not sending message');
+            return;
+        }
         channel.send(message);
     }
 

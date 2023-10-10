@@ -44,7 +44,8 @@ class ResponsePrompter {
             }
         }
         // Add as many historical messages as possible
-        for (let i = 0; i < history.length; i++) {
+        let histMessagesAdded = 0;
+        for (let i = history.length-1; i >= 0; i--) {
             message = history[i];
             tokensPerMessage = this._addMessageToPrompt(message, tokens, maxTokens, true);
             if (tokensPerMessage === -1) {
@@ -52,8 +53,12 @@ class ResponsePrompter {
                 break;
             } else {
                 tokens += tokensPerMessage;
+                histMessagesAdded++;
             }
         }
+        // reverse the order of just the added messages
+        const reversed = this.responseBuffer.slice(0, histMessagesAdded).reverse();
+        this.responseBuffer = reversed.concat(this.responseBuffer.slice(histMessagesAdded));
 
         //this.handler.nextResponseID = this.handler.lastResponseID + dequeuedMessages;
         const chatHistory = this.responseBuffer.join('');

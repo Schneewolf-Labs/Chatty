@@ -86,6 +86,7 @@ class MessageManager extends EventEmitter {
                     text: historicalResponse
                 });
             }
+            // Add the historical messages from users
             history.push(this.chatHistory[i]);
         }
 

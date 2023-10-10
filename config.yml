@@ -21,7 +21,7 @@ discord:
     channels: ['1131254684330496172', '1161343672911143024', '1161350290876940358']
     fallback-to-default-channel: false
     default-channel: 0
-    allow-dms: false
+    allow-dms: true
 messages:
     max-tokens: 1000
     response-interval: 3000
@@ -75,7 +75,7 @@ stable_diffusion:
     banned_tokens: []
     rejected_response: "Sorry I can't draw that!"
 voice:
-    enabled: true
+    enabled: false
     voice_index: 0
     audio_device: 1
     exe_location: "F:/TTS/wintts-stream/WinTTS-Stream.exe"

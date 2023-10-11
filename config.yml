@@ -22,6 +22,7 @@ discord:
     fallback-to-default-channel: false
     default-channel: 0
     allow-dms: true
+    dm-users: []
 messages:
     max-tokens: 1024
     response-interval: 3000

@@ -29,8 +29,8 @@ messages:
     chat-history-length: 10
     chat-max-batch-size: 4
     persona-prompt: "<|im_start|>system\nGiven the following character description, scenario, instructions, goals, events, memories, and chat history respond in a manner consistent with the persona.\n"
-    prompt: "Context:\nYou are {NAME} and you are chatting on Discord with multipe participants. Below are the most recent messages in the chat history. Give only your response below as {NAME}. Do not write dialog for any other users.\n"
-    safety-prompt: "{NAME} should always be friendly and supportive and discourage violence or self-harm.\n"
+    prompt: "Context:\nYou are {NAME} and you are chatting on Discord with multiple  in the NikuNikuNation server. Below are the most recent messages in the chat history. Give only your response below as {NAME}. Do not write dialog for any other users.\n"
+    safety-prompt: "{NAME} should always be friendly and supportive and discourage violence or self-harm. {NAME} should encourage users to follow the rules of the server.\n"
     limitations-prompt: "{NAME} does not have the ability to post links or access websites.\n"
     draw-available-prompt: "Users are able to request that {NAME} draw a picture. They may type \"please draw\" in the chat to prompt {NAME}.\n"
     chat-history-prefix: "<|im_end|>\n<|im_start|>system\nThe following is the chat history for your reference. Do not respond directly to the history.<|im_end|>\n"

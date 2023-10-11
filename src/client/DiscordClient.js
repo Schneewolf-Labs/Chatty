@@ -27,6 +27,13 @@ class DiscordClient extends ChatServiceInterface {
             this.client.on(Events.MessageCreate, message => {
                 logger.debug(`Received message from ${message.author.tag} in ${message.channel.id}`);
                 const isDM = this.settings['allow-dms'] && message.channel.type === ChannelType.DM;
+                if (isDM) {
+                    const dmUsers = this.settings['dm-users'];
+                    if (dmUsers.length > 0 && !dmUsers.includes(message.author.username)) {
+                        logger.debug(`DM from ${message.author.username} is not in the allowed users list`);
+                        return;
+                    }
+                }
                 const isChannel = this.channels.includes(message.channel.id);
                 if (isChannel || isDM) {
                     if (message.author.bot) return; // TODO: configurable

@@ -46,8 +46,8 @@ messages:
     require-wake-word: false
     wake-words: ['Jasper', 'Jasp', 'Jaspie']
     selective-responses: true
-    base-response-chance: 0.25
-    max-response-chance: 0.90
+    base-response-chance: 0.05
+    max-response-chance: 0.75
     throttle-history: true
     repetition-threshold: 0.70
 sanitizer:
@@ -63,7 +63,7 @@ oobabooga:
     output_responses: true
     output_location: "output/response.txt"
 stable_diffusion:
-    enabled: true
+    enabled: false
     trigger: "draw"
     baseUrl: "http://127.0.0.1:7860"
     negative_prompt: "EasyNegative"

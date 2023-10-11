@@ -18,11 +18,11 @@ discord:
     reply-in-chat: true
     post-image-output: true
     send-is-typing: true
-    channels: ['1131254684330496172', '1161343672911143024', '1161350290876940358']
+    channels: ['1161343672911143024', '1161350290876940358']
     fallback-to-default-channel: false
     default-channel: 0
     allow-dms: true
-    dm-users: []
+    dm-users: ['birubawa']
 messages:
     max-tokens: 1000
     response-interval: 3000

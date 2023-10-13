@@ -8,11 +8,13 @@ class VoiceService extends ChatServiceInterface {
         super();
         this.config = config;
         this.voiceHandler = new WinTTS(config.voice);
-        this.whisperHandler = new Whisper(config.whisper);
-        this.whisperHandler.on('message', (message) => {
-            logger.debug(`VoiceService emitting Whisper message: ${message.text}`);
-            this.emit('message', message);
-        });
+        if (config.whisper['enabled']) {
+            this.whisperHandler = new Whisper(config.whisper);
+            this.whisperHandler.on('message', (message) => {
+                logger.debug(`VoiceService emitting Whisper message: ${message.text}`);
+                this.emit('message', message);
+            });
+        }
     }
 
     sendMessage(message) {

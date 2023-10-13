@@ -84,6 +84,12 @@ voice:
     alphanumeric_only: true
     block_responses: true
     max-speak-duration: 30000
+whisper:
+    enabled: true
+    exe_location: "F:/SpeechRec/whisper-bin-x64/stream.exe"
+    model_location: "F:/SpeechRec/whisper-bin-x64/models/ggml-tiny.en.bin"
+    audio_device: 3
+    file_output: "output/whisper.txt"
 http:
     enabled: true
     analyze-links: true

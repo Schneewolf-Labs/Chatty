@@ -1,6 +1,6 @@
 const logger = require('../util/logger');
 const Buffer = require('buffer').Buffer;
-const { Client, Events, GatewayIntentBits, Partials, ChannelType } = require('discord.js');
+const { Client, Events, GatewayIntentBits, Partials, ChannelType, MessageType } = require('discord.js');
 const ChatServiceInterface = require('../chat/ChatServiceInterface');
 const ChatMessage = require('../chat/message/ChatMessage');
 
@@ -26,6 +26,12 @@ class DiscordClient extends ChatServiceInterface {
         if (settings['chat-enabled']) {
             this.client.on(Events.MessageCreate, message => {
                 logger.debug(`Received message from ${message.author.tag} in ${message.channel.id}`);
+                logger.debug(`Message type: ${message.type}`);
+                const isMessage = message.type == MessageType.Default;
+                if (!isMessage) {
+                    logger.debug(`Message is not a default message`);
+                    return;
+                }
                 const isDM = this.settings['allow-dms'] && message.channel.type === ChannelType.DM;
                 if (isDM) {
                     const dmUsers = this.settings['dm-users'];

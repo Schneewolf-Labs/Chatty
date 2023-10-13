@@ -15,7 +15,7 @@ if (config.oobabooga.output_responses === true) {
 
 // Setup voice output
 if (process.platform === 'win32' && config.voice.enabled === true) {
-    const VoiceService = require('./src/tts/VoiceService');
+    const VoiceService = require('./src/voice/VoiceService');
     const voice = new VoiceService(config);
     chatty.attachVoiceService(voice);
 }

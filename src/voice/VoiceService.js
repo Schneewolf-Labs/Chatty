@@ -1,14 +1,18 @@
 const logger = require('../util/logger');
 const ChatServiceInterface = require('../chat/ChatServiceInterface');
 const WinTTS = require('./WinTTS');
+const Whisper = require('./Whisper');
 
 class VoiceService extends ChatServiceInterface {
     constructor(config) {
         super();
         this.config = config;
         this.voiceHandler = new WinTTS(config.voice);
-
-        // TODO: support input from a microphone to be encoded as text and emitted as a message
+        this.whisperHandler = new Whisper(config.whisper);
+        this.whisperHandler.on('message', (message) => {
+            logger.debug(`VoiceService emitting Whisper message: ${message.text}`);
+            this.emit('message', message);
+        });
     }
 
     sendMessage(message) {

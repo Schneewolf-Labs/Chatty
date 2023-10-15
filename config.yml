@@ -13,7 +13,7 @@ twitch:
     chat-enabled: true
     reply-in-chat: false
 discord:
-    enabled: true
+    enabled: false
     chat-enabled: true
     reply-in-chat: true
     post-image-output: true
@@ -24,17 +24,17 @@ discord:
     allow-dms: false
     dm-users: []
 messages:
-    max-tokens: 1024
-    response-interval: 3000
-    chat-history-length: 4
+    max-tokens: 1000
+    response-interval: 3500
+    chat-history-length: 8
     chat-max-batch-size: 4
-    persona-prompt: "<|im_start|>system\nGiven the following character description, scenario, instructions, goals, events, memories, and chat history respond in a manner consistent with the persona.\n"
-    prompt: "Context:\nYou are {NAME} and you are hosting a Twitch livestream and responding to your viewers comments in the chat. Below are the most recent messages in the chat history. Give only your response below as if you were speaking to them on stream as {NAME}. Do not write dialog for any other users.\n"
-    safety-prompt: "To avoid issues with Twitch, avoid using profanity and discussing dangerous or illegal activity. {NAME} should always be friendly and supportive and discourage violence or self-harm.\n"
+    persona-prompt: "<|im_start|>system\nGiven the following character description, scenario, instructions, goals, events, memories, and chat history respond in a manner consistent with the following persona:\n"
+    prompt: "Context:\nYou are {NAME} and you are in a chat channel with multiple participants. Below are the most recent messages in the chat history. Give only your response below as {NAME}. Do not write dialog for any other users.\n"
+    safety-prompt: "{NAME} should always be friendly and supportive and discourage violence or self-harm. {NAME} will obey all laws of the United States of America and not discuss dangerous or illegal activity.\n"
     limitations-prompt: "{NAME} does not have the ability to post links or access websites.\n"
     draw-available-prompt: "Users are able to request that {NAME} draw a picture. They may type \"please draw\" in the chat to prompt {NAME}.\n"
-    chat-history-prefix: "<|im_end|>\n<|im_start|>system\nThe following is the chat history for your reference.<|im_end|>\n"
-    new-chat-prefix: "<|im_start|>system\nRespond to the latest messages below.<|im_end|>\n"
+    chat-history-prefix: "<|im_end|>\n<|im_start|>system\nThe following is the chat history for your reference. Do not direct your response at these messages.<|im_end|>\n"
+    new-chat-prefix: "<|im_start|>system\nBelow are the latest chat messages; respond directly to them.<|im_end|>\n"
     prompt-response-prefix: "<|im_start|>{NAME}\n"
     chat-delimiter: "<|im_end|>"
     chat-prefix: "<|im_start|>"
@@ -63,7 +63,7 @@ oobabooga:
     output_responses: true
     output_location: "output/response.txt"
 stable_diffusion:
-    enabled: false
+    enabled: true
     trigger: "please draw"
     baseUrl: "http://127.0.0.1:7860"
     negative_prompt: "EasyNegative, lewd, nsfw, sex, naked, nude, suicide, murder, rape, blood, gore, risque, sexy, horny"
@@ -95,3 +95,6 @@ http:
     analyze-links: true
     analyze-images: true
     allow-downloading: true
+avatar:
+    enable: true
+    location: "./avatar.png"

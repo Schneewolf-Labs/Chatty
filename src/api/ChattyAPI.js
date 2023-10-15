@@ -112,6 +112,19 @@ class ChattyAPI {
                 };
                 this.receiveMessage(chatmsg);
                 break;
+            case 'request_persona':
+                ws.send(JSON.stringify({
+                    event: 'receive_persona',
+                    data: this.chatty.persona
+                }));
+                break;
+            case 'request_avatar':
+                if (!this.config.avatar.enabled) return;
+                ws.send(JSON.stringify({
+                    event: 'receive_avatar',
+                    data: this.avatar.getBase64()
+                }));
+                break;
             default:
                 console.log(`Unknown API message event: ${msg.event}`);
         }

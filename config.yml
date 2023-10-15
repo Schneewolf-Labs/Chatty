@@ -21,7 +21,7 @@ discord:
     channels: ['1131254684330496172']
     fallback-to-default-channel: false
     default-channel: 0
-    allow-dms: true
+    allow-dms: false
     dm-users: []
 messages:
     max-tokens: 1024
@@ -44,7 +44,7 @@ messages:
     illegal-response-tokens: ['<', 'http', 'www', '![', '[', '#']
     prune-history: false
     require-wake-word: false
-    wake-words: ['Alpha', 'Alphie']
+    wake-words: ['Jasper']
     selective-responses: true
     base-response-chance: 0.25
     max-response-chance: 0.90
@@ -58,8 +58,8 @@ sanitizer:
     sentiment-threshold: -0.5
     remove-actions: true
 oobabooga:
-    baseUrl: "ws://127.0.0.1:5005"
-    requestParams: { 'max_new_tokens': 1024, 'auto_max_new_tokens': true }
+    baseUrl: "ws://192.168.40.163:5005"
+    requestParams: { 'max_new_tokens': 512, 'auto_max_new_tokens': true }
     output_responses: true
     output_location: "output/response.txt"
 stable_diffusion:
@@ -76,7 +76,7 @@ stable_diffusion:
     banned_tokens: ['lewd', 'nude', 'sex', 'rape', 'nsfw', 'naked', 'penis', 'vagina', 'boobs', 'tits', 'ass']
     rejected_response: "Sorry I can't draw that!"
 voice:
-    enabled: true
+    enabled: false
     voice_index: 1
     audio_device: 2
     exe_location: "F:/TTS/wintts-stream/WinTTS-Stream.exe"

@@ -94,7 +94,7 @@ class ChatHandler {
 
         // Notify all registered chat services when the AI is "typing"
         chatChannel.on('token', (token) => {
-            logger.debug(`ChatHandler got token: ${token}`)
+            //logger.debug(`ChatHandler got token: ${token}`)
             if (!token) return;
             if (!this.isTyping) {
                 this.isTyping = true;

@@ -140,6 +140,7 @@ class ResponseStreamer extends EventEmitter {
     abort() {
         this.emitChunk();
         this.abortStream = true;
+        this.ooba.stop();
         this.clear();
     }
 }

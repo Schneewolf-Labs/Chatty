@@ -95,3 +95,6 @@ http:
     analyze-links: true
     analyze-images: true
     allow-downloading: true
+avatar:
+    enable: true
+    location: "./avatar.png"

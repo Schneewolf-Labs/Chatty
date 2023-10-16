@@ -29,6 +29,15 @@ TWITCH_CHANNEL=your_twitch_channel
 DISCORD_TOKEN=your_discord_token
 ```
 
+## Persona File
+The persona file is in the same YAML format that Oobabooga uses for characters. The default location for this `persona.yaml` in the root directory, but this can be changed in the `config.yml` file. The persona file should look like this:
+```
+name: Assistant
+greeting: Hello! How may I assist you?
+context: |
+    I am an assistant AI, determined to offer the best service possible. 
+```
+
 ## Voice Synthesis (TTS)
 Chatty supports voice synthesis on Windows using the Windows Speech API via [WinTTS](https://github.com/Schneewolf-Labs/WinTTS-Stream). Install .NET 6.0 and point the `config.yml` to the WinTTS executable. You can also choose an output device via the config file.
 

@@ -8,6 +8,7 @@ class Persona {
             const persona = YAML.parse(fs.readFileSync(personaFile, 'utf8'));
             this.name = persona.name;
             this.directive = persona.context;
+            this.greeting = persona.greeting;
             // get number of tokens in directive
             const tokens = this.directive.split(' ');
             this.numTokens = tokens.length;

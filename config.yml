@@ -63,7 +63,7 @@ oobabooga:
     output_responses: true
     output_location: "output/response.txt"
 stable_diffusion:
-    enabled: false
+    enabled: true
     trigger: "draw"
     baseUrl: "http://127.0.0.1:7860"
     negative_prompt: "EasyNegative"
@@ -76,7 +76,7 @@ stable_diffusion:
     banned_tokens: []
     rejected_response: "Sorry I can't draw that!"
 voice:
-    enabled: false
+    enabled: true
     voice_index: 0
     audio_device: 1
     exe_location: "F:/TTS/wintts-stream/WinTTS-Stream.exe"
@@ -85,7 +85,7 @@ voice:
     block_responses: true
     max-speak-duration: 30000
 whisper:
-    enabled: true
+    enabled: false
     exe_location: "F:/SpeechRec/whisper-bin-x64/stream.exe"
     model_location: "F:/SpeechRec/whisper-bin-x64/models/ggml-tiny.en.bin"
     audio_device: 3

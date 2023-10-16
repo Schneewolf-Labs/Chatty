@@ -90,12 +90,12 @@ class Whisper extends EventEmitter {
             logger.debug('Whisper text is empty, ignoring');
             return;
         } else {
-            logger.debug('Whisper is emitting message:');
-            logger.debug(text);
+            logger.info('Whisper is emitting message:');
+            logger.info(text);
         }
 
         // TODO: discern who is talking and make them the author
-        const msg = new ChatMessage('Whisper', text);
+        const msg = new ChatMessage('birubawa', text);
         this.emit('message', msg);
     }
 }

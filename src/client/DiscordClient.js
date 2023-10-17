@@ -27,9 +27,9 @@ class DiscordClient extends ChatServiceInterface {
             this.client.on(Events.MessageCreate, message => {
                 logger.debug(`Received message from ${message.author.tag} in ${message.channel.id}`);
                 logger.debug(`Message type: ${message.type}`);
-                const isMessage = message.type == MessageType.Default;
+                const isMessage = message.type == MessageType.Default || message.type == MessageType.Reply;
                 if (!isMessage) {
-                    logger.debug(`Message is not a default message`);
+                    logger.debug(`Message is not a default message or reply, ignoring`);
                     return;
                 }
                 const isDM = this.settings['allow-dms'] && message.channel.type === ChannelType.DM;

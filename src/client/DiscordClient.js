@@ -103,6 +103,7 @@ class DiscordClient extends ChatServiceInterface {
         chatMessage.channel = message.channel.id;
         const isReply = message.reference;
         if (isReply) {
+            chatMessage.isReply = true;
             const referenceMessage = message.channel.messages.cache.get(message.reference.messageId);
             if (referenceMessage && referenceMessage.author.id === this.client.user.id) {
                 logger.debug(`Message is a reply to a message from the bot`);

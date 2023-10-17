@@ -59,8 +59,7 @@ class ResponsePrompter {
         // reverse the order of just the added messages
         const reversed = this.responseBuffer.slice(0, histMessagesAdded).reverse();
         this.responseBuffer = reversed.concat(this.responseBuffer.slice(histMessagesAdded));
-
-        //this.handler.nextResponseID = this.handler.lastResponseID + dequeuedMessages;
+        // Add the persona prompt and response prefix
         const chatHistory = this.responseBuffer.join('');
         logger.debug(`Chat history: ${chatHistory}`);
         const prompt = this.personaPrompt + this.chatPrompt 

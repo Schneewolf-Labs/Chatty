@@ -6,14 +6,14 @@ api:
     enabled: true
     port: 3000
 logger:
-    level: "info"
+    level: "debug"
     pretty: true
 twitch:
     enabled: false
     chat-enabled: true
     reply-in-chat: false
 discord:
-    enabled: false
+    enabled: true
     chat-enabled: true
     reply-in-chat: true
     post-image-output: true

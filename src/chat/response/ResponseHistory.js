@@ -3,7 +3,6 @@ class ResponseHistory {
         this.persona = persona;
         this._history = [];
         this.lastResponseID = 0;
-        this.nextResponseID = 0;
     }
 
     addResponse(response) {

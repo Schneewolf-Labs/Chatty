@@ -6,7 +6,7 @@ api:
     enabled: true
     port: 3000
 logger:
-    level: "debug"
+    level: "info"
     pretty: true
 twitch:
     enabled: false
@@ -44,7 +44,7 @@ messages:
     illegal-response-tokens: ['<', 'http', 'www', '![', '[', '#']
     prune-history: false
     require-wake-word: false
-    wake-words: ['Jasper']
+    wake-words: ['Alpha', 'Alphie']
     selective-responses: true
     base-response-chance: 0.25
     max-response-chance: 0.90
@@ -58,15 +58,15 @@ sanitizer:
     sentiment-threshold: -0.5
     remove-actions: true
 oobabooga:
-    baseUrl: "ws://192.168.40.163:5005"
-    blockingUrl: "http://192.168.40.163:5000"
+    baseUrl: "ws://127.0.0.1:5005"
+    blockingUrl: "http://127.0.0.1:5000"
     requestParams: { 'max_new_tokens': 512, 'auto_max_new_tokens': true }
     output_responses: true
     output_location: "output/response.txt"
 stable_diffusion:
     enabled: true
-    trigger: "please draw"
-    baseUrl: "http://192.168.40.163:7860"
+    trigger: "draw"
+    baseUrl: "http://127.0.0.1:7860"
     negative_prompt: "EasyNegative, lewd, nsfw, sex, naked, nude, suicide, murder, rape, blood, gore, risque, sexy, horny"
     requestParams: {}
     output_location: "output/drawing.png"
@@ -79,7 +79,7 @@ stable_diffusion:
 voice:
     enabled: false
     voice_index: 1
-    audio_device: 2
+    audio_device: 1
     exe_location: "F:/TTS/wintts-stream/WinTTS-Stream.exe"
     output_location: "output/voice.wav"
     alphanumeric_only: true
@@ -97,5 +97,5 @@ http:
     analyze-images: true
     allow-downloading: true
 avatar:
-    enable: true
+    enable: false
     location: "./avatar.png"

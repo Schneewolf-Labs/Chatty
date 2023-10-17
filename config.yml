@@ -6,7 +6,7 @@ api:
     enabled: true
     port: 3000
 logger:
-    level: "debug"
+    level: "info"
     pretty: true
 twitch:
     enabled: false
@@ -21,7 +21,7 @@ discord:
     channels: ['1131254684330496172']
     fallback-to-default-channel: false
     default-channel: 0
-    allow-dms: true
+    allow-dms: false
     dm-users: []
 messages:
     max-tokens: 1000
@@ -59,12 +59,13 @@ sanitizer:
     remove-actions: true
 oobabooga:
     baseUrl: "ws://127.0.0.1:5005"
+    blockingUrl: "http://127.0.0.1:5000"
     requestParams: { 'max_new_tokens': 512, 'auto_max_new_tokens': true }
     output_responses: true
     output_location: "output/response.txt"
 stable_diffusion:
     enabled: true
-    trigger: "please draw"
+    trigger: "draw"
     baseUrl: "http://127.0.0.1:7860"
     negative_prompt: "EasyNegative, lewd, nsfw, sex, naked, nude, suicide, murder, rape, blood, gore, risque, sexy, horny"
     requestParams: {}
@@ -78,7 +79,7 @@ stable_diffusion:
 voice:
     enabled: false
     voice_index: 1
-    audio_device: 2
+    audio_device: 1
     exe_location: "F:/TTS/wintts-stream/WinTTS-Stream.exe"
     output_location: "output/voice.wav"
     alphanumeric_only: true
@@ -96,5 +97,5 @@ http:
     analyze-images: true
     allow-downloading: true
 avatar:
-    enable: true
+    enable: false
     location: "./avatar.png"

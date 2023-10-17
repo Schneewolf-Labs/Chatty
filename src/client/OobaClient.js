@@ -7,6 +7,7 @@ class OobaClient extends EventEmitter{
         super();
         this.settings = settings;
         this.baseUrl = settings.baseUrl;
+        this.blockingUrl = settings.blockingUrl;
         this.requestParams = settings.requestParams;
 
         this.messageQueue = [];
@@ -23,6 +24,27 @@ class OobaClient extends EventEmitter{
             prompt: prompt,
             ...this.requestParams
         }));
+    }
+
+    stop() {
+        // use the blocking api to stop the stream with /api/v1/stop-stream
+        const url = this.blockingUrl+"/api/v1/stop-stream";
+        logger.debug(`Stopping stream with blocking api at ${url}`);
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(this.requestParams)
+        }).then(res => {
+            if (res.status === 200) {
+                logger.info("Stream stopped");
+            } else {
+                logger.error(`Error stopping stream: ${res.status} ${res.statusText}`);
+            }
+        }).catch(err => {
+            logger.error(`Error stopping stream: ${err}`);
+        });
     }
 
     flush() {
@@ -45,6 +67,7 @@ class OobaClient extends EventEmitter{
                 this.messageQueue.push(json.text);
                 this.emit('token', json.text);
             } else if (json.event === 'stream_end') {
+                logger.debug('Message stream from Oobabooga ended...');
                 const message = this.flush();
                 this.emit('message', message);
                 this.recievingMessage = false;

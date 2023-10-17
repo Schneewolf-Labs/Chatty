@@ -158,7 +158,7 @@ class MessageManager extends EventEmitter {
         let chance = baseChance + (maxChance - baseChance) * timeFactor / 10;
     
         chance = Math.min(1.0, Math.max(0.0, chance));
-        return chance * 100;  // Convert to percentage
+        return chance;
     }
 }
 

@@ -57,6 +57,11 @@ class ResponseHandler extends EventEmitter {
         logger.debug(`Added channel ${channelID} to response handler`);
     }
 
+    updateLastResponseID(id, channel) {
+        const history = this.getHistory(channel);
+        history.lastResponseID = id;
+    }
+
     getHistory(channel) {
         return this.histories[channel];
     }
@@ -90,7 +95,7 @@ class ResponseHandler extends EventEmitter {
         // Generate a response prompt
         const { prompt, dequeuedMessages } = this.responsePrompter.generatePrompt(messages, history);
 
-        channelHist.lastResponseID = channelHist.lastResponseID + dequeuedMessages;
+        //channelHist.lastResponseID = channelHist.lastResponseID + dequeuedMessages;
 
         if (this.awaitingResponse) {
             logger.debug('Currently awaiting response, enqueuing response: ' + prompt);

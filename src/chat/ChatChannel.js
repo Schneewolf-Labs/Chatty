@@ -53,6 +53,10 @@ class ChatChannel extends EventEmitter {
     setVoiceService(voiceService) {
         this.messageManager.setVoiceService(voiceService);
     }
+
+    updateLastResponseID(id) {
+        this.responseHandler.updateLastResponseID(id, this.channelID);
+    }
 }
 
 module.exports = ChatChannel;

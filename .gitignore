@@ -2,6 +2,9 @@ persona.yaml
 output/*
 avatar.png
 
+# OS
+.DS_Store
+
 # Logs
 logs
 *.log

@@ -44,7 +44,7 @@ messages:
     illegal-response-tokens: ['<', 'http', 'www', '![', '[', '#']
     prune-history: false
     require-wake-word: false
-    wake-words: ['Jasper', 'Jaspie']
+    wake-words: []
     selective-responses: false
     base-response-chance: 0.75
     max-response-chance: 0.90

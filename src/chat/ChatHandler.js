@@ -81,7 +81,7 @@ class ChatHandler {
                 text = this.config.sanitizer['profanity-replacement'];
             }
             // Put the sanitized response into history
-            chatChannel.responseHandler.addResponseToHistory(text, chatChannel.channelID);
+            this.responseHandler.addResponseToHistory(text, chatChannel.channelID);
             // Set response channel
             response.channel = chatChannel.channelID;
             response.text = text;

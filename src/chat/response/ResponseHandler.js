@@ -16,11 +16,7 @@ class ResponseHandler extends EventEmitter {
         this.responsePrompter = new ResponsePrompter(config, persona, this);
 
         this.responseQueue = [];
-        //this.responseHistory = {};
         this.histories = {};
-        // this.lastResponseID = 0;
-        // this.nextResponseID = 0;
-        // this.processingResponseID = 0;
         this.awaitingResponse = false;
         this.currentChannel = null;
 
@@ -41,7 +37,6 @@ class ResponseHandler extends EventEmitter {
         // Check if message is empty
         if (message.length === 0) {
             logger.warn(`Response is empty`);
-            //return;
         }
 
         // Emit final response message for other services to consume
@@ -60,6 +55,11 @@ class ResponseHandler extends EventEmitter {
         const channelID = channel.channelID;
         this.histories[channelID] = new ResponseHistory(this.persona);
         logger.debug(`Added channel ${channelID} to response handler`);
+    }
+
+    updateLastResponseID(id, channel) {
+        const history = this.getHistory(channel);
+        history.setLastResponseID(id);
     }
 
     getHistory(channel) {
@@ -95,19 +95,18 @@ class ResponseHandler extends EventEmitter {
         // Generate a response prompt
         const { prompt, dequeuedMessages } = this.responsePrompter.generatePrompt(messages, history);
 
-        channelHist.lastResponseID = channelHist.lastResponseID + dequeuedMessages;
+        //channelHist.lastResponseID = channelHist.lastResponseID + dequeuedMessages;
 
         if (this.awaitingResponse) {
             logger.debug('Currently awaiting response, enqueuing response: ' + prompt);
             const resQueueItem = {
-                id: this.lastResponseID,
+                id: channelHist.lastResponseID,
                 prompt: prompt,
                 channel: channel
             }
             this.responseQueue.push(resQueueItem);
         } else {
             logger.debug('Sending response: ' + prompt);
-            //this.processingResponseID = this.lastResponseID;
             this.currentChannel = channel;
             this._sendResponse(prompt);
         }

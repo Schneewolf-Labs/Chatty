@@ -3,11 +3,9 @@ class ResponseHistory {
         this.persona = persona;
         this._history = [];
         this.lastResponseID = 0;
-        this.nextResponseID = 0;
     }
 
     addResponse(response) {
-        this._history.push(response);
         // Add response to response history
         let prevResponse = this._history[this.lastResponseID];
         if (prevResponse) {
@@ -30,6 +28,13 @@ class ResponseHistory {
 
     getResponse(id) {
         return this._history[id];
+    }
+
+    setLastResponseID(id) {
+        if (typeof id !== 'number' || id < 0) {
+            throw new Error("Invalid response ID");
+        }
+        this.lastResponseID = id;
     }
 }
 

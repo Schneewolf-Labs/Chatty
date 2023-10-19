@@ -110,6 +110,11 @@ class MessageManager extends EventEmitter {
             logger.debug('Not enqueuing response to message queue');
         }
 
+        // Update last response id
+        const lastResponseID = lowId + dequeuedMessages;
+        logger.debug(`updating last response id to ${lastResponseID}`);
+        this.chatChannel.updateLastResponseID(lastResponseID);
+
         // Dequeue messages
         logger.debug(`dequeuing ${dequeuedMessages} messages from message queue`);
         this.messageQueue = this.messageQueue.slice(dequeuedMessages);
@@ -158,7 +163,7 @@ class MessageManager extends EventEmitter {
         let chance = baseChance + (maxChance - baseChance) * timeFactor / 10;
     
         chance = Math.min(1.0, Math.max(0.0, chance));
-        return chance * 100;  // Convert to percentage
+        return chance;
     }
 }
 

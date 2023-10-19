@@ -59,7 +59,7 @@ class ResponseHandler extends EventEmitter {
 
     updateLastResponseID(id, channel) {
         const history = this.getHistory(channel);
-        history.lastResponseID = id;
+        history.setLastResponseID(id);
     }
 
     getHistory(channel) {

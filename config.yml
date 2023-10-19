@@ -13,7 +13,7 @@ twitch:
     chat-enabled: true
     reply-in-chat: false
 discord:
-    enabled: true
+    enabled: false
     chat-enabled: true
     reply-in-chat: true
     post-image-output: true
@@ -67,7 +67,7 @@ oobabooga:
     output_location: "output/response.txt"
 stable_diffusion:
     enabled: true
-    trigger: "draw"
+    trigger: "draw "
     baseUrl: "http://192.168.40.163:7860"
     negative_prompt: "EasyNegative, lewd, nsfw, sex, naked, nude, suicide, murder, rape, blood, gore, risque, sexy, horny"
     requestParams: {}

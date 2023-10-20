@@ -5,6 +5,7 @@ const ResponsePrompter = require('./ResponsePrompter');
 const ResponseHistory = require('./ResponseHistory');
 const ChatMessage = require('../message/ChatMessage');
 const ResponseToken = require('./ResponseToken');
+const RepetitionDetector = require('../../util/RepetitionDetector');
 
 class ResponseHandler extends EventEmitter {
     constructor(config, ooba, persona) {
@@ -14,11 +15,13 @@ class ResponseHandler extends EventEmitter {
         this.persona = persona;
         this.responseStreamer = new ResponseStreamer(config, this, this.ooba);
         this.responsePrompter = new ResponsePrompter(config, persona, this);
+        this.repetitionDetector = new RepetitionDetector(config.messages['repetition-threshold'], config.messages['chat-history-length']/2);
 
         this.responseQueue = [];
         this.histories = {};
         this.awaitingResponse = false;
         this.currentChannel = null;
+        this.throttleHistory = false;
 
         // Handle events from the response streamer
         this.responseStreamer.on('chunk', (response) => {
@@ -39,8 +42,22 @@ class ResponseHandler extends EventEmitter {
             logger.warn(`Response is empty`);
         }
 
+        // Check if message is repetitive
+        let shouldRespond = true;
+        if (this.config.messages['block-repetitive-responses']) {
+            const isRepetitive = this.repetitionDetector.isRepetitive(message, this.getHistory(this.currentChannel));
+            if (isRepetitive) {
+                logger.warn(`Response is repetitive, blocking`);
+                this.responseStreamer.abortStream();
+                shouldRespond = false;
+                if (this.config.messages['throttle-history-on-repetitive-response']) {
+                    this.throttleHistory = true;
+                }
+            }
+        }
+
         // Emit final response message for other services to consume
-        this.emitResponse(message, this.currentChannel);
+        if (shouldRespond) this.emitResponse(message, this.currentChannel);
 
         // Dequeue next response
         if (this.responseQueue.length > 0) {
@@ -92,6 +109,12 @@ class ResponseHandler extends EventEmitter {
     sendResponse(messages, history, channel) {
         // Get History
         const channelHist = this.histories[channel];
+        // Check if chat history should be throttled
+        if (this.throttleHistory) {
+            logger.debug(`Throttling history for channel ${channel}`);
+            history = [];
+            this.throttleHistory = false;
+        }
         // Generate a response prompt
         const { prompt, dequeuedMessages } = this.responsePrompter.generatePrompt(messages, history);
 

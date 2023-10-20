@@ -13,15 +13,15 @@ twitch:
     chat-enabled: true
     reply-in-chat: false
 discord:
-    enabled: false
+    enabled: true
     chat-enabled: true
     reply-in-chat: true
     post-image-output: true
     send-is-typing: true
-    channels: []
+    channels: ['1152372106097602643', '1160606476063223945']
     fallback-to-default-channel: false
     default-channel: 0
-    allow-dms: false
+    allow-dms: true
     dm-users: []
 messages:
     max-tokens: 1000
@@ -46,10 +46,10 @@ messages:
     illegal-response-tokens: ['<', 'http', 'www', '![', '[', '#']
     prune-history: false
     require-wake-word: false
-    wake-words: []
-    selective-responses: false
+    wake-words: ['Alpha', 'Alphie']
+    selective-responses: true
     base-response-chance: 0.75
-    max-response-chance: 0.90
+    max-response-chance: 0.95
     throttle-history: true
     block-repetitive-responses: true
     throttle-history-on-repetitive-response: true
@@ -62,15 +62,15 @@ sanitizer:
     sentiment-threshold: -0.5
     remove-actions: true
 oobabooga:
-    baseUrl: "ws://192.168.40.163:5005"
-    blockingUrl: "http://192.168.40.163:5000"
+    baseUrl: "ws://127.0.0.1:5005"
+    blockingUrl: "http://127.0.0.1:5000"
     requestParams: { 'max_new_tokens': 512, 'auto_max_new_tokens': true }
     output_responses: true
     output_location: "output/response.txt"
 stable_diffusion:
     enabled: true
     trigger: "draw "
-    baseUrl: "http://192.168.40.163:7860"
+    baseUrl: "http://127.0.0.1:7860"
     negative_prompt: "EasyNegative, lewd, nsfw, sex, naked, nude, suicide, murder, rape, blood, gore, risque, sexy, horny"
     requestParams: {}
     output_location: "output/drawing.png"

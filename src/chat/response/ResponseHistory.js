@@ -26,6 +26,17 @@ class ResponseHistory {
         }
     }
 
+    getHistory(numResponses) {
+        if (!numResponses) numResponses = this._history.length;
+        const history = [];
+        // iterate through the history backwards until we have desired number of responses
+        for (let i = this.lastResponseID; i >= 0 && history.length < numResponses; i--) {
+            const response = this._history[i];
+            if (response) history.push(response);
+        }
+        return history;
+    }
+
     getResponse(id) {
         return this._history[id];
     }

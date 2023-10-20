@@ -5,6 +5,7 @@ const ResponsePrompter = require('./ResponsePrompter');
 const ResponseHistory = require('./ResponseHistory');
 const ChatMessage = require('../message/ChatMessage');
 const ResponseToken = require('./ResponseToken');
+const RepetitionDetector = require('../../util/RepetitionDetector');
 
 class ResponseHandler extends EventEmitter {
     constructor(config, ooba, persona) {
@@ -14,6 +15,7 @@ class ResponseHandler extends EventEmitter {
         this.persona = persona;
         this.responseStreamer = new ResponseStreamer(config, this, this.ooba);
         this.responsePrompter = new ResponsePrompter(config, persona, this);
+        this.repetitionDetector = new RepetitionDetector(config.messages['repetition-threshold'], config.messages['chat-history-length']/2);
 
         this.responseQueue = [];
         this.histories = {};
@@ -37,6 +39,16 @@ class ResponseHandler extends EventEmitter {
         // Check if message is empty
         if (message.length === 0) {
             logger.warn(`Response is empty`);
+        }
+
+        // Check if message is repetitive
+        if (this.config.messages['block-repetitive-responses']) {
+            const isRepetitive = this.repetitionDetector.isRepetitive(message, this.getHistory(this.currentChannel));
+            if (isRepetitive) {
+                logger.warn(`Response is repetitive, blocking`);
+                this.responseStreamer.abortStream();
+                return;
+            }
         }
 
         // Emit final response message for other services to consume

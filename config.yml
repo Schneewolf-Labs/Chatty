@@ -28,6 +28,8 @@ messages:
     response-interval: 3500
     chat-history-length: 8
     chat-max-batch-size: 4
+    include-datetime: true
+    datetime-prompt: "<|im_start|>system\nCurrent date and time: {DATE} {TIME}\n<|im_end|>\n"
     persona-prompt: "<|im_start|>system\nGiven the following character description, scenario, instructions, goals, events, memories, and chat history respond in a manner consistent with the following persona:\n"
     prompt: "Context:\nYou are {NAME} and you are in a chat channel with multiple participants. Below are the most recent messages in the chat history. Give only your response below as {NAME}. Do not write dialog for any other users.\n"
     safety-prompt: "{NAME} should always be friendly and supportive and discourage violence or self-harm. {NAME} will obey all laws of the United States of America and not discuss dangerous or illegal activity.\n"

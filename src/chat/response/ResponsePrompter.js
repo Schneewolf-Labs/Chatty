@@ -9,6 +9,7 @@ class ResponsePrompter {
         this.responseBuffer = [];
 
         // Setup prompts from the config
+        this.datetimePrompt = this._replacePlaceholders(config.messages['datetime-prompt']);
         this.personaPrompt = config.messages['persona-prompt'] + persona.directive + "\n";
         this.drawPrompt = this.handler.config.stable_diffusion.enabled ? this._replacePlaceholders(config.messages['draw-available-prompt']) : '';
         this.chatPrompt = this._replacePlaceholders(config.messages['prompt']) 
@@ -19,8 +20,8 @@ class ResponsePrompter {
         this.chatDelimiter = config.messages['chat-delimiter'];
         this.responsePrefix = this._replacePlaceholders(config.messages['prompt-response-prefix']);
         this.newChatPrefix = this._replacePlaceholders(config.messages['new-chat-prefix']);
-        // Calculate total prompt overhead
-        this.promptTokens = this.personaPrompt.split(' ').length + this.chatPrompt.split(' ').length + this.responsePrefix.split(' ').length + this.newChatPrefix.split(' ').length;
+        // Calculate total prompt overhead (approximate)
+        this.promptTokens = 16 + this.personaPrompt.split(' ').length + this.chatPrompt.split(' ').length + this.responsePrefix.split(' ').length + this.newChatPrefix.split(' ').length;
     }
 
     generatePrompt(messages, history) {
@@ -62,8 +63,11 @@ class ResponsePrompter {
         // Add the persona prompt and response prefix
         const chatHistory = this.responseBuffer.join('');
         logger.debug(`Chat history: ${chatHistory}`);
-        const prompt = this.personaPrompt + this.chatPrompt 
+        let prompt = this.personaPrompt + this.chatPrompt 
                     + chatHistory + `${this.responsePrefix}`;
+        if (this.config.messages['include-datetime']) {
+            prompt = this.datetimePrompt + prompt;
+        }
         logger.debug(`Used ${tokens} tokens to respond to ${this.responseBuffer.length} messages`);
         this.responseBuffer = [];
         return {
@@ -97,7 +101,15 @@ class ResponsePrompter {
     }
 
     _replacePlaceholders(message) {
+        // replace {DATE} and {TIME} with current date and time
+        const date = new Date();
+        // ensure date also includes day of the week
+        const dateStr = date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        message = message.replace('{DATE}', dateStr);
+        message = message.replace('{TIME}', date.toLocaleTimeString());
+        // replace {NAME} with persona name
         message = this.persona.insertName(message);
+        // replace {DELIMITER} with chat delimiter
         return message.replace('{DELIMITER}', this.chatDelimiter);
     }
 }

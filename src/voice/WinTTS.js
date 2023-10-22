@@ -2,6 +2,10 @@ const logger = require('../util/logger');
 const { spawn } = require('child_process');
 
 class WinTTS {
+    /**
+     * Creates a new WinTTS instance
+     * @param {Object} options - The options object
+     */
     constructor(options) {
         this.options = options;
         this.exe_location = options.exe_location;
@@ -18,6 +22,11 @@ class WinTTS {
         this._startProcess();
     }
 
+    /**
+     * Speak a token
+     * @param {string} token - The token to speak
+     * @param {boolean} force - Force the token to be spoken even if the TTS is already speaking
+     */
     speak(token, force=false) {
         if (!force && this.is_speaking) {
             logger.debug(`WinTTS is already speaking, enqueueing token: ${token}`);
@@ -50,6 +59,10 @@ class WinTTS {
         }, this.maxDuration);
     }
 
+    /**
+     * Dequeue the next token to speak
+     * @private
+     */
     _dequeue() {
         if (this.durationTimer) clearTimeout(this.durationTimer);
         if (this.queue.length > 0) {
@@ -60,6 +73,10 @@ class WinTTS {
         }
     }
 
+    /**
+     * Start the TTS process
+     * @private
+     */
     _startProcess() {
         if (this.voice_process) {
             logger.debug(`WinTTS killing old process`);

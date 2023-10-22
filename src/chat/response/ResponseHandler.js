@@ -48,7 +48,7 @@ class ResponseHandler extends EventEmitter {
             const isRepetitive = this.repetitionDetector.isRepetitive(message, this.getHistory(this.currentChannel));
             if (isRepetitive) {
                 logger.warn(`Response is repetitive, blocking`);
-                this.responseStreamer.abortStream();
+                this.responseStreamer.abort();
                 shouldRespond = false;
                 if (this.config.messages['throttle-history-on-repetitive-response']) {
                     this.throttleHistory = true;

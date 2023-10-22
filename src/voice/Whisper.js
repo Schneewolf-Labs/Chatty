@@ -72,6 +72,7 @@ class Whisper extends EventEmitter {
         }
         let lastLine = this.buffer[bufferLen - 1];
         lastLine = lastLine.trim();
+        // eslint-disable-next-line no-control-regex
         lastLine = lastLine.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');        
         logger.debug(`Processing Whisper buffer of ${bufferLen} lines`);
         logger.debug(lastLine);

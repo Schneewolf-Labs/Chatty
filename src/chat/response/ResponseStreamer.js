@@ -137,8 +137,8 @@ class ResponseStreamer extends EventEmitter {
         this.enclosureState = null;
     }
 
-    abort() {
-        this.emitChunk();
+    abort(emit=true) {
+        if (emit) this.emitChunk();
         this.abortStream = true;
         this.ooba.stop();
         this.clear();

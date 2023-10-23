@@ -43,7 +43,7 @@ messages:
     response-expire-time: 30000
     include-responses-in-history: true
     chunk-delimiters: ['.', '\n', '?', '!', ';', ':', '—']
-    illegal-response-tokens: ['<', 'http', 'www', '![', '[', '#']
+    illegal-response-tokens: ['<', 'http', 'www', '![', '[', '#', '\', '/']
     prune-history: false
     require-wake-word: false
     wake-words: []

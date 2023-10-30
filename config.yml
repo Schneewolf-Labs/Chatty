@@ -50,7 +50,6 @@ messages:
     selective-responses: false
     base-response-chance: 0.75
     max-response-chance: 0.90
-    throttle-history: true
     block-repetitive-responses: true
     throttle-history-on-repetitive-response: true
     repetition-threshold: 0.70

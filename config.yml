@@ -18,7 +18,7 @@ discord:
     reply-in-chat: true
     post-image-output: true
     send-is-typing: true
-    channels: ['1131254684330496172']
+    channels: []
     fallback-to-default-channel: false
     default-channel: 0
     allow-dms: false

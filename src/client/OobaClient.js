@@ -43,6 +43,7 @@ class OobaClient extends EventEmitter{
                             return;
                         } else {
                             try {
+                                // XXX: these should be chunked to ensure we have a complete message with valid json
                                 let text = decoder.decode(value, {stream: true});
                                 text = text.replace('data: ', '');
                                 const json = JSON.parse(text);
@@ -52,7 +53,7 @@ class OobaClient extends EventEmitter{
                                 this.messageQueue.push(token);
                                 this.emit('token', token);
                             } catch (e) {
-                                logger.error(`Error parsing json: ${e}`);
+                                logger.error(`Error parsing token from ooba stream: ${e}`);
                             }
                         }
                         read();

@@ -34,12 +34,17 @@ class ResponseStreamer extends EventEmitter {
     }
 
     receiveToken(token) {
-        const isLegal = this.isTokenLegal(token);
-        if (!isLegal) {
-            logger.debug(`Token: ${token} is illegal, aborting stream`);
-            this.abort();
-            return;
+        // Check for illegal tokens
+        let containsIllegalToken = false;
+        const illegalTokenIndex = this.getIllegalTokenIndex(token);
+        if (illegalTokenIndex !== -1) {
+            logger.warn(`Token: ${token} contains illegal token, splitting`);
+            const split = [token.slice(0, illegalTokenIndex), token.slice(illegalTokenIndex)];
+            token = split[0];
+            containsIllegalToken = true;
         }
+
+        // Check for a delimited message
         const delimiterIndex = this.getDelimiterIndex(token);
         if (delimiterIndex !== -1) {
             logger.warn(`Token: ${token} contains delimiter, splitting`);
@@ -51,6 +56,18 @@ class ResponseStreamer extends EventEmitter {
         }
         this.pushToken(token);
         this.processTokens();
+
+        if (containsIllegalToken) {
+            this.abort();
+        }
+    }
+
+    getIllegalTokenIndex(token) {
+        const illegalTokens = this.illegalTokens;
+        const indices = illegalTokens.map(illegalToken => token.indexOf(illegalToken));
+        const validIndices = indices.filter(i => i !== -1);
+        if (validIndices.length === 0) return -1;
+        return Math.min(...validIndices);
     }
 
     isTokenLegal(token) {

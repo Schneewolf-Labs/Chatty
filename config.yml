@@ -13,7 +13,7 @@ twitch:
     chat-enabled: true
     reply-in-chat: false
 discord:
-    enabled: false
+    enabled: true
     chat-enabled: true
     reply-in-chat: true
     post-image-output: true
@@ -61,13 +61,12 @@ sanitizer:
     sentiment-threshold: -0.5
     remove-actions: true
 oobabooga:
-    baseUrl: "ws://127.0.0.1:5005"
-    blockingUrl: "http://127.0.0.1:5000"
-    requestParams: { 'max_new_tokens': 512, 'auto_max_new_tokens': true }
+    baseUrl: "http://127.0.0.1:5000"
+    requestParams: { 'max_tokens': 512, 'auto_max_new_tokens': true }
     output_responses: true
     output_location: "output/response.txt"
 stable_diffusion:
-    enabled: true
+    enabled: false
     trigger: "draw "
     baseUrl: "http://127.0.0.1:7860"
     negative_prompt: "EasyNegative, lewd, nsfw, sex, naked, nude, suicide, murder, rape, blood, gore, risque, sexy, horny"

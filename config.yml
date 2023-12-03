@@ -22,7 +22,7 @@ discord:
     fallback-to-default-channel: false
     default-channel: 0
     allow-dms: true
-    dm-users: ['birubawa']
+    dm-users: []
     allow-attachments: true
 messages:
     max-tokens: 1000

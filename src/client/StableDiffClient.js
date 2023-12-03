@@ -51,6 +51,32 @@ class StableDiffClient extends EventEmitter {
             return json.images[0];
         });
     }
+
+    // returns a promise that resolves to a string
+    img2txt(img) {
+        const uri = this.uri+'interrogate';
+        logger.debug(`Sending image to StableDiff for interrogation`);
+        return fetch(uri, {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json',
+                'accept': 'application/json'
+            },
+            body: JSON.stringify({
+                "image": img,
+                "model": "clip"
+            })
+        }).then(res => {
+            if (res.ok) {
+                return res.json();
+            } else {
+                logger.error("Could not convert image to text: "+res.status+" "+res.statusText);
+            }
+        }).then(json => {
+            if (!json) return 'ERROR';
+            return json['caption'];
+        });
+    }
 }
 
 module.exports = StableDiffClient;

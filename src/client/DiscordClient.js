@@ -3,6 +3,7 @@ const Buffer = require('buffer').Buffer;
 const { Client, Events, GatewayIntentBits, Partials, ChannelType, MessageType } = require('discord.js');
 const ChatServiceInterface = require('../chat/ChatServiceInterface');
 const ChatMessage = require('../chat/message/ChatMessage');
+const MessageAttachment = require('../chat/message/MessageAttachment');
 
 class DiscordClient extends ChatServiceInterface {
     constructor(token, settings) {
@@ -102,7 +103,7 @@ class DiscordClient extends ChatServiceInterface {
         const chatMessage = new ChatMessage(message.author.username, message.content);
         chatMessage.channel = message.channel.id;
         const isReply = message.reference;
-        if (isReply) {
+        if (isReply) { // handle case where message is a reply to another message
             chatMessage.isReply = true;
             const referenceMessage = message.channel.messages.cache.get(message.reference.messageId);
             if (referenceMessage && referenceMessage.author.id === this.client.user.id) {
@@ -110,6 +111,19 @@ class DiscordClient extends ChatServiceInterface {
                 chatMessage.directReply = true;
             }
         }
+        // add attachments
+        if (this.settings['allow-attachments']) {
+            message.attachments.forEach(attachment => {
+                const contentType = attachment.contentType;
+                logger.debug(`Found attachment with content type ${contentType}`);
+                if (contentType.startsWith('image')) {
+                    logger.debug(`Attachment is an image, adding to message`);
+                    const messageAttachment = new MessageAttachment(chatMessage, attachment.url);
+                    chatMessage.attachments.push(messageAttachment);
+                }
+            });
+        }
+
         chatMessage.reply = (txt) => {
             // reply to original discord message
             message.reply(txt);

@@ -39,6 +39,7 @@ class ChatChannel extends EventEmitter {
     }
 
     addEventToHistory(event) {
+        logger.debug(`Channel ${this.channelID} adding event to history: ${event}`);
         this.responseHandler.addEventToHistory(event, this.channelID);
     }
 

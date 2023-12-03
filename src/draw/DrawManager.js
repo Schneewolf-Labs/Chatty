@@ -73,6 +73,30 @@ class DrawManager extends EventEmitter{
         }
     }
 
+    caption(attachment) {
+        logger.debug('DrawManager captioning image...');
+        const data = attachment.data;
+        if (!data) {
+            logger.error('DrawManager recieved attachment with no image data');
+            attachment.processing = false;
+            return;
+        }
+        this.stableDiffClient.img2txt(data).then(caption => {
+            logger.debug(`DrawManager recieved caption: ${caption} for image(${attachment.url})`);
+            if (caption) {
+                if (this.settings['truncate_captions']) {
+                    // truncate to first comma (prevents adding hallucinated artists and too much info)
+                    const commaIndex = caption.indexOf(',');
+                    if (commaIndex !== -1) {
+                        caption = caption.substring(0, commaIndex);
+                    }
+                }
+                attachment.caption = caption;
+                this.emit('caption', attachment);
+            }
+        });
+    }
+
     extractPrompt(message) {
         // set message to lowercase
         message = message.toLowerCase();

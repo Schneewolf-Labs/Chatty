@@ -1,5 +1,6 @@
 const logger = require('../../util/logger');
 const EventEmitter = require('events');
+const Buffer = require('buffer').Buffer;
 
 class MessageManager extends EventEmitter {
     constructor(options, chatChannel) {
@@ -12,14 +13,12 @@ class MessageManager extends EventEmitter {
         this.chatHistory = [];
         this.messageQueue = [];
 
+        this.blockOnProcessing = options['block-while-processing-attachments'];
+
         // Setup interval to respond to message queue
         setInterval(() => {
-            const queueLength = this.messageQueue.length;
-            logger.debug(`Message queue length: ${queueLength}`);
-            // Exit if queue is empty or voice service is speaking
-            const isSpeaking = this.voiceService && this.voiceService.isBlocking();
-            if (isSpeaking) logger.debug(`Voice service is speaking, skipping response`);
-            if (queueLength == 0 || isSpeaking) return;
+            //const queueLength = this.messageQueue.length;
+            //logger.debug(`Message queue length: ${queueLength}`);
             this.respondToChatFromMessageQueue();
         }, this.options['response-interval']);
     }
@@ -30,8 +29,35 @@ class MessageManager extends EventEmitter {
         // TODO: message parsing can be its own class
         // Check for a drawing trigger, if stable diffusion is enabled
         if (this.drawManager) {
+            // check for image attachments
+            if (message.attachments.length > 0) {
+                // TODO: handle multiple attachments
+                const attachment = message.attachments[0];
+                const url = attachment.url;
+                logger.debug(`Got image attachment: ${url}`);
+                attachment.processing = true;
+                // Download image from url
+                fetch(url).then(res => {
+                    if (res.ok) {
+                        logger.debug(`Downloaded image from ${url}`);
+                        return res.arrayBuffer();
+                    } else {
+                        logger.error(`Could not download image from ${url}: ${res.status} ${res.statusText}`);
+                        attachment.processing = false;
+                    }
+                }).then(buffer => {
+                    if (!buffer) return;
+                    // Convert arraybuffer to base64
+                    const base64 = Buffer.from(buffer).toString('base64');
+                    attachment.data = base64;
+                    // Send image to draw manager
+                    this.drawManager.caption(attachment);
+                });
+            }
+
             const prompt = this.drawManager.extractPrompt(message.text);
             if (prompt) {
+                // TODO: if there's a prompt and an image attachment, we should use img2img
                 logger.debug(`Extracted drawing prompt: ${prompt}`);
                 const enqueued = this.drawManager.draw(prompt, message.channel);
                 if (!enqueued) { // drawing was rejected, let the user know
@@ -40,6 +66,11 @@ class MessageManager extends EventEmitter {
                 }
             }
         }
+        // Push message to the chat history
+        this.chatHistory.push(message);
+
+        // If the message text is empty, disregard it at this point
+        if (!message.getText()) return;
         // Check for a wake word in the message
         const wakewords = this.options['wake-words'];
         const containsWakeword = wakewords.some((word) => {
@@ -50,7 +81,7 @@ class MessageManager extends EventEmitter {
             message.directReply = true;
         }
 
-        this.chatHistory.push(message);
+        // Add message to message queue
         const id = this.chatHistory.length - 1;
         this.messageQueue.push(id);
         if (this.options['prune-history']) this.pruneHistory();
@@ -60,13 +91,48 @@ class MessageManager extends EventEmitter {
     }
 
     respondToChatFromMessageQueue() {
+        // Exit if queue is empty, voice service is speaking, or processing attachments
+        const queueLength = this.messageQueue.length;
+        if (queueLength == 0) {
+            logger.debug('Message queue is empty, skipping response');
+            return;
+        }
+        const isSpeaking = this.voiceService && this.voiceService.isBlocking();
+        if (isSpeaking) {
+            logger.debug(`Voice service is speaking, skipping response`);
+            return;
+        }
+
         const messages = [];
         const history = [];
         
         const lowId = this.messageQueue[0]; // first id of messages we want to respond to
         const lowerBound = Math.max(0, lowId - this.options['chat-history-length']); // lowest chat id we will show in history
-        const upperBound = Math.min(this.chatHistory.length, lowId + this.options['chat-max-batch-size']); // highest chat id we will show in history
+        let upperBound = Math.min(this.chatHistory.length, lowId + this.options['chat-max-batch-size']); // highest chat id we will show in history
         logger.debug(`lowID: ${lowId}, lowerBound: ${lowerBound}, upperBound: ${upperBound}`);
+
+        // Check for processing attachments
+        const processingBlock = this.blockOnProcessing;
+        if (processingBlock) {
+            let processingIdx = -1;
+            // iterate over message queue batch
+            for (let i = lowId; i < upperBound; i++) {
+                const msg = this.chatHistory[i];
+                if (!msg.attachments) continue; // skip messages with no attachments
+                const attachmentsProcessing = msg.attachments.some((attachment) => {
+                    return attachment.processing;
+                });
+                if (attachmentsProcessing) {
+                    processingIdx = i;
+                    break;
+                }
+            }
+            if (processingIdx !== -1) {
+                logger.debug(`Message manager is processing attachments, skipping responses until ${processingIdx}`);
+                upperBound = processingIdx; // skip responses until we finish processing attachments
+                return;
+            }
+        }
 
         let directlyMentioned = false;
         // Add enqueued messages
@@ -83,7 +149,8 @@ class MessageManager extends EventEmitter {
             if (includeResponses && historicalResponse) {
                 history.push({
                     author: this.chatChannel.responseHandler.persona.name,
-                    text: historicalResponse
+                    text: historicalResponse,
+                    getText: () => { return historicalResponse; }
                 });
             }
             // Add the historical messages from users
@@ -128,6 +195,9 @@ class MessageManager extends EventEmitter {
         });
         this.drawManager.on('image', (image) => {
             this.chatChannel.addEventToHistory(`drew ${image.prompt}`);
+        });
+        this.drawManager.on('caption', (attachment) => {
+            attachment.processing = false;
         });
     }
 

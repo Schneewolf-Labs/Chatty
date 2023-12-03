@@ -14,7 +14,6 @@ class MessageManager extends EventEmitter {
         this.messageQueue = [];
 
         this.blockOnProcessing = options['block-while-processing-attachments'];
-        this.processing = false; // TODO: implement this on a per-message basis
 
         // Setup interval to respond to message queue
         setInterval(() => {
@@ -51,7 +50,6 @@ class MessageManager extends EventEmitter {
                     // Send image to draw manager
                     this.drawManager.caption(attachment);
                 });
-                this.processing = true;
             }
 
             const prompt = this.drawManager.extractPrompt(message.text);
@@ -101,7 +99,11 @@ class MessageManager extends EventEmitter {
             logger.debug(`Voice service is speaking, skipping response`);
             return;
         }
-        const processingBlock = this.processing && this.blockOnProcessing;
+        const processingBlock = this.blockOnProcessing && this.messageQueue.some((msg) => {
+            return this.chatHistory[msg].attachments.some((attachment) => {
+                return attachment.processing;
+            })
+        });
         if (processingBlock) {
             logger.debug(`Message manager is processing attachments, skipping response`);
             return;
@@ -178,7 +180,7 @@ class MessageManager extends EventEmitter {
             this.chatChannel.addEventToHistory(`drew ${image.prompt}`);
         });
         this.drawManager.on('caption', (attachment) => {
-            this.processing = false;
+            attachment.processing = false;
         });
     }
 

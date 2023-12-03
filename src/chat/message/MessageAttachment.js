@@ -5,6 +5,7 @@ class MessageAttachment {
 				this.url = url;
 				this.data = null;
 				this.caption = '';
+				this.processing = true;
 		}
 }
 

@@ -13,14 +13,13 @@ class MessageManager extends EventEmitter {
         this.chatHistory = [];
         this.messageQueue = [];
 
+        this.blockOnProcessing = options['block-while-processing-attachments'];
+        this.processing = false; // TODO: implement this on a per-message basis
+
         // Setup interval to respond to message queue
         setInterval(() => {
-            const queueLength = this.messageQueue.length;
-            logger.debug(`Message queue length: ${queueLength}`);
-            // Exit if queue is empty or voice service is speaking
-            const isSpeaking = this.voiceService && this.voiceService.isBlocking();
-            if (isSpeaking) logger.debug(`Voice service is speaking, skipping response`);
-            if (queueLength == 0 || isSpeaking) return;
+            //const queueLength = this.messageQueue.length;
+            //logger.debug(`Message queue length: ${queueLength}`);
             this.respondToChatFromMessageQueue();
         }, this.options['response-interval']);
     }
@@ -52,6 +51,7 @@ class MessageManager extends EventEmitter {
                     // Send image to draw manager
                     this.drawManager.caption(attachment);
                 });
+                this.processing = true;
             }
 
             const prompt = this.drawManager.extractPrompt(message.text);
@@ -69,7 +69,7 @@ class MessageManager extends EventEmitter {
         this.chatHistory.push(message);
 
         // If the message text is empty, disregard it at this point
-        if (!message.text) return;
+        if (!message.getText()) return;
         // Check for a wake word in the message
         const wakewords = this.options['wake-words'];
         const containsWakeword = wakewords.some((word) => {
@@ -90,6 +90,23 @@ class MessageManager extends EventEmitter {
     }
 
     respondToChatFromMessageQueue() {
+        // Exit if queue is empty, voice service is speaking, or processing attachments
+        const queueLength = this.messageQueue.length;
+        if (queueLength == 0) {
+            logger.debug('Message queue is empty, skipping response');
+            return;
+        }
+        const isSpeaking = this.voiceService && this.voiceService.isBlocking();
+        if (isSpeaking) {
+            logger.debug(`Voice service is speaking, skipping response`);
+            return;
+        }
+        const processingBlock = this.processing && this.blockOnProcessing;
+        if (processingBlock) {
+            logger.debug(`Message manager is processing attachments, skipping response`);
+            return;
+        }
+
         const messages = [];
         const history = [];
         
@@ -161,13 +178,7 @@ class MessageManager extends EventEmitter {
             this.chatChannel.addEventToHistory(`drew ${image.prompt}`);
         });
         this.drawManager.on('caption', (attachment) => {
-            //this.chatChannel.addEventToHistory(`captioned image(${attachment.hash}): ${attachment.caption}`);
-            const caption = attachment.caption;
-            if (!caption) return;
-            const message = attachment.message;
-            if (message) {
-                message.attachment = attachment;
-            }
+            this.processing = false;
         });
     }
 

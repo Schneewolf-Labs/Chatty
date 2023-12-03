@@ -54,6 +54,7 @@ messages:
     block-repetitive-responses: true
     throttle-history-on-repetitive-response: true
     repetition-threshold: 0.70
+    block-while-processing-attachments: true
 sanitizer:
     reject-profanity: false
     profane-response: "I'm sorry, I don't respond to profanity."
@@ -80,6 +81,7 @@ stable_diffusion:
     banned_tokens: ['lewd', 'nude', 'sex', 'rape', 'nsfw', 'naked', 'penis', 'vagina', 'boobs', 'tits', 'ass']
     rejected_response: "Sorry I can't draw that!"
     enable_img2txt: true
+    truncate_captions: true
 voice:
     enabled: false
     voice_index: 1

@@ -99,23 +99,37 @@ class MessageManager extends EventEmitter {
             logger.debug(`Voice service is speaking, skipping response`);
             return;
         }
-        const processingBlock = this.blockOnProcessing && this.messageQueue.some((msg) => {
-            return this.chatHistory[msg].attachments.some((attachment) => {
-                return attachment.processing;
-            })
-        });
-        if (processingBlock) {
-            logger.debug(`Message manager is processing attachments, skipping response`);
-            return;
-        }
 
         const messages = [];
         const history = [];
         
         const lowId = this.messageQueue[0]; // first id of messages we want to respond to
         const lowerBound = Math.max(0, lowId - this.options['chat-history-length']); // lowest chat id we will show in history
-        const upperBound = Math.min(this.chatHistory.length, lowId + this.options['chat-max-batch-size']); // highest chat id we will show in history
+        let upperBound = Math.min(this.chatHistory.length, lowId + this.options['chat-max-batch-size']); // highest chat id we will show in history
         logger.debug(`lowID: ${lowId}, lowerBound: ${lowerBound}, upperBound: ${upperBound}`);
+
+        // Check for processing attachments
+        const processingBlock = this.blockOnProcessing;
+        if (processingBlock) {
+            let processingIdx = -1;
+            // iterate over message queue batch
+            for (let i = lowId; i < upperBound; i++) {
+                const msg = this.chatHistory[i];
+                if (!msg.attachments) continue; // skip messages with no attachments
+                const attachmentsProcessing = msg.attachments.some((attachment) => {
+                    return attachment.processing;
+                });
+                if (attachmentsProcessing) {
+                    processingIdx = i;
+                    break;
+                }
+            }
+            if (processingIdx !== -1) {
+                logger.debug(`Message manager is processing attachments, skipping responses until ${processingIdx}`);
+                upperBound = processingIdx; // skip responses until we finish processing attachments
+                return;
+            }
+        }
 
         let directlyMentioned = false;
         // Add enqueued messages

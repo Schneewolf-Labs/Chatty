@@ -78,6 +78,7 @@ class DrawManager extends EventEmitter{
         const data = attachment.data;
         if (!data) {
             logger.error('DrawManager recieved attachment with no image data');
+            attachment.processing = false;
             return;
         }
         this.stableDiffClient.img2txt(data).then(caption => {

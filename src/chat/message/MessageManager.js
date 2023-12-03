@@ -35,6 +35,7 @@ class MessageManager extends EventEmitter {
                 const attachment = message.attachments[0];
                 const url = attachment.url;
                 logger.debug(`Got image attachment: ${url}`);
+                attachment.processing = true;
                 // Download image from url
                 fetch(url).then(res => {
                     if (res.ok) {
@@ -42,8 +43,10 @@ class MessageManager extends EventEmitter {
                         return res.arrayBuffer();
                     } else {
                         logger.error(`Could not download image from ${url}: ${res.status} ${res.statusText}`);
+                        attachment.processing = false;
                     }
                 }).then(buffer => {
+                    if (!buffer) return;
                     // Convert arraybuffer to base64
                     const base64 = Buffer.from(buffer).toString('base64');
                     attachment.data = base64;

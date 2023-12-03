@@ -73,6 +73,18 @@ class DrawManager extends EventEmitter{
         }
     }
 
+    caption(attachment) {
+        logger.debug('DrawManager captioning image...');
+        const data = attachment.data;
+        if (!data) {
+            logger.error('DrawManager recieved attachment with no image data');
+            return;
+        }
+        this.stableDiffClient.img2txt(data).then(caption => {
+            logger.debug(`DrawManager recieved caption: ${caption} for image(${attachment.hash})`);
+        });
+    }
+
     extractPrompt(message) {
         // set message to lowercase
         message = message.toLowerCase();

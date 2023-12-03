@@ -21,8 +21,9 @@ discord:
     channels: []
     fallback-to-default-channel: false
     default-channel: 0
-    allow-dms: false
-    dm-users: []
+    allow-dms: true
+    dm-users: ['birubawa']
+    allow-attachments: true
 messages:
     max-tokens: 1000
     response-interval: 3500
@@ -66,7 +67,7 @@ oobabooga:
     output_responses: true
     output_location: "output/response.txt"
 stable_diffusion:
-    enabled: false
+    enabled: true
     trigger: "draw "
     baseUrl: "http://127.0.0.1:7860"
     negative_prompt: "EasyNegative, lewd, nsfw, sex, naked, nude, suicide, murder, rape, blood, gore, risque, sexy, horny"
@@ -78,6 +79,7 @@ stable_diffusion:
     max_prompt_length: 512
     banned_tokens: ['lewd', 'nude', 'sex', 'rape', 'nsfw', 'naked', 'penis', 'vagina', 'boobs', 'tits', 'ass']
     rejected_response: "Sorry I can't draw that!"
+    enable_img2txt: true
 voice:
     enabled: false
     voice_index: 1

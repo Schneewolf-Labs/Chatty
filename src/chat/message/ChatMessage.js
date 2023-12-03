@@ -7,6 +7,8 @@ class ChatMessage {
         this.timestamp = Date.now();
         this.options = options;
 
+        this.attachments = [];
+
         this.channel = null;
         this.directReply = false;
         this.isReply = false;

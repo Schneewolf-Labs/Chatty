@@ -1,5 +1,6 @@
 const logger = require('../../util/logger');
 const EventEmitter = require('events');
+const Buffer = require('buffer').Buffer;
 
 class MessageManager extends EventEmitter {
     constructor(options, chatChannel) {
@@ -30,8 +31,33 @@ class MessageManager extends EventEmitter {
         // TODO: message parsing can be its own class
         // Check for a drawing trigger, if stable diffusion is enabled
         if (this.drawManager) {
+            // check for image attachments
+            if (message.attachments.length > 0) {
+                const attachment = message.attachments[0];
+                const url = attachment.url;
+                logger.debug(`Got image attachment: ${url}`);
+                // Add to event history
+                this.chatChannel.addEventToHistory(`${message.author} sent an image(${attachment.hash}): processing...`);
+                // Download image from url
+                fetch(url).then(res => {
+                    if (res.ok) {
+                        logger.debug(`Downloaded image from ${url}`);
+                        return res.arrayBuffer();
+                    } else {
+                        logger.error(`Could not download image from ${url}: ${res.status} ${res.statusText}`);
+                    }
+                }).then(buffer => {
+                    // Convert arraybuffer to base64
+                    const base64 = Buffer.from(buffer).toString('base64');
+                    attachment.data = base64;
+                    // Send image to draw manager
+                    this.drawManager.caption(attachment);
+                });
+            }
+
             const prompt = this.drawManager.extractPrompt(message.text);
             if (prompt) {
+                // TODO: if there's a prompt and an image attachment, we should use img2img
                 logger.debug(`Extracted drawing prompt: ${prompt}`);
                 const enqueued = this.drawManager.draw(prompt, message.channel);
                 if (!enqueued) { // drawing was rejected, let the user know
@@ -40,6 +66,8 @@ class MessageManager extends EventEmitter {
                 }
             }
         }
+        // If the message text is empty, disregard it at this point
+        if (!message.text) return;
         // Check for a wake word in the message
         const wakewords = this.options['wake-words'];
         const containsWakeword = wakewords.some((word) => {

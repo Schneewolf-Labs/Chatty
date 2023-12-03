@@ -33,11 +33,10 @@ class MessageManager extends EventEmitter {
         if (this.drawManager) {
             // check for image attachments
             if (message.attachments.length > 0) {
+                // TODO: handle multiple attachments
                 const attachment = message.attachments[0];
                 const url = attachment.url;
                 logger.debug(`Got image attachment: ${url}`);
-                // Add to event history
-                this.chatChannel.addEventToHistory(`${message.author} sent an image(${attachment.hash}): processing...`);
                 // Download image from url
                 fetch(url).then(res => {
                     if (res.ok) {
@@ -66,6 +65,9 @@ class MessageManager extends EventEmitter {
                 }
             }
         }
+        // Push message to the chat history
+        this.chatHistory.push(message);
+
         // If the message text is empty, disregard it at this point
         if (!message.text) return;
         // Check for a wake word in the message
@@ -78,7 +80,7 @@ class MessageManager extends EventEmitter {
             message.directReply = true;
         }
 
-        this.chatHistory.push(message);
+        // Add message to message queue
         const id = this.chatHistory.length - 1;
         this.messageQueue.push(id);
         if (this.options['prune-history']) this.pruneHistory();
@@ -111,7 +113,8 @@ class MessageManager extends EventEmitter {
             if (includeResponses && historicalResponse) {
                 history.push({
                     author: this.chatChannel.responseHandler.persona.name,
-                    text: historicalResponse
+                    text: historicalResponse,
+                    getText: () => { return historicalResponse; }
                 });
             }
             // Add the historical messages from users
@@ -158,7 +161,13 @@ class MessageManager extends EventEmitter {
             this.chatChannel.addEventToHistory(`drew ${image.prompt}`);
         });
         this.drawManager.on('caption', (attachment) => {
-            this.chatChannel.addEventToHistory(`captioned image(${attachment.hash}): ${attachment.caption}`);
+            //this.chatChannel.addEventToHistory(`captioned image(${attachment.hash}): ${attachment.caption}`);
+            const caption = attachment.caption;
+            if (!caption) return;
+            const message = attachment.message;
+            if (message) {
+                message.attachment = attachment;
+            }
         });
     }
 

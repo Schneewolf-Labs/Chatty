@@ -81,7 +81,7 @@ class DrawManager extends EventEmitter{
             return;
         }
         this.stableDiffClient.img2txt(data).then(caption => {
-            logger.debug(`DrawManager recieved caption: ${caption} for image(${attachment.hash})`);
+            logger.debug(`DrawManager recieved caption: ${caption} for image(${attachment.url})`);
             if (caption) {
                 attachment.caption = caption;
                 this.emit('caption', attachment);

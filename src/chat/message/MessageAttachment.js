@@ -7,6 +7,7 @@ class MessageAttachment {
 				this.url = url;
 				this.hash = crypto.createHash('sha256').update(url).digest('hex');
 				this.data = null;
+				this.caption = '';
 		}
 }
 

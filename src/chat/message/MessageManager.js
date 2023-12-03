@@ -157,6 +157,9 @@ class MessageManager extends EventEmitter {
         this.drawManager.on('image', (image) => {
             this.chatChannel.addEventToHistory(`drew ${image.prompt}`);
         });
+        this.drawManager.on('caption', (attachment) => {
+            this.chatChannel.addEventToHistory(`captioned image(${attachment.hash}): ${attachment.caption}`);
+        });
     }
 
     setVoiceService(voiceService) {

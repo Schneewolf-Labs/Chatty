@@ -19,7 +19,7 @@ class XTTS extends TTSInterface {
 		this.queue = [];
 	}
 
-	speak(token, force=false) {
+	speak(token, force = false) {
 		if (!force && this.is_speaking) {
 			logger.debug(`XTTS is already speaking, enqueueing token: ${token}`);
 			this.queue.push(token);
@@ -42,6 +42,13 @@ class XTTS extends TTSInterface {
 			return;
 		}
 		this.is_speaking = true;
+		// Set a timer to dequeue the next token if the current one takes too long
+		this.durationTimer = setTimeout(() => {
+			logger.warn(`WinTTS took too long to speak, dequeuing`);
+			this.is_speaking = false;
+			this._dequeue();
+		}, this.maxDuration);
+		// Send the token to the XTTS server
 		const data = JSON.stringify({
 			speaker_wav: this.speaker,
 			language: this.language,
@@ -49,7 +56,7 @@ class XTTS extends TTSInterface {
 		});
 		logger.debug(`Sending token to XTTS server: ${data}`);
 		// Send a POST request to the XTTS server /tts_to_audio endpoint
-		fetch(this.url+'/tts_to_audio', {
+		fetch(this.url + '/tts_to_audio', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -79,29 +86,43 @@ class XTTS extends TTSInterface {
 						}).then(() => {
 							logger.debug(`Finished playing audio file: ${filepath}`);
 							this.is_speaking = false;
-							//this._dequeue();
+							this._dequeue();
 						}).catch(err => {
 							logger.error(`Error playing audio file: ${err}`);
 							this.is_speaking = false;
-							//this._dequeue();
+							this._dequeue();
 						});
 					});
 				}).catch(err => {
 					logger.error(`Error reading audio data from XTTS server response: ${err}`);
 					this.is_speaking = false;
-					//this._dequeue();
+					this._dequeue();
 				});
 			} else {
 				logger.error(`Error sending token to XTTS server: ${res.status} ${res.statusText}`);
+				this.is_speaking = false;
+				this._dequeue();
 			}
 		}).catch(err => {
 			logger.error(`Error sending token to XTTS server: ${err}`);
+			this.is_speaking = false;
+			this._dequeue();
 		});
 
 	}
 
 	isSpeaking() {
 		return this.is_speaking;
+	}
+
+	_dequeue() {
+		if (this.durationTimer) clearTimeout(this.durationTimer);
+		if (this.queue.length > 0) {
+			const token = this.queue.shift();
+			this.speak(token, true);
+		} else {
+			this.is_speaking = false;
+		}
 	}
 }
 

@@ -83,14 +83,20 @@ stable_diffusion:
     enable_img2txt: true
     truncate_captions: true
 voice:
-    enabled: false
-    voice_index: 1
-    audio_device: 1
-    exe_location: "F:/TTS/wintts-stream/WinTTS-Stream.exe"
+    enabled: true
+    tts: "XTTS"
     output_location: "output/voice.wav"
     alphanumeric_only: true
     block_responses: true
     max-speak-duration: 30000
+    xtts:
+        url: "http://localhost:8020"
+        speaker: "jasper"
+        language: "en"
+    wintts:
+        voice_index: 1
+        audio_device: 2
+        exe_location: "F:/TTS/wintts-stream/WinTTS-Stream.exe"
 whisper:
     enabled: false
     exe_location: "F:/SpeechRec/whisper-bin-x64/stream.exe"

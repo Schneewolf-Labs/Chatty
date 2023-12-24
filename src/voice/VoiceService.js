@@ -1,13 +1,14 @@
 const logger = require('../util/logger');
 const ChatServiceInterface = require('../chat/ChatServiceInterface');
-const WinTTS = require('./WinTTS');
 const Whisper = require('./Whisper');
 
 class VoiceService extends ChatServiceInterface {
     constructor(config) {
         super();
         this.config = config;
-        this.voiceHandler = new WinTTS(config.voice);
+        this.tts = config.voice.tts;
+        const TTS = require(`./${this.tts}`);
+        this.voiceHandler = new TTS(config.voice);
         if (config.whisper['enabled']) {
             this.whisperHandler = new Whisper(config.whisper);
             this.whisperHandler.on('message', (message) => {
@@ -31,7 +32,7 @@ class VoiceService extends ChatServiceInterface {
     }
 
     isSpeaking() {
-        return this.voiceHandler.is_speaking;
+        return this.voiceHandler.isSpeaking();
     }
 
     isBlocking() {

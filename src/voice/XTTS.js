@@ -1,7 +1,7 @@
 const logger = require('../util/logger');
 const TTSInterface = require('./TTSInterface');
 const Buffer = require('buffer').Buffer;
-const portAudio = require('naudiodon');
+const player = require('node-wav-player');
 
 class XTTS extends TTSInterface {
 	constructor(options) {
@@ -17,15 +17,6 @@ class XTTS extends TTSInterface {
 
 		this.is_speaking = false;
 		this.queue = [];
-
-		this.player = new portAudio.AudioIO({
-			outOptions: {
-				channelCount: 1,
-				sampleFormat: portAudio.SampleFormat16Bit,
-				sampleRate: 24000,
-				closeOnError: true
-			}
-		});
 	}
 
 	speak(token, force=false) {
@@ -82,19 +73,18 @@ class XTTS extends TTSInterface {
 						}
 						// Play the audio file
 						logger.debug(`Playing audio file: ${filepath}`);
-						const rs = fs.createReadStream(filepath);
-						rs.pipe(this.player);
-						this.player.on('error', (err) => {
-							logger.error(`Error playing audio: ${err}`);
+						player.play({
+							path: filepath,
+							sync: true
+						}).then(() => {
+							logger.debug(`Finished playing audio file: ${filepath}`);
+							this.is_speaking = false;
+							//this._dequeue();
+						}).catch(err => {
+							logger.error(`Error playing audio file: ${err}`);
 							this.is_speaking = false;
 							//this._dequeue();
 						});
-						this.player.on('finish', () => {
-							logger.debug(`Finished playing audio`);
-							this.is_speaking = false;
-							//this._dequeue();
-						});
-						this.player.start();
 					});
 				}).catch(err => {
 					logger.error(`Error reading audio data from XTTS server response: ${err}`);

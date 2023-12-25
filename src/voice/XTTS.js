@@ -45,12 +45,6 @@ class XTTS extends TTSInterface {
 			this._dequeue();
 			return;
 		}
-		// Set a timer to dequeue the next token if the current one takes too long
-		// this.durationTimer = setTimeout(() => {
-		// 	logger.warn(`WinTTS took too long to speak, dequeuing`);
-		// 	this.is_speaking = false;
-		// 	this._dequeue();
-		// }, this.maxDuration);
 		this.synthesizing = true;
 		// Send the token to the XTTS server
 		const data = JSON.stringify({
@@ -108,7 +102,6 @@ class XTTS extends TTSInterface {
 	}
 
 	_dequeue() {
-		// if (this.durationTimer) clearTimeout(this.durationTimer);
 		if (this.queue.length > 0) {
 			const token = this.queue.shift();
 			this.speak(token, true);

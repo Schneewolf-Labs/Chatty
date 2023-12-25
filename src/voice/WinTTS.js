@@ -1,12 +1,14 @@
 const logger = require('../util/logger');
 const { spawn } = require('child_process');
+const TTSInterface = require('./TTSInterface');
 
-class WinTTS {
+class WinTTS extends TTSInterface {
     constructor(options) {
+        super();
         this.options = options;
-        this.exe_location = options.exe_location;
-        this.voice_index = options.voice_index;
-        this.audio_device = options.audio_device;
+        this.exe_location = options.wintts.exe_location;
+        this.voice_index = options.wintts.voice_index;
+        this.audio_device = options.wintts.audio_device;
         this.alphanumeric_only = options.alphanumeric_only;
         this.maxDuration = options['max-speak-duration'];
         this.durationTimer = null;
@@ -48,6 +50,10 @@ class WinTTS {
             this.is_speaking = false;
             this._dequeue();
         }, this.maxDuration);
+    }
+
+    isSpeaking() {
+        return this.is_speaking;
     }
 
     _dequeue() {

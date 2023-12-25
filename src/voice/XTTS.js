@@ -2,6 +2,8 @@ const logger = require('../util/logger');
 const TTSInterface = require('./TTSInterface');
 const Buffer = require('buffer').Buffer;
 const player = require('node-wav-player');
+const fs = require('fs');
+const path = require('path');
 
 class XTTS extends TTSInterface {
 	constructor(options) {
@@ -15,13 +17,15 @@ class XTTS extends TTSInterface {
 		this.maxDuration = options['max-speak-duration'];
 		this.durationTimer = null;
 
+		this.synthesizing = false;
 		this.is_speaking = false;
 		this.queue = [];
+		this.playbackQueue = [];
 	}
 
 	speak(token, force = false) {
-		if (!force && this.is_speaking) {
-			logger.debug(`XTTS is already speaking, enqueueing token: ${token}`);
+		if (!force && this.synthesizing) {
+			logger.debug(`XTTS is already synthesizing, enqueueing token: ${token}`);
 			this.queue.push(token);
 			return;
 		}
@@ -31,7 +35,7 @@ class XTTS extends TTSInterface {
 			return;
 		}
 		token = token.trim();
-		logger.info(`XTTS speaking: ${token}`);
+		logger.info(`XTTS synthesizing: ${token}`);
 		// strip non-alphanumeric (except puncutation) characters if enabled
 		if (this.alphanumeric_only) {
 			token = token.replace(/[^a-zA-Z0-9\s.,!?']/g, '');
@@ -41,13 +45,13 @@ class XTTS extends TTSInterface {
 			this._dequeue();
 			return;
 		}
-		this.is_speaking = true;
 		// Set a timer to dequeue the next token if the current one takes too long
-		this.durationTimer = setTimeout(() => {
-			logger.warn(`WinTTS took too long to speak, dequeuing`);
-			this.is_speaking = false;
-			this._dequeue();
-		}, this.maxDuration);
+		// this.durationTimer = setTimeout(() => {
+		// 	logger.warn(`WinTTS took too long to speak, dequeuing`);
+		// 	this.is_speaking = false;
+		// 	this._dequeue();
+		// }, this.maxDuration);
+		this.synthesizing = true;
 		// Send the token to the XTTS server
 		const data = JSON.stringify({
 			speaker_wav: this.speaker,
@@ -67,45 +71,33 @@ class XTTS extends TTSInterface {
 				// Get the audio data from the response
 				res.arrayBuffer().then(buffer => {
 					// Write the audio data to a file
-					const fs = require('fs');
-					const path = require('path');
-					//const filename = `${Date.now()}.wav`;
-					const filepath = path.join(this.outputLocation);
+					const filename = `${Date.now()}.wav`;
+					const filepath = path.join(this.outputLocation, filename);
 					fs.writeFile(filepath, Buffer.from(buffer), (err) => {
 						if (err) {
 							logger.error(`Error writing audio file: ${err}`);
-							this.is_speaking = false;
+							this.synthesizing = false;
 							this._dequeue();
 							return;
 						}
-						// Play the audio file
-						logger.debug(`Playing audio file: ${filepath}`);
-						player.play({
-							path: filepath,
-							sync: true
-						}).then(() => {
-							logger.debug(`Finished playing audio file: ${filepath}`);
-							this.is_speaking = false;
-							this._dequeue();
-						}).catch(err => {
-							logger.error(`Error playing audio file: ${err}`);
-							this.is_speaking = false;
-							this._dequeue();
-						});
+						this.playbackQueue.push(filepath);
+						this._play();
+						this.synthesizing = false;
+						this._dequeue();
 					});
 				}).catch(err => {
 					logger.error(`Error reading audio data from XTTS server response: ${err}`);
-					this.is_speaking = false;
+					this.synthesizing = false;
 					this._dequeue();
 				});
 			} else {
 				logger.error(`Error sending token to XTTS server: ${res.status} ${res.statusText}`);
-				this.is_speaking = false;
+				this.synthesizing = false;
 				this._dequeue();
 			}
 		}).catch(err => {
 			logger.error(`Error sending token to XTTS server: ${err}`);
-			this.is_speaking = false;
+			this.synthesizing = false;
 			this._dequeue();
 		});
 
@@ -116,12 +108,38 @@ class XTTS extends TTSInterface {
 	}
 
 	_dequeue() {
-		if (this.durationTimer) clearTimeout(this.durationTimer);
+		// if (this.durationTimer) clearTimeout(this.durationTimer);
 		if (this.queue.length > 0) {
 			const token = this.queue.shift();
 			this.speak(token, true);
 		} else {
 			this.is_speaking = false;
+		}
+	}
+
+	_play() {
+		if (!this.is_speaking && this.playbackQueue.length > 0) {
+			this.is_speaking = true;
+			const filepath = this.playbackQueue.shift();
+			logger.debug(`Playing audio file: ${filepath}`);
+			player.play({
+				path: filepath,
+				sync: true
+			}).then(() => {
+				logger.debug(`Finished playing audio file: ${filepath}`);
+				this.is_speaking = false;
+				// delete the file
+				fs.unlink(filepath, (err) => {
+					if (err) {
+						logger.error(`Error deleting audio file: ${err}`);
+					}
+				});
+				// play the next file
+				this._play();
+			}).catch(err => {
+				logger.error(`Error playing audio file: ${err}`);
+				this._play();
+			});
 		}
 	}
 }

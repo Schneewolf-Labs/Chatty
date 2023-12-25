@@ -85,7 +85,7 @@ stable_diffusion:
 voice:
     enabled: true
     tts: "XTTS"
-    output_location: "output/voice.wav"
+    output_location: "output/"
     alphanumeric_only: true
     block_responses: true
     max-speak-duration: 30000

@@ -83,7 +83,7 @@ stable_diffusion:
     enable_img2txt: true
     truncate_captions: true
 voice:
-    enabled: true
+    enabled: false
     tts: "XTTS"
     output_location: "output/"
     alphanumeric_only: true
@@ -91,7 +91,7 @@ voice:
     max-speak-duration: 30000
     xtts:
         url: "http://localhost:8020"
-        speaker: "jasper"
+        speaker: "alpha"
         language: "en"
     wintts:
         voice_index: 1

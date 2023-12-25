@@ -64,14 +64,14 @@ sanitizer:
     remove-actions: true
 oobabooga:
     baseUrl: "http://127.0.0.1:5000"
-    requestParams: { 'max_tokens': 512, 'auto_max_new_tokens': true }
+    requestParams: { 'max_tokens': 512, 'auto_max_new_tokens': false }
     output_responses: true
     output_location: "output/response.txt"
 stable_diffusion:
     enabled: true
     trigger: "draw "
     baseUrl: "http://127.0.0.1:7860"
-    negative_prompt: "EasyNegative, lewd, nsfw, sex, naked, nude, suicide, murder, rape, blood, gore, risque, sexy, horny"
+    negative_prompt: "EasyNegative, lewd, nsfw, sex, naked, nude, suicide, murder, rape, blood, gore, risque, sexy, horny, (((nude)))"
     requestParams: {}
     output_location: "output/drawing.png"
     prompt_output_location: "output/prompt.txt"

@@ -63,14 +63,14 @@ sanitizer:
     sentiment-threshold: -0.5
     remove-actions: true
 oobabooga:
-    baseUrl: "http://127.0.0.1:5000"
+    baseUrl: "http://192.168.40.249:5000"
     requestParams: { 'max_tokens': 512, 'auto_max_new_tokens': false }
     output_responses: true
     output_location: "output/response.txt"
 stable_diffusion:
     enabled: true
     trigger: "draw "
-    baseUrl: "http://127.0.0.1:7860"
+    baseUrl: "http://192.168.40.249:7860"
     negative_prompt: "EasyNegative, lewd, nsfw, sex, naked, nude, suicide, murder, rape, blood, gore, risque, sexy, horny, (((nude)))"
     requestParams: {}
     output_location: "output/drawing.png"
@@ -83,16 +83,19 @@ stable_diffusion:
     enable_img2txt: true
     truncate_captions: true
 voice:
-    enabled: false
+    enabled: true
     tts: "XTTS"
     output_location: "output/"
     alphanumeric_only: true
     block_responses: true
     max-speak-duration: 30000
     xtts:
-        url: "http://localhost:8020"
-        speaker: "alpha"
+        url: "http://192.168.40.249:8020"
+        speaker: "jasper"
         language: "en"
+        sample_rate: 24000
+        bit_depth: 16
+        channels: 1
     wintts:
         voice_index: 1
         audio_device: 2

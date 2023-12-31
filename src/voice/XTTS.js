@@ -1,9 +1,9 @@
 const logger = require('../util/logger');
 const TTSInterface = require('./TTSInterface');
 const Buffer = require('buffer').Buffer;
-const player = require('node-wav-player');
 const fs = require('fs');
 const path = require('path');
+const Speaker = require('speaker');
 
 class XTTS extends TTSInterface {
 	constructor(options) {
@@ -12,6 +12,9 @@ class XTTS extends TTSInterface {
 		this.url = options.xtts.url;
 		this.speaker = options.xtts.speaker;
 		this.language = options.xtts.language;
+		this.sample_rate = options.xtts.sample_rate;
+		this.bit_depth = options.xtts.bit_depth;
+		this.channels = options.xtts.channels;
 		this.outputLocation = options.output_location;
 		this.alphanumeric_only = options.alphanumeric_only;
 		this.maxDuration = options['max-speak-duration'];
@@ -115,22 +118,17 @@ class XTTS extends TTSInterface {
 			this.is_speaking = true;
 			const filepath = this.playbackQueue.shift();
 			logger.debug(`Playing audio file: ${filepath}`);
-			player.play({
-				path: filepath,
-				sync: true
-			}).then(() => {
+			const speaker = new Speaker({
+				channels: this.channels,
+				bitDepth: this.bit_depth,
+				sampleRate: this.sample_rate,
+			});
+			
+			const stream = fs.createReadStream(filepath);
+			stream.pipe(speaker);
+			stream.on('end', () => {
 				logger.debug(`Finished playing audio file: ${filepath}`);
 				this.is_speaking = false;
-				// delete the file
-				fs.unlink(filepath, (err) => {
-					if (err) {
-						logger.error(`Error deleting audio file: ${err}`);
-					}
-				});
-				// play the next file
-				this._play();
-			}).catch(err => {
-				logger.error(`Error playing audio file: ${err}`);
 				this._play();
 			});
 		}

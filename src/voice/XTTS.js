@@ -126,10 +126,8 @@ class XTTS extends TTSInterface {
 				sampleRate: this.sample_rate,
 				device: this.output_device
 			});
-			
 			const stream = fs.createReadStream(filepath);
-			stream.pipe(speaker);
-			stream.on('end', () => {
+			speaker.on('flush', () => {
 				logger.debug(`Finished playing audio file: ${filepath}`);
 				this.is_speaking = false;
 				// cleanup stream
@@ -143,6 +141,7 @@ class XTTS extends TTSInterface {
 				// play the next file
 				this._play();
 			});
+			stream.pipe(speaker);
 		}
 	}
 }

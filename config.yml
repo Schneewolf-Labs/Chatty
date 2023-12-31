@@ -96,6 +96,7 @@ voice:
         sample_rate: 24000
         bit_depth: 16
         channels: 1
+        output_device: null
     wintts:
         voice_index: 1
         audio_device: 2

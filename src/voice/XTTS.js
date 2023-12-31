@@ -15,6 +15,7 @@ class XTTS extends TTSInterface {
 		this.sample_rate = options.xtts.sample_rate;
 		this.bit_depth = options.xtts.bit_depth;
 		this.channels = options.xtts.channels;
+		this.output_device = options.xtts.output_device;
 		this.outputLocation = options.output_location;
 		this.alphanumeric_only = options.alphanumeric_only;
 		this.maxDuration = options['max-speak-duration'];
@@ -62,7 +63,8 @@ class XTTS extends TTSInterface {
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: data
+			body: data,
+			timeout: this.maxDuration
 		}).then(res => {
 			if (res.status === 200) {
 				// Get the audio data from the response
@@ -122,6 +124,7 @@ class XTTS extends TTSInterface {
 				channels: this.channels,
 				bitDepth: this.bit_depth,
 				sampleRate: this.sample_rate,
+				device: this.output_device
 			});
 			
 			const stream = fs.createReadStream(filepath);
@@ -129,6 +132,15 @@ class XTTS extends TTSInterface {
 			stream.on('end', () => {
 				logger.debug(`Finished playing audio file: ${filepath}`);
 				this.is_speaking = false;
+				// cleanup stream
+				stream.unpipe();
+				// delete the file
+				fs.unlink(filepath, (err) => {
+					if (err) {
+						logger.error(`Error deleting audio file: ${err}`);
+					}
+				});
+				// play the next file
 				this._play();
 			});
 		}

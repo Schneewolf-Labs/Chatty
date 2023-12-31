@@ -33,27 +33,37 @@ class OobaClient extends EventEmitter{
                 logger.debug("Prompt sent, receiving streamed response...");
                 const reader = res.body.getReader();
                 const decoder = new TextDecoder();
+                let buffer = '';
                 const read = () => {
                     reader.read().then(({done, value}) => {
                         if (done) {
+                            if (buffer) {
+                                logger.warn('Partial data remaining in buffer after stream ended');
+                            }
                             logger.debug('Message stream from Oobabooga ended...');
                             const message = this.flush();
                             this.emit('message', message);
                             this.recievingMessage = false;
                             return;
                         } else {
-                            try {
-                                // XXX: these should be chunked to ensure we have a complete message with valid json
-                                let text = decoder.decode(value, {stream: true});
-                                text = text.replace('data: ', '');
-                                const json = JSON.parse(text);
-                                const token = json.choices[0].text;
-                                if (!this.recievingMessage) logger.debug('Message stream from Oobabooga started...');
-                                this.recievingMessage = true;
-                                this.messageQueue.push(token);
-                                this.emit('token', token);
-                            } catch (e) {
-                                logger.error(`Error parsing token from ooba stream: ${e}`);
+                            buffer += decoder.decode(value, {stream: true});
+                            let newlineIndex;
+                            while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
+                                const line = buffer.slice(0, newlineIndex);
+                                buffer = buffer.slice(newlineIndex + 1);
+                                if (line.startsWith('data: ')) {
+                                    const text = line.slice(6); // remove 'data: ' prefix
+                                    try {
+                                        const json = JSON.parse(text);
+                                        const token = json.choices[0].text;
+                                        if (!this.recievingMessage) logger.debug('Message stream from Oobabooga started...');
+                                        this.recievingMessage = true;
+                                        this.messageQueue.push(token);
+                                        this.emit('token', token);
+                                    } catch (err) {
+                                        logger.error(`Error parsing json from stream: ${err}`);
+                                    }
+                                }
                             }
                         }
                         read();

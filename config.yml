@@ -90,9 +90,13 @@ voice:
     block_responses: true
     max-speak-duration: 30000
     xtts:
-        url: "http://localhost:8020"
+        url: "http://127.0.0.1:8020"
         speaker: "alpha"
         language: "en"
+        sample_rate: 24000
+        bit_depth: 16
+        channels: 1
+        output_device: null
     wintts:
         voice_index: 1
         audio_device: 2

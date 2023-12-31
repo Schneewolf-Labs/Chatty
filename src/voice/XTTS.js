@@ -133,7 +133,7 @@ class XTTS extends TTSInterface {
 				logger.debug(`Finished playing audio file: ${filepath}`);
 				this.is_speaking = false;
 				// cleanup stream
-				stream.unpipe();
+				stream.destroy();
 				// delete the file
 				fs.unlink(filepath, (err) => {
 					if (err) {

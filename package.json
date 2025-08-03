@@ -2,10 +2,14 @@
   "name": "chatty",
   "version": "0.0.1",
   "description": "Framework for AI communication on Twitch",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint . --config .eslintrc.js"
+    "lint": "eslint . --config .eslintrc.js",
+    "typecheck": "tsc --noEmit"
   },
   "repository": {
     "type": "git",
@@ -32,6 +36,15 @@
     "yaml": "^2.3.2"
   },
   "devDependencies": {
-    "eslint": "^8.50.0"
-  }
+    "@types/express": "^5.0.3",
+    "@types/fast-levenshtein": "^0.0.4",
+    "@types/node": "^20.0.0",
+    "@types/node-fetch": "^2.6.13",
+    "@types/ws": "^8.18.1",
+    "@types/yamljs": "^0.2.34",
+    "eslint": "^8.50.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

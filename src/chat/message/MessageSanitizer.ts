@@ -2,9 +2,6 @@ import logger from '../../util/Logger';
 import * as badwords from 'bad-words';
 import * as Sentiment from 'sentiment';
 
-const filter = new badwords();
-const sentiment = new Sentiment();
-
 interface MessageSanitizerOptions {
     'reject-profanity': boolean;
     'profanity-replacement': string;
@@ -18,21 +15,39 @@ interface Persona {
     name: string;
 }
 
+interface ProfanityFilter {
+    isProfane(text: string): boolean;
+}
+
+interface SentimentAnalyzer {
+    analyze(text: string): { score: number };
+}
+
 class MessageSanitizer {
     private options: MessageSanitizerOptions;
     private persona: Persona;
     private chatDelimiter: string;
     private speechBuffer?: string;
+    private filter: ProfanityFilter;
+    private sentiment: SentimentAnalyzer;
 
-    constructor(options: MessageSanitizerOptions, persona: Persona, chatDelimiter: string) {
+    constructor(
+        options: MessageSanitizerOptions,
+        persona: Persona,
+        chatDelimiter: string,
+        profanityFilter?: ProfanityFilter,
+        sentimentAnalyzer?: SentimentAnalyzer
+    ) {
         this.options = options;
         this.persona = persona;
         this.chatDelimiter = chatDelimiter;
+        this.filter = profanityFilter || new badwords();
+        this.sentiment = sentimentAnalyzer || new Sentiment();
     }
 
     shouldReject(message: string): boolean {
         // Check for profanity
-        if (this.options['reject-profanity'] && filter.isProfane(message)) {
+        if (this.options['reject-profanity'] && this.filter.isProfane(message)) {
             logger.debug(`got profrane message`);
             const replacement = this.options['profanity-replacement'];
             this.speechBuffer = replacement;
@@ -40,7 +55,7 @@ class MessageSanitizer {
         }
         // Check for negativity
         if (this.options['reject-negativity']) {
-            const score = sentiment.analyze(message).score;
+            const score = this.sentiment.analyze(message).score;
             const threshold = this.options['sentiment-threshold'];
             logger.debug(`sentiment score: ${score}`);
             if (score < threshold) {

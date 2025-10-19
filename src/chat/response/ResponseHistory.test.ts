@@ -186,8 +186,7 @@ describe('ResponseHistory', () => {
       }).toThrow('Invalid response ID');
     });
 
-    it.skip('should throw error for NaN', () => {
-      // Skip this test - NaN doesn't fail the typeof check in JavaScript
+    it('should throw error for NaN', () => {
       expect(() => {
         history.setLastResponseID(NaN);
       }).toThrow('Invalid response ID');

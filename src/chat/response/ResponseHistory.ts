@@ -51,7 +51,7 @@ class ResponseHistory {
     }
 
     setLastResponseID(id: number): void {
-        if (typeof id !== 'number' || id < 0) {
+        if (typeof id !== 'number' || id < 0 || isNaN(id)) {
             throw new Error("Invalid response ID");
         }
         this.lastResponseID = id;

@@ -6,12 +6,15 @@
     "module": "commonjs",
     "moduleResolution": "node",
 
+    /* JavaScript Support */
+    "allowJs": true,
+    "checkJs": false,
+
     /* Emit */
     "outDir": "./dist",
     "rootDir": "./",
     "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
+    "declaration": false,
     "removeComments": false,
 
     /* Interop Constraints */
@@ -20,27 +23,16 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
 
-    /* Type Checking */
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
+    /* Type Checking - relaxed for JS migration */
+    "strict": false,
+    "noImplicitAny": false,
 
     /* Completeness */
     "skipLibCheck": true
   },
   "include": [
-    "src/**/*",
-    "index.ts"
+    "src/**/*.js",
+    "index.js"
   ],
   "exclude": [
     "node_modules",
